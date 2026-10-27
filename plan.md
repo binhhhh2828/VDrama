@@ -180,7 +180,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 - [x] Tạo monorepo theo cấu trúc mục 3, `.gitignore`, `README.md`, `.env.example`
 - [x] Scaffold `apps/api` (FastAPI, cấu hình pydantic-settings, `/api/health`)
 - [x] Scaffold `apps/web` (Next.js + TypeScript + Tailwind)
-- [ ] Dockerfile cho cả hai; `docker-compose.dev.yml` (web + api + Postgres local) — đã viết, **chưa build thử** (Docker daemon chưa chạy)
+- [x] Dockerfile cho cả hai; `docker-compose.dev.yml` (web + api + Postgres local)
 - [x] Cấu hình lint/format: ruff + pytest (api), eslint + prettier (web)
 - [ ] CI GitHub Actions: chạy lint + test mỗi PR — đã viết `ci.yml`, **chưa chạy trên GitHub**
 - [ ] (cuối tuần 1) Deploy bản "hello world" (web + `/api/health`) lên VPS qua Caddy + Cloudflare để phát hiện sớm lỗi DNS/HTTPS/CI-CD; cần xong Giai đoạn 0 (domain, VPS)
