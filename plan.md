@@ -116,7 +116,7 @@ vdrama/
 
 ## 4. Mô hình dữ liệu (PostgreSQL)
 
-**Đã triển khai** (migration `0001`–`0006`, 2026-10-27). Thiết kế chi tiết, lý do và nguyên tắc scale: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md). Nguồn sự thật là model trong `apps/api/app/models/`.
+**Đã triển khai** (migration `0001`–`0009`, 2026-10-27). Thiết kế chi tiết, lý do và nguyên tắc scale: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md) (bảng, `0001`–`0006`) và [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md) (trạng thái, xóa mềm, nhật ký, `0007`–`0009`). Nguồn sự thật là model trong `apps/api/app/models/`.
 
 | Migration | Nhóm | Bảng |
 |---|---|---|
@@ -126,13 +126,18 @@ vdrama/
 | `0004` | Tìm kiếm | hàm `immutable_unaccent`, cột `series.search_text`, index GIN trigram |
 | `0005` | VIP & thanh toán | `vip_plans`, `payments`, `subscriptions`, `payment_events` |
 | `0006` | Hoạt động | `watch_history`, `favorites` |
+| `0007` | Trạng thái | `payments.paid_event_id`, `failure_code`, `failure_detail`; trigger chuyển trạng thái `payments_guard`, `subscriptions_guard` |
+| `0008` | Xóa mềm | `deleted_at`, `deleted_by_id` cho `users`, `series`, `episodes`, `genres`, `vip_plans`; trigger `block_hard_delete` |
+| `0009` | Nhật ký | `audit_logs` (chỉ thêm) |
 
 Quy tắc chính nằm ở tầng DB (có test):
 - Email duy nhất không phân biệt hoa/thường; tìm user theo `lower(email)`.
 - Tập phim chỉ xuất bản được khi video `ready`; series xuất bản phải có `published_at`.
 - Một payment chỉ cộng VIP một lần (unique `subscriptions.payment_id`); webhook trùng bị chặn (unique `payment_events(provider, event_id)`); đơn `paid`/`refunded` phải có `paid_at`.
-- Không xóa user/gói/payment/series còn được tham chiếu bởi dữ liệu tiền hoặc tập phim (RESTRICT); dữ liệu riêng của user thì xóa theo (CASCADE).
-- (Đang lên plan, migration `0007`–`0009`) Xóa trên web chỉ là **xóa mềm** (`deleted_at`), DB chặn `DELETE` thật; `payments`/`subscriptions`/`payment_events` không bao giờ bị xóa; mọi thao tác quan trọng ghi vào `audit_logs` (chỉ thêm, không sửa/xóa). Chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md).
+- Đơn chỉ `paid` khi gắn với giao dịch ngân hàng thật (`paid_event_id`, một giao dịch trả một đơn): admin không thể tự đánh dấu đã thanh toán. Cho VIP không qua tiền thì dùng "tặng VIP" (subscription không có payment, bắt buộc lý do).
+- Trạng thái chỉ chuyển theo sơ đồ (trigger): đơn `pending → paid | failed | expired`, `paid → refunded`; gói `active → expired | cancelled`; trạng thái cuối không đổi được. Đơn đã rời `pending` thì khóa trường tiền. Đơn `failed` phải có `failure_code`.
+- **Xóa trên web chỉ là xóa mềm** (`deleted_at`): dòng bị ẩn khỏi mọi truy vấn ORM nhưng vẫn nằm trong DB, khôi phục được; email/slug/số tập vẫn giữ chỗ. DB chặn `DELETE`/`TRUNCATE` thật trên 9 bảng quan trọng (chỉ script bảo trì bật cờ `vdrama.allow_hard_delete` mới qua được). `payments`/`subscriptions`/`payment_events` không bao giờ bị xóa, chỉ đổi trạng thái. Khóa ngoại RESTRICT/CASCADE chỉ còn tác dụng trong bảo trì.
+- **Nhật ký thao tác `audit_logs`**: ai, lúc nào, làm gì, trên đối tượng nào, user bị ảnh hưởng, trước/sau, lý do, IP, request_id. Ghi cùng transaction với thay đổi; bắt buộc lý do cho xóa/khôi phục/đổi quyền/hủy gói/hoàn tiền/tặng VIP/gắn giao dịch; che mật khẩu và token; DB cấm sửa và xóa nhật ký.
 - Gia hạn VIP: thêm dòng `subscriptions` mới với `starts_at` = max(bây giờ, hạn VIP hiện tại), `expires_at` = `starts_at` + `duration_days`; không sửa dòng cũ.
 - Trạng thái VIP (chốt 2026-10-27, thêm ở migration `0010` cùng auth): cột `users.vip_expires_at`, VIP khi `vip_expires_at > now()`; không dùng role `vip` hay cờ `is_vip`. Cột này là bản tóm tắt của `subscriptions`, chỉ được ghi bởi `services/vip.py` trong cùng transaction.
 - Mọi khóa ngoại đều có index; `watch_history` ghi bằng upsert và cập nhật tại chỗ (HOT).
@@ -192,7 +197,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 
 ### Giai đoạn 2 — Backend lõi
 - [x] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md); xong 2026-10-27 trên Postgres local, **chưa thử trên Neon thật** vì chưa có tài khoản) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
-- [ ] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), chờ duyệt) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
+- [x] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), xong 2026-10-27, migration `0007`–`0009`) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
 - [ ] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), đã rà soát lại, chờ duyệt; có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [ ] Catalog: series, episodes, thể loại, phân trang

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án) và phần DB của Giai đoạn 2 (toàn bộ bảng, migration 0001–0006); chưa có endpoint nghiệp vụ (auth, catalog, play, thanh toán). Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án) và phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009); việc kế tiếp là auth (`docs/plans/gd2-b2-auth.md`, migration 0010); chưa có endpoint nghiệp vụ (auth, catalog, play, thanh toán). Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -53,6 +53,14 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
 
 - Web và API dùng **một domain**: mọi route API nằm dưới `/api` (kể cả `/api/health`), Caddy chuyển `/api/*` sang FastAPI, phần còn lại sang Next.js. Local không có Caddy nên Next.js `rewrites` thay vai trò đó. Không dùng CORS.
 - Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`). DB là SQLAlchemy 2 **async** + psycopg 3 (`core/db.py`: engine tạo lười, dependency `DbSession`); `DATABASE_URL` là URL qua pooler cho app, `DATABASE_URL_DIRECT` cho migration. Kế hoạch DB/scale: `docs/plans/gd2-b1-database.md`. Model nằm ở `app/models/` theo nhóm (user, user_session, email_token, catalog, vip, activity); thêm model mới phải import trong `app/models/__init__.py` để Alembic thấy. Mọi khóa ngoại phải có index (có test chung bắt lỗi này); không index cột ghi liên tục của `watch_history` (có test đo HOT update). Ràng buộc nghiệp vụ quan trọng nằm ở tầng DB (CHECK/unique/FK), có test trong `app/tests/test_*_schema.py`. Tìm series theo tên luôn dùng `series_search_condition()` (`app/services/search.py`) để khớp index trigram; tìm user theo email so `lower(email)`.
+- **Quy ước dữ liệu** (đều có test, vi phạm thì test hoặc DB báo lỗi):
+  - Trạng thái, vai trò, mã lỗi dùng `StrEnum` trong `app/models/enums.py` (`PaymentStatus.PAID`...), không gõ chuỗi tay. CHECK sinh từ enum bằng `sql_in()`. Thêm giá trị mới thì sửa cả enum lẫn migration (test `test_db_check_matches_enum` bắt lệch). Chuyển trạng thái payments/subscriptions chỉ theo `PAYMENT_TRANSITIONS`/`SUBSCRIPTION_TRANSITIONS` (trigger trong DB chặn phần còn lại).
+  - Xóa mềm (`users`, `series`, `episodes`, `genres`, `vip_plans`): mọi truy vấn ORM tự ẩn dòng đã xóa (`app/models/soft_delete.py`); cần thấy cả dòng đã xóa (admin, thùng rác, kiểm tra trùng) thì `execution_options(include_deleted=True)` hoặc `get_including_deleted()`. Truy vấn phục vụ người dùng **không viết SQL tay** (`text()` không được lọc). Xóa/khôi phục chỉ qua `app/services/soft_delete.py`, không tự gán `deleted_at`. Ẩn "theo cha" (tập của series đã xóa) do truy vấn nghiệp vụ tự join điều kiện của series.
+  - DB chặn `DELETE`/`TRUNCATE` thật trên các bảng quan trọng; test cascade/restrict dùng helper `hard_delete()` trong `app/tests/conftest.py` (bật cờ bảo trì trong đúng transaction).
+  - Mọi thao tác admin, thay đổi trạng thái tiền và quyền tài khoản phải ghi `audit_logs` qua `app/services/audit.py` trong **cùng transaction**: gọi `require_reason()` trước khi đổi dữ liệu, chụp `await load_snapshot()` trước/sau, rồi `record(...)`. Tên hành động dạng `<bảng>.<động từ>` (ví dụ `series.delete`). Người thực hiện truyền bằng `Actor.admin(id)` / `Actor.system()` / `Actor.webhook()`. Mật khẩu/token đã được che sẵn.
+  - Đơn `paid` phải có `paid_event_id` (giao dịch ngân hàng thật từ SePay); không viết code đánh dấu đã thanh toán theo cách khác.
+  - Service async đọc cột do DB tính (`now()`, cột sinh sẵn) phải nạp lại tường minh (`refresh`/`load_snapshot`), vì nạp ngầm trong async báo lỗi `MissingGreenlet`.
+- Mỗi request có `X-Request-ID` (`app/core/request_context.py`); `current_request()` trả request_id, IP, user agent cho nhật ký và log.
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

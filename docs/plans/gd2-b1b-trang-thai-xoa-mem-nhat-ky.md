@@ -1,6 +1,6 @@
 # Plan: Bổ sung schema — trạng thái rõ ràng, xóa mềm, nhật ký thao tác (audit log), lý do thanh toán thất bại
 
-> Trạng thái: **đã duyệt (2026-10-27), đang làm Bước 1.** Làm **trước** plan auth (`gd2-b2-auth.md`), vì auth dựa vào xóa mềm (user bị xóa không đăng nhập được) và nhật ký (đổi quyền admin phải có dấu vết). Migration của auth vì vậy đổi thành `0010`.
+> Trạng thái: **xong (2026-10-27)**, migration `0007`–`0009`. Làm **trước** plan auth (`gd2-b2-auth.md`), vì auth dựa vào xóa mềm (user bị xóa không đăng nhập được) và nhật ký (đổi quyền admin phải có dấu vết). Migration của auth vì vậy đổi thành `0010`.
 > Yêu cầu gốc (2026-10-27): thêm `failure_reason` cho payments; định nghĩa rõ trạng thái subscriptions và kiểm tra VIP theo cả trạng thái lẫn thời hạn; xóa phải là xóa mềm, DB vẫn lưu, có nhật ký rõ ràng để truy vết.
 
 ## Mục tiêu và phạm vi
@@ -150,7 +150,7 @@ Một bảng chung thay cho `admin_audit_logs` riêng: các cột `admin_user_id
   - Hoàn thành khi: test xóa/khôi phục từng loại; dòng đã xóa không hiện ở mọi truy vấn ORM thường nhưng hiện khi `include_deleted=True`; `DELETE` thật bị từ chối trên 9 bảng và chỉ chạy được khi bật cờ bảo trì; xóa user thu hồi mọi phiên; các test cũ được sửa và vẫn pass.
 - [x] **Bước 3: Nhật ký thao tác (migration 0009)** (xong; model `app/models/audit.py`, service `app/services/audit.py` (`record`, `require_reason`, `load_snapshot`, che trường nhạy cảm, bỏ qua `updated_at`/`search_text`), middleware `app/core/request_context.py` (header `X-Request-ID`); xóa/khôi phục giờ bắt buộc `actor` + `reason` và tự ghi nhật ký; DB chặn `UPDATE` nhật ký kể cả khi bảo trì, chặn `DELETE`/`TRUNCATE` như 0008)
   - Hoàn thành khi: test xóa/khôi phục/đổi trạng thái tạo đúng một dòng nhật ký với `changes` trước/sau; trường nhạy cảm bị che; thiếu `reason` ở thao tác bắt buộc thì bị từ chối; transaction bị hủy thì không còn dòng nhật ký; `UPDATE`/`DELETE` trên `audit_logs` bị DB từ chối; request_id có trong nhật ký và header phản hồi.
-- [ ] **Bước 4: Tài liệu** — `plan.md` mục 4, CLAUDE.md, cập nhật plan auth; CI xanh.
+- [x] **Bước 4: Tài liệu** (xong) — `plan.md` mục 4, CLAUDE.md, cập nhật plan auth; CI xanh.
 
 ## Rủi ro
 

@@ -3,7 +3,16 @@
 > Trạng thái: **đã rà soát lại theo góp ý (2026-10-27), chờ duyệt lần cuối.** Chưa code. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
-> Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002).
+> Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
+
+## Nối với phần bổ sung schema đã làm (0007–0009)
+
+Plan bổ sung schema đã xong; auth dùng lại như sau, không làm lại:
+- **User bị xóa mềm**: bộ lọc tự động ẩn user đã xóa ở mọi truy vấn ORM, nên đăng nhập tìm theo email không thấy → trả cùng lỗi `invalid_credentials` (không lộ là tài khoản từng tồn tại). `CurrentUser` nạp user qua ORM nên phiên của user đã xóa cũng tự 401; ngoài ra service xóa user đã thu hồi mọi phiên. User bị khóa (`is_active = false`, chưa xóa) thì trả `account_disabled`.
+- **Đăng ký với email của user đã xóa mềm** → `email_taken` (email vẫn giữ chỗ để khôi phục được, đã chốt). Kiểm tra trùng email phải truy vấn với `include_deleted=True`, nếu không sẽ lọt qua bước kiểm tra rồi mới vấp unique index của DB.
+- **Nhật ký**: đổi role (`users.role_change`) và lệnh `create-admin` ghi `audit_logs` qua `app/services/audit.py`, bắt buộc lý do; lệnh CLI dùng `Actor.system()`. Khóa/mở tài khoản (`users.disable` / `users.enable`) cũng ghi nhật ký. Đăng nhập/đăng xuất thường **không** ghi vào `audit_logs` (quá nhiều, đã có `sessions` để truy vết).
+- **Enum**: role dùng `UserRole.USER` / `UserRole.ADMIN`.
+- **IP thật**: thay phần lấy IP trong `app/core/request_context.py` bằng hàm đọc `CF-Connecting-IP` (chỉ khi `TRUST_CLOUDFLARE_IP=true`), để rate limit, `sessions.ip` và `audit_logs.ip` dùng chung một nguồn.
 
 ## Mục tiêu và phạm vi
 
@@ -152,10 +161,10 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 - [ ] **Bước 3: Refresh có xoay vòng**
   - Việc: `/auth/refresh` theo thiết kế trên.
   - Hoàn thành khi: test refresh thành công đổi cả hai cookie; token cũ dùng lại trong 60 giây vẫn được; dùng lại sau 60 giây thì thu hồi cả session; session hết hạn/đã thu hồi → 401 và xóa cookie; hạn session trượt thêm 30 ngày.
-- [ ] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin`**
+- [ ] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**
   - Việc: thêm `services/vip.py` với hai hàm duy nhất chạm vào VIP: `grant_vip(...)` (thêm subscription nối tiếp + cập nhật `users.vip_expires_at` trong cùng transaction) và `cancel_subscription(...)` (hủy + tính lại `vip_expires_at`); `is_vip(user)`. Giai đoạn 5 (thanh toán SePay, admin tặng VIP) gọi lại các hàm này.
   - Hoàn thành khi: test `/me` có/không cookie, access hết hạn, session bị thu hồi thì 401 ngay; user bị khóa thì 401; `OptionalUser` trả `None` cho khách thay vì lỗi; endpoint admin thử nghiệm trả 403 cho user thường, 200 cho admin; VIP đúng với các trường hợp chưa từng mua, còn hạn, vừa quá hạn một giây, mua lại sau khi quá hạn (tính từ lúc mua), gia hạn khi còn hạn (cộng nối tiếp), subscription bị hủy (hạn tính lại); `vip_expires_at` luôn khớp với `subscriptions`; lệnh `create-admin` tạo mới và nâng quyền user có sẵn.
-- [ ] **Bước 5: CSRF và rate limit**
+- [ ] **Bước 5: CSRF, rate limit, IP thật (dùng chung cho request_context)**
   - Hoàn thành khi: test POST có cookie mà `Origin` lạ → 403, đúng `Origin` → qua, request không cookie không bị chặn; login quá ngưỡng → 429 có `Retry-After`; `CF-Connecting-IP` chỉ được tin khi bật cấu hình.
 - [ ] **Bước 6: Tài liệu và kiểm tra cuối**
   - Việc: `docs/api.md` (auth), `.env.example`, compose dev, CLAUDE.md, README; chạy thử bằng compose với curl (đăng ký → `/me` → refresh → đăng xuất); CI xanh.
