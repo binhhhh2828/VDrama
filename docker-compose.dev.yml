@@ -1,0 +1,33 @@
+# Môi trường local: web + api + Postgres. Chạy: docker compose -f docker-compose.dev.yml up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vdrama
+      POSTGRES_PASSWORD: vdrama
+      POSTGRES_DB: vdrama
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vdrama"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./apps/api
+    environment:
+      ENV: dev
+      DATABASE_URL: postgresql://vdrama:vdrama@db:5432/vdrama
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+
+  web:
+    build: ./apps/web
+    environment:
+      API_INTERNAL_URL: http://api:8000
+    ports: ["3000:3000"]
+    depends_on: [api]
+
+volumes:
+  pgdata:

@@ -4,15 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-VDrama là dự án mới, chưa có code. Công nghệ, lệnh build/test/lint chưa được chọn.
-Khi stack được chốt, cập nhật mục "Lệnh thường dùng" và "Kiến trúc" bên dưới (hoặc chạy lại `/init`). Không tự đoán hay bịa thông tin chưa có.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Mới xong Giai đoạn 1 (khung dự án); chưa có DB, auth hay tính năng. Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
 Mọi thay đổi không tầm thường đi theo vòng lặp: **Khám phá → Plan → Thực thi từng bước → Kiểm tra → Commit**.
 
 1. **Khám phá**: đọc code liên quan, chưa sửa gì (dùng Plan Mode). Yêu cầu mơ hồ thì hỏi làm rõ trước.
-2. **Plan**: ghi kế hoạch vào `plan.md` ở thư mục gốc (xem mẫu trong file đó). Chờ người dùng review/chỉnh xong mới code.
+2. **Plan**: ghi kế hoạch vào `plan.md` ở thư mục gốc (xem mẫu ở `docs/plan-template.md`). Chờ người dùng review/chỉnh xong mới code.
 3. **Thực thi**: làm đúng **một bước** trong `plan.md`, rồi dừng cho người dùng xem. Không làm cả plan một lượt.
 4. **Kiểm tra**: chạy test, lint, type-check của dự án; sửa đến khi pass. Báo trung thực nếu có thứ không chạy được.
 5. **Commit**: mỗi bước chạy ổn là một commit nhỏ, message rõ ràng. Chỉ commit khi người dùng yêu cầu.
@@ -33,11 +32,24 @@ Mọi thay đổi không tầm thường đi theo vòng lặp: **Khám phá → 
 
 ## Lệnh thường dùng
 
-Chưa có. Điền vào khi chốt stack (build, test, chạy một test đơn lẻ, lint, type-check).
+API (chạy trong `apps/api`):
+
+- Cài/chạy: `uv sync`, `uv run uvicorn app.main:app --reload`
+- Kiểm tra: `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -q`
+- Một test: `uv run pytest app/tests/test_health.py::test_health_ok`
+
+Web (chạy trong `apps/web`):
+
+- Chạy: `pnpm dev` (đặt `API_PROXY_TARGET=http://localhost:8000` để proxy `/api/*` sang FastAPI)
+- Kiểm tra: `pnpm lint`, `pnpm typecheck`, `pnpm format:check`, `pnpm build`
+
+Cả bộ local: `docker compose -f docker-compose.dev.yml up --build`. CI (`.github/workflows/ci.yml`) chạy đúng các lệnh kiểm tra trên.
 
 ## Kiến trúc
 
-Chưa có. Mô tả bức tranh tổng thể ở đây khi code đã thành hình.
+- Web và API dùng **một domain**: mọi route API nằm dưới `/api` (kể cả `/api/health`), Caddy chuyển `/api/*` sang FastAPI, phần còn lại sang Next.js. Local không có Caddy nên Next.js `rewrites` thay vai trò đó. Không dùng CORS.
+- Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`).
+- Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm
 
