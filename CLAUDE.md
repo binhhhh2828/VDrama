@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Mới xong Giai đoạn 1 (khung dự án) và nền DB (async + Alembic); chưa có bảng, auth hay tính năng. Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án) và phần DB của Giai đoạn 2 (toàn bộ bảng, migration 0001–0006); chưa có endpoint nghiệp vụ (auth, catalog, play, thanh toán). Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -47,12 +47,12 @@ Web (chạy trong `apps/web`):
 - Chạy: `pnpm dev` (đặt `API_PROXY_TARGET=http://localhost:8000` để proxy `/api/*` sang FastAPI)
 - Kiểm tra: `pnpm lint`, `pnpm typecheck`, `pnpm format:check`, `pnpm build`
 
-Cả bộ local: `docker compose -f docker-compose.dev.yml up --build`. CI (`.github/workflows/ci.yml`) chạy đúng các lệnh kiểm tra trên.
+Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service `migrate` tự chạy `alembic upgrade head` trước khi api khởi động). CI (`.github/workflows/ci.yml`) chạy đúng các lệnh kiểm tra trên.
 
 ## Kiến trúc
 
 - Web và API dùng **một domain**: mọi route API nằm dưới `/api` (kể cả `/api/health`), Caddy chuyển `/api/*` sang FastAPI, phần còn lại sang Next.js. Local không có Caddy nên Next.js `rewrites` thay vai trò đó. Không dùng CORS.
-- Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`). DB là SQLAlchemy 2 **async** + psycopg 3 (`core/db.py`: engine tạo lười, dependency `DbSession`); `DATABASE_URL` là URL qua pooler cho app, `DATABASE_URL_DIRECT` cho migration. Kế hoạch DB/scale: `docs/plans/gd2-b1-database.md`. Ràng buộc nghiệp vụ quan trọng nằm ở tầng DB (CHECK/unique/FK), có test trong `app/tests/test_*_schema.py`. Tìm series theo tên luôn dùng `series_search_condition()` (`app/services/search.py`) để khớp index trigram; tìm user theo email so `lower(email)`.
+- Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`). DB là SQLAlchemy 2 **async** + psycopg 3 (`core/db.py`: engine tạo lười, dependency `DbSession`); `DATABASE_URL` là URL qua pooler cho app, `DATABASE_URL_DIRECT` cho migration. Kế hoạch DB/scale: `docs/plans/gd2-b1-database.md`. Model nằm ở `app/models/` theo nhóm (user, user_session, email_token, catalog, vip, activity); thêm model mới phải import trong `app/models/__init__.py` để Alembic thấy. Mọi khóa ngoại phải có index (có test chung bắt lỗi này); không index cột ghi liên tục của `watch_history` (có test đo HOT update). Ràng buộc nghiệp vụ quan trọng nằm ở tầng DB (CHECK/unique/FK), có test trong `app/tests/test_*_schema.py`. Tìm series theo tên luôn dùng `series_search_condition()` (`app/services/search.py`) để khớp index trigram; tìm user theo email so `lower(email)`.
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

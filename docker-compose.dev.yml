@@ -1,4 +1,5 @@
-# Môi trường local: web + api + Postgres. Chạy: docker compose -f docker-compose.dev.yml up --build
+# Môi trường local: Postgres + migration + api + web.
+# Chạy: docker compose -f docker-compose.dev.yml up --build
 services:
   db:
     image: postgres:16-alpine
@@ -13,14 +14,26 @@ services:
       interval: 5s
       retries: 10
 
+  # Chạy migration một lần rồi thoát; api chỉ khởi động khi migration thành công.
+  migrate:
+    build: ./apps/api
+    image: vdrama-api:dev
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql://vdrama:vdrama@db:5432/vdrama
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
   api:
     build: ./apps/api
+    image: vdrama-api:dev
     environment:
       ENV: dev
       DATABASE_URL: postgresql://vdrama:vdrama@db:5432/vdrama
     ports: ["8000:8000"]
     depends_on:
-      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
 
   web:
     build: ./apps/web

@@ -116,21 +116,24 @@ vdrama/
 
 ## 4. Mô hình dữ liệu (PostgreSQL)
 
-- **users**: id, email (unique), password_hash, display_name, role (`user`/`admin`), is_active, created_at
-- **series**: id, slug (unique), title, description, poster_url, banner_url, year, country, status, is_published, created_at
-- **genres** + **series_genres**: phân loại thể loại
-- **episodes**: id, series_id, number, title, duration_sec, stream_video_id, is_free, is_published, published_at
-- **vip_plans**: id, name, price_vnd, duration_days, is_active
-- **subscriptions**: id, user_id, plan_id, starts_at, expires_at, status
-- **payments**: id, user_id, plan_id, provider, provider_order_id (unique), amount_vnd, status, raw_payload (jsonb), created_at, paid_at
-- **watch_history**: user_id, episode_id, progress_sec, updated_at
-- **favorites**: user_id, series_id
-- **sessions** (bắt buộc, thay cho refresh_tokens): id, user_id, refresh_token_hash, device_info, created_at, last_seen_at, revoked_at. Cần có từ Giai đoạn 2 vì giới hạn thiết bị đồng thời (Giai đoạn 5) và đăng xuất từ xa dựa vào bảng này
-- **email_tokens**: id, user_id, purpose (`verify_email`/`reset_password`), token_hash, expires_at, used_at
-- **payment_events**: id, provider, event_id (unique), payload (jsonb), received_at — chống xử lý webhook trùng
-- Quy tắc gia hạn VIP: nếu còn hạn thì `expires_at` mới = `expires_at` cũ + `duration_days`; hết hạn thì tính từ lúc thanh toán
+**Đã triển khai** (migration `0001`–`0006`, 2026-10-27). Thiết kế chi tiết, lý do và nguyên tắc scale: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md). Nguồn sự thật là model trong `apps/api/app/models/`.
 
-Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(user_id, expires_at)`, `payments.provider_order_id`.
+| Migration | Nhóm | Bảng |
+|---|---|---|
+| `0001` | Extension | `pg_trgm`, `unaccent` |
+| `0002` | Tài khoản | `users`, `sessions`, `email_tokens` |
+| `0003` | Catalog | `series`, `series_stats`, `genres`, `series_genres`, `episodes` |
+| `0004` | Tìm kiếm | hàm `immutable_unaccent`, cột `series.search_text`, index GIN trigram |
+| `0005` | VIP & thanh toán | `vip_plans`, `payments`, `subscriptions`, `payment_events` |
+| `0006` | Hoạt động | `watch_history`, `favorites` |
+
+Quy tắc chính nằm ở tầng DB (có test):
+- Email duy nhất không phân biệt hoa/thường; tìm user theo `lower(email)`.
+- Tập phim chỉ xuất bản được khi video `ready`; series xuất bản phải có `published_at`.
+- Một payment chỉ cộng VIP một lần (unique `subscriptions.payment_id`); webhook trùng bị chặn (unique `payment_events(provider, event_id)`); đơn `paid`/`refunded` phải có `paid_at`.
+- Không xóa user/gói/payment/series còn được tham chiếu bởi dữ liệu tiền hoặc tập phim (RESTRICT); dữ liệu riêng của user thì xóa theo (CASCADE).
+- Gia hạn VIP: thêm dòng `subscriptions` mới với `starts_at` = max(bây giờ, hạn VIP hiện tại), `expires_at` = `starts_at` + `duration_days`; không sửa dòng cũ.
+- Mọi khóa ngoại đều có index; `watch_history` ghi bằng upsert và cập nhật tại chỗ (HOT).
 
 ---
 
@@ -186,7 +189,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 - [ ] (cuối tuần 1) Deploy bản "hello world" (web + `/api/health`) lên VPS qua Caddy + Cloudflare để phát hiện sớm lỗi DNS/HTTPS/CI-CD; cần xong Giai đoạn 0 (domain, VPS)
 
 ### Giai đoạn 2 — Backend lõi
-- [ ] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md)) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
+- [x] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md); xong 2026-10-27 trên Postgres local, **chưa thử trên Neon thật** vì chưa có tài khoản) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
 - [ ] Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [ ] Catalog: series, episodes, thể loại, phân trang

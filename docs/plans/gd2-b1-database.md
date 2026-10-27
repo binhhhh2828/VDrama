@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / bước đầu — Nền DB (async), Alembic, migration theo từng nhóm bảng
 
-> Trạng thái: **đã duyệt hướng; Bước 1 đang làm. Các bước 3–6 (thiết kế bảng) cần bạn đọc lại mục "Thiết kế bảng" trước khi code.**
+> Trạng thái: **xong (2026-10-27).** Còn mở: kiểm chứng trên Neon thật (pooler, extension) khi có tài khoản, đưa vào checklist Giai đoạn 6.
 > Liên quan: `plan.md` mục 4 (mô hình dữ liệu) và Giai đoạn 2. Mục 4 của `plan.md` sẽ được cập nhật theo plan này khi xong.
 
 ## Mục tiêu và phạm vi
@@ -83,7 +83,7 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 - [x] **Bước 4: Nhóm catalog + tìm kiếm** (xong; thêm CHECK: series đã xuất bản phải có `published_at`, tập đã xuất bản phải có video `ready`; hàm tìm kiếm dùng chung ở `app/services/search.py`) — models + migrations `0003`, `0004` + test (trùng `(series_id, number)`, `slug`, `stream_video_id` bị chặn; tìm "nang tho" ra "Nàng Thơ" bằng truy vấn trigram; kiểm tra bằng `EXPLAIN` rằng truy vấn danh sách dùng đúng index).
 - [x] **Bước 5: Nhóm VIP & thanh toán** (xong; bổ sung: `subscriptions.payment_id` cho phép NULL khi admin tặng VIP thủ công; CHECK đơn `paid`/`refunded` phải có `paid_at`; CHECK `expires_at > starts_at`; `payment_events.processed_at`; index `payments(user_id, created_at DESC)` cho lịch sử thanh toán; gia hạn = thêm dòng subscription nối tiếp, không sửa dòng cũ) — models + migration `0005` + test (trùng `provider_order_id`, `(provider, event_id)`, `payment_id` trong subscriptions bị chặn; CHECK trạng thái; xóa user còn payments bị `RESTRICT`).
 - [x] **Bước 6: Nhóm hoạt động** (xong; bỏ index `(user_id, updated_at DESC)` để giữ HOT update, có test đo HOT qua `pg_stat_xact_user_tables`; hàm upsert dùng chung ở `app/services/activity.py`) — models + migration `0006` + test (upsert `watch_history` ghi đè đúng một dòng; cascade).
-- [ ] **Bước 7: Tài liệu và dev compose** — cập nhật `.env.example`, compose dev (scheme `postgresql+psycopg://`), README, CLAUDE.md (lệnh migrate/test DB), `plan.md` mục 4; `alembic check` sạch; chạy lại `docker compose up`; CI xanh.
+- [x] **Bước 7: Tài liệu và dev compose** (xong; compose có service `migrate` tự chạy `alembic upgrade head` trước khi api khởi động; giữ URL dạng `postgresql://` trong compose vì app tự đổi driver; đã chạy thử từ DB trống: đủ 6 migration, 14 bảng, `alembic check` sạch, `/api/health/db` ok, web 200).
 
 ## Rủi ro
 
