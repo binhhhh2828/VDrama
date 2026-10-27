@@ -36,6 +36,8 @@ API (chạy trong `apps/api`):
 
 - Cài/chạy: `uv sync`, `uv run uvicorn app.main:app --reload`
 - Kiểm tra: `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -q`
+- Test cần Postgres: bật DB (`docker compose -f docker-compose.dev.yml up -d db`) rồi đặt `TEST_DATABASE_URL=postgresql://vdrama:vdrama@localhost:5432/vdrama`; thiếu biến này các test đó tự bỏ qua (CI luôn đặt)
+- Windows: psycopg async cần SelectorEventLoop, chạy server bằng `uv run uvicorn app.main:app --reload --loop app.core.loop:selector_loop_factory` (Linux/Docker không cần)
 - Một test: `uv run pytest app/tests/test_health.py::test_health_ok`
 
 Web (chạy trong `apps/web`):
@@ -48,7 +50,7 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build`. CI (`.gi
 ## Kiến trúc
 
 - Web và API dùng **một domain**: mọi route API nằm dưới `/api` (kể cả `/api/health`), Caddy chuyển `/api/*` sang FastAPI, phần còn lại sang Next.js. Local không có Caddy nên Next.js `rewrites` thay vai trò đó. Không dùng CORS.
-- Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`).
+- Code API theo lớp trong `apps/api/app/`: `routers/` → `services/` → `models/`, cấu hình ở `core/config.py` (pydantic-settings, đọc `.env`). DB là SQLAlchemy 2 **async** + psycopg 3 (`core/db.py`: engine tạo lười, dependency `DbSession`); `DATABASE_URL` là URL qua pooler cho app, `DATABASE_URL_DIRECT` cho migration. Kế hoạch DB/scale: `docs/plans/gd2-b1-database.md`.
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

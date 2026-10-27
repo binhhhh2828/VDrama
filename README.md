@@ -9,6 +9,7 @@ Cần: Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm, Docker (t
 ```bash
 # API  → http://localhost:8000/api/health
 cd apps/api && uv sync && uv run uvicorn app.main:app --reload
+# Windows: thêm  --loop app.core.loop:selector_loop_factory
 
 # Web  → http://localhost:3000  (API_PROXY_TARGET=http://localhost:8000 để proxy /api)
 cd apps/web && pnpm install && pnpm dev

@@ -186,7 +186,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 - [ ] (cuối tuần 1) Deploy bản "hello world" (web + `/api/health`) lên VPS qua Caddy + Cloudflare để phát hiện sớm lỗi DNS/HTTPS/CI-CD; cần xong Giai đoạn 0 (domain, VPS)
 
 ### Giai đoạn 2 — Backend lõi
-- [ ] Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
+- [ ] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md)) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
 - [ ] Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [ ] Catalog: series, episodes, thể loại, phân trang
