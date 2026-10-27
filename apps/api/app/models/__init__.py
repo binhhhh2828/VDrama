@@ -3,6 +3,7 @@
 # Đăng ký bộ lọc tự ẩn dòng đã xóa mềm cho mọi truy vấn ORM.
 import app.models.soft_delete  # noqa: F401
 from app.models.activity import Favorite, WatchHistory
+from app.models.audit import AuditLog
 from app.models.catalog import Episode, Genre, Series, SeriesStats, series_genres
 from app.models.email_token import EmailToken
 from app.models.user import User
@@ -10,6 +11,7 @@ from app.models.user_session import UserSession
 from app.models.vip import Payment, PaymentEvent, Subscription, VipPlan
 
 __all__ = [
+    "AuditLog",
     "EmailToken",
     "Episode",
     "Favorite",

@@ -47,6 +47,15 @@ class PaymentFailureCode(StrEnum):
     OTHER = "other"
 
 
+class ActorType(StrEnum):
+    """Ai thực hiện một thao tác được ghi vào audit_logs."""
+
+    ADMIN = "admin"
+    USER = "user"
+    SYSTEM = "system"  # job chạy định kỳ, lệnh bảo trì
+    WEBHOOK = "webhook"  # cổng thanh toán, Cloudflare Stream
+
+
 class SubscriptionStatus(StrEnum):
     ACTIVE = "active"
     EXPIRED = "expired"

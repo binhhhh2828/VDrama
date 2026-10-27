@@ -22,6 +22,7 @@ from app.models import (
 )
 from app.models.enums import PaymentStatus
 from app.models.soft_delete import INCLUDE_DELETED
+from app.services.audit import Actor
 from app.services.soft_delete import get_including_deleted, restore, soft_delete
 from app.tests.conftest import hard_delete
 
@@ -212,17 +213,17 @@ async def test_soft_delete_and_restore_series(adb: AsyncSession):
     adb.add(s)
     await adb.flush()
 
-    assert await soft_delete(adb, s, deleted_by_id=admin.id) is True
+    assert await soft_delete(adb, s, actor=Actor.admin(admin.id), reason="Đăng nhầm") is True
     await adb.commit()
     assert s.deleted_by_id == admin.id
     assert (await adb.execute(select(Series).where(Series.id == s.id))).scalar() is None
 
-    again = await soft_delete(adb, s, deleted_by_id=admin.id)
+    again = await soft_delete(adb, s, actor=Actor.admin(admin.id), reason="Đăng nhầm")
     assert again is False  # xóa lần hai không làm gì
 
     found = await get_including_deleted(adb, Series, s.id)
     assert found is not None
-    assert await restore(adb, found) is True
+    assert await restore(adb, found, actor=Actor.admin(admin.id), reason="Xóa nhầm") is True
     await adb.commit()
     adb.expunge_all()
     back = (await adb.execute(select(Series).where(Series.id == s.id))).scalar()
@@ -238,7 +239,7 @@ async def test_deleting_user_revokes_all_sessions(adb: AsyncSession):
     )
     await adb.flush()
 
-    await soft_delete(adb, user, deleted_by_id=None)
+    await soft_delete(adb, user, actor=Actor.system(), reason="Tài khoản vi phạm")
     await adb.commit()
 
     active = await adb.scalar(
@@ -253,4 +254,4 @@ async def test_restore_not_deleted_is_noop(adb: AsyncSession):
     s = Series(slug="phim", title="Phim")
     adb.add(s)
     await adb.flush()
-    assert await restore(adb, s) is False
+    assert await restore(adb, s, actor=Actor.system(), reason="Thử") is False
