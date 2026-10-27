@@ -4,6 +4,9 @@ Quy tắc chính nằm ở tầng DB để đúng kể cả khi code có lỗi:
 - Một payment chỉ cộng VIP một lần: subscriptions.payment_id là unique.
 - Webhook trùng không xử lý hai lần: unique (provider, event_id).
 - Không xóa user/gói còn lịch sử thanh toán: khóa ngoại RESTRICT.
+- Đơn chỉ `paid` khi gắn với một giao dịch ngân hàng thật (paid_event_id); một giao dịch
+  chỉ trả cho một đơn. Admin không thể tự đánh dấu đã thanh toán.
+- Chuyển trạng thái chỉ theo PAYMENT_TRANSITIONS / SUBSCRIPTION_TRANSITIONS (trigger, 0007).
 """
 
 from datetime import datetime
@@ -19,6 +22,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
     text,
@@ -27,10 +31,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+from app.models.enums import PaymentFailureCode, PaymentStatus, SubscriptionStatus, sql_in
 from app.models.mixins import CreatedAtMixin, TimestampMixin
-
-PAYMENT_STATUSES = ("pending", "paid", "failed", "expired", "refunded")
-SUBSCRIPTION_STATUSES = ("active", "expired", "cancelled")
 
 
 class VipPlan(TimestampMixin, Base):
@@ -63,16 +65,42 @@ class Payment(TimestampMixin, Base):
     provider_order_id: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     # Lưu giá tại thời điểm mua (giá gói có thể đổi sau đó). Đối chiếu với số tiền cổng báo về.
     amount_vnd: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="pending")
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=PaymentStatus.PENDING.value
+    )
     raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Giao dịch ngân hàng thật (từ webhook/đối soát SePay) đã trả cho đơn này.
+    paid_event_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("payment_events.id", ondelete="RESTRICT"), unique=True
+    )
+    failure_code: Mapped[str | None] = mapped_column(String(50))
+    failure_detail: Mapped[str | None] = mapped_column(Text)
 
     __table_args__ = (
         CheckConstraint("amount_vnd > 0", name="amount_positive"),
-        CheckConstraint(f"status IN {PAYMENT_STATUSES!r}", name="status"),
+        CheckConstraint(sql_in("status", PaymentStatus), name="status"),
         CheckConstraint(
             "status NOT IN ('paid', 'refunded') OR paid_at IS NOT NULL", name="paid_at_set"
+        ),
+        # Không có giao dịch thật thì không thể "đã thanh toán", kể cả admin sửa tay.
+        CheckConstraint(
+            "status NOT IN ('paid', 'refunded') OR paid_event_id IS NOT NULL",
+            name="paid_requires_event",
+        ),
+        CheckConstraint(
+            f"failure_code IS NULL OR {sql_in('failure_code', PaymentFailureCode)}",
+            name="failure_code",
+        ),
+        # Chỉ đơn thất bại / hết hạn / hoàn tiền mới có lý do; đơn failed bắt buộc có mã.
+        CheckConstraint(
+            "failure_code IS NULL OR status IN ('failed', 'expired', 'refunded')",
+            name="failure_code_status",
+        ),
+        CheckConstraint("status <> 'failed' OR failure_code IS NOT NULL", name="failed_has_code"),
+        CheckConstraint(
+            "failure_detail IS NULL OR failure_code IS NOT NULL", name="detail_has_code"
         ),
         Index("ix_payments_user_id_created_at", "user_id", text("created_at DESC")),
         Index("ix_payments_plan_id", "plan_id"),
@@ -99,10 +127,12 @@ class Subscription(CreatedAtMixin, Base):
     )
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="active")
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=SubscriptionStatus.ACTIVE.value
+    )
 
     __table_args__ = (
-        CheckConstraint(f"status IN {SUBSCRIPTION_STATUSES!r}", name="status"),
+        CheckConstraint(sql_in("status", SubscriptionStatus), name="status"),
         CheckConstraint("expires_at > starts_at", name="period_valid"),
         # "User còn VIP không / hết hạn khi nào": lấy dòng expires_at lớn nhất của user.
         Index("ix_subscriptions_user_id_expires_at", "user_id", text("expires_at DESC")),

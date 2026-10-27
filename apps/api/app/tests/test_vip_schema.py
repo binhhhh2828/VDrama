@@ -34,10 +34,21 @@ def plan(db: Session) -> VipPlan:
     return p
 
 
+def make_event(db: Session, event_id: str = "sepay-1") -> PaymentEvent:
+    """Giả lập một giao dịch ngân hàng SePay đã ghi nhận."""
+    ev = PaymentEvent(provider="sepay", event_id=event_id, payload={"transferAmount": 49000})
+    db.add(ev)
+    db.flush()
+    return ev
+
+
 def make_payment(db: Session, user: User, plan: VipPlan, order: str = "VD-1", **kw) -> Payment:
     kw.setdefault("amount_vnd", plan.price_vnd)
     kw.setdefault("expires_at", NOW + timedelta(minutes=15))
-    p = Payment(user_id=user.id, plan_id=plan.id, provider="momo", provider_order_id=order, **kw)
+    # Đơn đã thanh toán phải gắn giao dịch thật (ck_payments_paid_requires_event).
+    if kw.get("status") in ("paid", "refunded") and "paid_event_id" not in kw:
+        kw["paid_event_id"] = make_event(db, f"sepay-{order}").id
+    p = Payment(user_id=user.id, plan_id=plan.id, provider="sepay", provider_order_id=order, **kw)
     db.add(p)
     db.flush()
     return p

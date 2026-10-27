@@ -13,9 +13,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
+from app.models.enums import EmailTokenPurpose, sql_in
 from app.models.mixins import CreatedAtMixin
-
-EMAIL_TOKEN_PURPOSES = ("verify_email", "reset_password")
 
 
 class EmailToken(CreatedAtMixin, Base):
@@ -33,7 +32,7 @@ class EmailToken(CreatedAtMixin, Base):
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
-        CheckConstraint(f"purpose IN {EMAIL_TOKEN_PURPOSES!r}", name="purpose"),
+        CheckConstraint(sql_in("purpose", EmailTokenPurpose), name="purpose"),
         Index("ix_email_tokens_user_id", "user_id"),
         Index("ix_email_tokens_expires_at", "expires_at"),  # job dọn token hết hạn
     )

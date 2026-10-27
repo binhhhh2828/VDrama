@@ -132,7 +132,9 @@ Quy tắc chính nằm ở tầng DB (có test):
 - Tập phim chỉ xuất bản được khi video `ready`; series xuất bản phải có `published_at`.
 - Một payment chỉ cộng VIP một lần (unique `subscriptions.payment_id`); webhook trùng bị chặn (unique `payment_events(provider, event_id)`); đơn `paid`/`refunded` phải có `paid_at`.
 - Không xóa user/gói/payment/series còn được tham chiếu bởi dữ liệu tiền hoặc tập phim (RESTRICT); dữ liệu riêng của user thì xóa theo (CASCADE).
+- (Đang lên plan, migration `0007`–`0009`) Xóa trên web chỉ là **xóa mềm** (`deleted_at`), DB chặn `DELETE` thật; `payments`/`subscriptions`/`payment_events` không bao giờ bị xóa; mọi thao tác quan trọng ghi vào `audit_logs` (chỉ thêm, không sửa/xóa). Chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md).
 - Gia hạn VIP: thêm dòng `subscriptions` mới với `starts_at` = max(bây giờ, hạn VIP hiện tại), `expires_at` = `starts_at` + `duration_days`; không sửa dòng cũ.
+- Trạng thái VIP (chốt 2026-10-27, thêm ở migration `0010` cùng auth): cột `users.vip_expires_at`, VIP khi `vip_expires_at > now()`; không dùng role `vip` hay cờ `is_vip`. Cột này là bản tóm tắt của `subscriptions`, chỉ được ghi bởi `services/vip.py` trong cùng transaction.
 - Mọi khóa ngoại đều có index; `watch_history` ghi bằng upsert và cập nhật tại chỗ (HOT).
 
 ---
@@ -190,7 +192,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 
 ### Giai đoạn 2 — Backend lõi
 - [x] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md); xong 2026-10-27 trên Postgres local, **chưa thử trên Neon thật** vì chưa có tài khoản) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
-- [ ] Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
+- [ ] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), chờ duyệt) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
+- [ ] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), đã rà soát lại, chờ duyệt; có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [ ] Catalog: series, episodes, thể loại, phân trang
 - [ ] Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
@@ -230,6 +233,9 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 - [ ] Ca bất thường, đưa vào hàng chờ cho admin xử lý thay vì tự đoán: chuyển thiếu tiền, không có/không khớp mã đơn, chuyển hai lần cho một đơn. Chuyển **sau khi đơn hết hạn** mà đúng mã và đủ tiền thì vẫn kích hoạt (tiền đã nhận); chuyển dư thì kích hoạt và ghi chú để admin xem
 - [ ] Job đối soát định kỳ: gọi API giao dịch của SePay lấy các giao dịch gần đây, xử lý những giao dịch webhook bị trượt (cùng logic, idempotent); đóng đơn pending quá hạn
 - [ ] Rate limit tạo đơn (tránh spam đơn pending)
+- [ ] **Nhắc hạn VIP** (yêu cầu 2026-10-27): job chạy hằng ngày tìm user có VIP hết hạn trong **5 ngày** tới mà chưa gia hạn nối tiếp → gửi email + hiện thông báo trên web, có nút "Gia hạn" mở thẳng trang thanh toán của gói đang dùng. Nhắc thêm 1 ngày trước và đúng ngày hết hạn. Ghi lại đã nhắc lần nào (bảng thông báo, thêm bằng migration khi làm) để không gửi trùng khi job chạy lại
+- [ ] **Gia hạn**: thanh toán sớm không mất ngày nào, subscription mới nối tiếp từ hạn hiện tại (quy tắc ở mục 4). Trang tài khoản hiện rõ "VIP đến ngày …"
+- [ ] **Hết hạn** (chốt 2026-10-27: **không tự động trừ tiền gia hạn**): quá `vip_expires_at` là mất quyền xem tập VIP ngay, không cần job (so với giờ hiện tại). Job hằng ngày chỉ làm việc sổ sách: chuyển subscription quá hạn sang `expired` và gửi thông báo "Gói VIP đã hết hạn" kèm nút mua lại. Người dùng tự thanh toán lại; gói mới tính từ lúc thanh toán
 - [ ] Giới hạn số thiết bị/phiên đăng nhập đồng thời (ví dụ 2) để hạn chế chia sẻ tài khoản VIP
 - [ ] Xuất hóa đơn điện tử cho đơn VIP (thủ công hoặc qua nhà cung cấp hóa đơn)
 - [ ] Email xác nhận thanh toán (Resend/Brevo/SMTP)

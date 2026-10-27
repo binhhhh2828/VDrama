@@ -23,10 +23,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
+from app.models.enums import SeriesStatus, StreamStatus, sql_in
 from app.models.mixins import TimestampMixin
-
-SERIES_STATUSES = ("ongoing", "completed")
-STREAM_STATUSES = ("none", "uploading", "processing", "ready", "error")
 
 series_genres = Table(
     "series_genres",
@@ -57,7 +55,9 @@ class Series(TimestampMixin, Base):
     banner_url: Mapped[str | None] = mapped_column(Text)
     year: Mapped[int | None] = mapped_column(SmallInteger)
     country: Mapped[str | None] = mapped_column(String(100))
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="ongoing")
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=SeriesStatus.ONGOING.value
+    )
     total_episodes: Mapped[int | None] = mapped_column(Integer)  # số tập dự kiến
     is_published: Mapped[bool] = mapped_column(nullable=False, server_default="false")
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -69,7 +69,7 @@ class Series(TimestampMixin, Base):
     genres: Mapped[list[Genre]] = relationship(secondary=series_genres)
 
     __table_args__ = (
-        CheckConstraint(f"status IN {SERIES_STATUSES!r}", name="status"),
+        CheckConstraint(sql_in("status", SeriesStatus), name="status"),
         CheckConstraint("total_episodes IS NULL OR total_episodes >= 0", name="total_episodes"),
         # Phân trang keyset theo published_at cần giá trị khi đã xuất bản.
         CheckConstraint("NOT is_published OR published_at IS NOT NULL", name="published_at_set"),
@@ -121,7 +121,9 @@ class Episode(TimestampMixin, Base):
     duration_sec: Mapped[int | None] = mapped_column(Integer)
     thumbnail_url: Mapped[str | None] = mapped_column(Text)
     stream_video_id: Mapped[str | None] = mapped_column(String(100), unique=True)
-    stream_status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="none")
+    stream_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=StreamStatus.NONE.value
+    )
     is_free: Mapped[bool] = mapped_column(nullable=False, server_default="false")
     is_published: Mapped[bool] = mapped_column(nullable=False, server_default="false")
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -131,7 +133,7 @@ class Episode(TimestampMixin, Base):
         UniqueConstraint("series_id", "number", name="uq_episodes_series_id_number"),
         CheckConstraint("number > 0", name="number_positive"),
         CheckConstraint("duration_sec IS NULL OR duration_sec >= 0", name="duration_sec"),
-        CheckConstraint(f"stream_status IN {STREAM_STATUSES!r}", name="stream_status"),
+        CheckConstraint(sql_in("stream_status", StreamStatus), name="stream_status"),
         # Không bao giờ xuất bản tập chưa có video phát được.
         CheckConstraint(
             "NOT is_published OR (published_at IS NOT NULL AND stream_status = 'ready')",
