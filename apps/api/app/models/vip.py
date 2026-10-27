@@ -32,10 +32,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
 from app.models.enums import PaymentFailureCode, PaymentStatus, SubscriptionStatus, sql_in
-from app.models.mixins import CreatedAtMixin, TimestampMixin
+from app.models.mixins import CreatedAtMixin, SoftDeleteMixin, TimestampMixin
 
 
-class VipPlan(TimestampMixin, Base):
+class VipPlan(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "vip_plans"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)

@@ -24,7 +24,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
 from app.models.enums import SeriesStatus, StreamStatus, sql_in
-from app.models.mixins import TimestampMixin
+from app.models.mixins import SoftDeleteMixin, TimestampMixin
 
 series_genres = Table(
     "series_genres",
@@ -36,7 +36,7 @@ series_genres = Table(
 )
 
 
-class Genre(Base):
+class Genre(SoftDeleteMixin, Base):
     __tablename__ = "genres"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -44,7 +44,7 @@ class Genre(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
 
 
-class Series(TimestampMixin, Base):
+class Series(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "series"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -108,7 +108,7 @@ class SeriesStats(Base):
     )
 
 
-class Episode(TimestampMixin, Base):
+class Episode(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "episodes"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)

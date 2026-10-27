@@ -1,5 +1,7 @@
 """Import mọi model ở đây để Alembic thấy chúng trong Base.metadata."""
 
+# Đăng ký bộ lọc tự ẩn dòng đã xóa mềm cho mọi truy vấn ORM.
+import app.models.soft_delete  # noqa: F401
 from app.models.activity import Favorite, WatchHistory
 from app.models.catalog import Episode, Genre, Series, SeriesStats, series_genres
 from app.models.email_token import EmailToken

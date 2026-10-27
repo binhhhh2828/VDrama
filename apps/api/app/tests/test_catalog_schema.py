@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Episode, Genre, Series, SeriesStats, series_genres
 from app.services.search import series_search_condition
-from app.tests.conftest import alembic_config
+from app.tests.conftest import alembic_config, hard_delete
 
 NOW = datetime.now(UTC)
 
@@ -176,7 +176,7 @@ def test_cannot_delete_series_with_episodes(db: Session):
     make_episode(db, s)
     db.commit()
     with pytest.raises(IntegrityError, match="fk_episodes_series_id_series"):
-        db.execute(text("DELETE FROM series WHERE id = :id"), {"id": s.id})
+        hard_delete(db, "series", s.id)
 
 
 def test_deleting_series_cascades_stats_and_genres(db: Session):
@@ -187,7 +187,7 @@ def test_deleting_series_cascades_stats_and_genres(db: Session):
     db.execute(insert(series_genres).values(series_id=s.id, genre_id=g.id))
     db.commit()
 
-    db.execute(text("DELETE FROM series WHERE id = :id"), {"id": s.id})
+    hard_delete(db, "series", s.id)
     db.commit()
     assert db.scalar(select(func.count()).select_from(SeriesStats)) == 0
     assert db.scalar(select(func.count()).select_from(series_genres)) == 0
@@ -199,7 +199,7 @@ def test_deleting_genre_cascades_links(db: Session):
     g = Genre(slug="hanh-dong", name="Hành động")
     s.genres.append(g)
     db.commit()
-    db.execute(text("DELETE FROM genres WHERE id = :id"), {"id": g.id})
+    hard_delete(db, "genres", g.id)
     db.commit()
     db.refresh(s)
     assert s.genres == []

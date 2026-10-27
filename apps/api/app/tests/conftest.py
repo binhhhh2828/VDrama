@@ -11,6 +11,7 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings, to_psycopg_url
@@ -106,3 +107,22 @@ def db(migrated_db_url: str) -> Iterator[Session]:
     with Session(engine) as session:
         yield session
     engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def adb(migrated_db_url: str) -> AsyncIterator[AsyncSession]:
+    """AsyncSession trên database tạm đã migrate; dùng để test service (code ứng dụng là async)."""
+    engine = create_async_engine(migrated_db_url)
+    async with AsyncSession(engine, expire_on_commit=False) as session:
+        yield session
+    await engine.dispose()
+
+
+def hard_delete(db: Session, table: str, id_: int) -> None:
+    """Xóa thật một dòng (chỉ dùng trong test cascade/restrict, như script bảo trì).
+
+    DB chặn DELETE trên các bảng quan trọng (migration 0008) trừ khi bật cờ bảo trì
+    trong đúng transaction đó.
+    """
+    db.execute(text("SET LOCAL vdrama.allow_hard_delete = 'on'"))
+    db.execute(text(f"DELETE FROM {table} WHERE id = :id"), {"id": id_})

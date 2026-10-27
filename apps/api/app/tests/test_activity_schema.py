@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Episode, Favorite, Series, User, WatchHistory
 from app.services.activity import upsert_progress_stmt
-from app.tests.conftest import alembic_config
+from app.tests.conftest import alembic_config, hard_delete
 
 
 @pytest.fixture
@@ -109,9 +109,9 @@ def test_deleting_user_or_episode_cascades_history(db: Session, user: User, seri
     db.execute(upsert_progress_stmt(user.id, e2.id, 10))
     db.commit()
 
-    db.execute(text("DELETE FROM episodes WHERE id = :id"), {"id": e1.id})
+    hard_delete(db, "episodes", e1.id)
     assert [r[1] for r in history_rows(db)] == [e2.id]
-    db.execute(text("DELETE FROM users WHERE id = :id"), {"id": user.id})
+    hard_delete(db, "users", user.id)
     assert history_rows(db) == []
 
 
@@ -139,9 +139,9 @@ def test_deleting_series_or_user_cascades_favorites(db: Session, user: User, ser
     )
     db.commit()
 
-    db.execute(text("DELETE FROM series WHERE id = :id"), {"id": series.id})
+    hard_delete(db, "series", series.id)
     assert db.scalar(select(func.count()).select_from(Favorite)) == 1
-    db.execute(text("DELETE FROM users WHERE id = :id"), {"id": user.id})
+    hard_delete(db, "users", user.id)
     assert db.scalar(select(func.count()).select_from(Favorite)) == 0
 
 

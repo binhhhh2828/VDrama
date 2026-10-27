@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import EmailToken, User, UserSession
-from app.tests.conftest import alembic_config
+from app.tests.conftest import alembic_config, hard_delete
 
 LATER = datetime.now(UTC) + timedelta(days=30)
 
@@ -114,7 +114,7 @@ def test_deleting_user_cascades_sessions_and_tokens(db: Session):
     db.add(EmailToken(user_id=user.id, purpose="reset_password", token_hash="t", expires_at=LATER))
     db.commit()
 
-    db.execute(text("DELETE FROM users WHERE id = :id"), {"id": user.id})
+    hard_delete(db, "users", user.id)
     db.commit()
 
     assert db.scalar(select(func.count()).select_from(UserSession)) == 0

@@ -146,7 +146,7 @@ Một bảng chung thay cho `admin_audit_logs` riêng: các cột `admin_user_id
 
 - [x] **Bước 1: Trạng thái, lý do thất bại, chặn "paid" giả (migration 0007)** (xong; enum ở `app/models/enums.py`; trigger `payments_guard`, `subscriptions_guard`; test duyệt mọi cặp trạng thái và đối chiếu CHECK trong DB với enum)
   - Hoàn thành khi: test mọi chuyển trạng thái hợp lệ đi qua, mọi chuyển không hợp lệ (ví dụ `expired → active`, `paid → pending`, `cancelled → active`) bị DB từ chối; trường tiền không sửa được sau khi rời `pending`; `paid` không có giao dịch thật bị từ chối, một giao dịch không trả được hai đơn; CHECK lý do thất bại đúng; code không còn chuỗi trạng thái viết tay; `alembic check` sạch.
-- [ ] **Bước 2: Xóa mềm (migration 0008)**
+- [x] **Bước 2: Xóa mềm (migration 0008)** (xong; `SoftDeleteMixin` + bộ lọc tự động `app/models/soft_delete.py`; service `app/services/soft_delete.py`; trigger `block_hard_delete` chặn cả `DELETE` lẫn `TRUNCATE` trên 8 bảng; test cũ xóa thật qua helper `hard_delete` có cờ bảo trì)
   - Hoàn thành khi: test xóa/khôi phục từng loại; dòng đã xóa không hiện ở mọi truy vấn ORM thường nhưng hiện khi `include_deleted=True`; `DELETE` thật bị từ chối trên 9 bảng và chỉ chạy được khi bật cờ bảo trì; xóa user thu hồi mọi phiên; các test cũ được sửa và vẫn pass.
 - [ ] **Bước 3: Nhật ký thao tác (migration 0009)**
   - Hoàn thành khi: test xóa/khôi phục/đổi trạng thái tạo đúng một dòng nhật ký với `changes` trước/sau; trường nhạy cảm bị che; thiếu `reason` ở thao tác bắt buộc thì bị từ chối; transaction bị hủy thì không còn dòng nhật ký; `UPDATE`/`DELETE` trên `audit_logs` bị DB từ chối; request_id có trong nhật ký và header phản hồi.

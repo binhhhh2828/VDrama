@@ -5,10 +5,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
 from app.models.enums import UserRole, sql_in
-from app.models.mixins import TimestampMixin
+from app.models.mixins import SoftDeleteMixin, TimestampMixin
 
 
-class User(TimestampMixin, Base):
+class User(SoftDeleteMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)

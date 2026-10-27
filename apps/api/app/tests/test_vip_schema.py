@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Payment, PaymentEvent, Subscription, User, VipPlan
-from app.tests.conftest import alembic_config
+from app.tests.conftest import alembic_config, hard_delete
 
 NOW = datetime.now(UTC)
 
@@ -194,14 +194,14 @@ def test_cannot_delete_user_with_payments(db: Session, user: User, plan: VipPlan
     make_payment(db, user, plan)
     db.commit()
     with pytest.raises(IntegrityError, match="fk_payments_user_id_users"):
-        db.execute(text("DELETE FROM users WHERE id = :id"), {"id": user.id})
+        hard_delete(db, "users", user.id)
 
 
 def test_cannot_delete_user_with_subscriptions(db: Session, user: User, plan: VipPlan):
     make_subscription(db, user, plan)
     db.commit()
     with pytest.raises(IntegrityError, match="fk_subscriptions_user_id_users"):
-        db.execute(text("DELETE FROM users WHERE id = :id"), {"id": user.id})
+        hard_delete(db, "users", user.id)
 
 
 def test_cannot_delete_plan_in_use(db: Session, user: User, plan: VipPlan):
@@ -209,7 +209,7 @@ def test_cannot_delete_plan_in_use(db: Session, user: User, plan: VipPlan):
     make_payment(db, user, plan)
     db.commit()
     with pytest.raises(IntegrityError, match="fk_payments_plan_id_vip_plans"):
-        db.execute(text("DELETE FROM vip_plans WHERE id = :id"), {"id": plan.id})
+        hard_delete(db, "vip_plans", plan.id)
 
 
 def test_cannot_delete_payment_that_granted_vip(db: Session, user: User, plan: VipPlan):
@@ -217,7 +217,7 @@ def test_cannot_delete_payment_that_granted_vip(db: Session, user: User, plan: V
     make_subscription(db, user, plan, payment_id=pay.id)
     db.commit()
     with pytest.raises(IntegrityError, match="fk_subscriptions_payment_id_payments"):
-        db.execute(text("DELETE FROM payments WHERE id = :id"), {"id": pay.id})
+        hard_delete(db, "payments", pay.id)
 
 
 # --- migration --------------------------------------------------------------
