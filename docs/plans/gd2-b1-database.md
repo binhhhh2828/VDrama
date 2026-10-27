@@ -66,7 +66,7 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 - **payment_events**: id, provider, event_id, payload (jsonb), received_at. Unique `(provider, event_id)`.
 
 **Nhóm hoạt động người dùng** (migration `0006`)
-- **watch_history**: PK `(user_id, episode_id)` (cascade), progress_sec, updated_at; `fillfactor = 70`; index `(user_id, updated_at DESC)` cho "xem tiếp"; index `episode_id` cho cascade.
+- **watch_history**: PK `(user_id, episode_id)` (cascade), progress_sec, updated_at; `fillfactor = 70`; **không** index `updated_at` (index đó làm mất HOT update vì cột đổi mỗi lần ghi; "xem tiếp" lấy theo khóa chính `(user_id, …)` rồi sắp xếp, mỗi user chỉ vài trăm dòng); index `episode_id` cho cascade.
 - **favorites**: PK `(user_id, series_id)` (cascade), **created_at**; index `series_id`.
 
 **Để dành, chưa làm ngay** (thêm sau bằng migration mới, không ảnh hưởng thiết kế trên): `audit_logs` cho thao tác admin/hoàn tiền (làm cùng phần admin), bảng ghi lượt xem để nuôi `series_stats` (làm cùng endpoint `play`), phát hiện dùng lại refresh token (rotation).
@@ -82,7 +82,7 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 - [x] **Bước 3: Nhóm tài khoản** (xong; thêm test chung bảo đảm mọi khóa ngoại đều có index, áp dụng tự động cho các nhóm bảng sau) — models + migration `0002` + test ràng buộc (email trùng khác hoa/thường bị chặn; xóa user cascade sessions/email_tokens; CHECK role sai bị từ chối). `alembic check` không báo lệch.
 - [x] **Bước 4: Nhóm catalog + tìm kiếm** (xong; thêm CHECK: series đã xuất bản phải có `published_at`, tập đã xuất bản phải có video `ready`; hàm tìm kiếm dùng chung ở `app/services/search.py`) — models + migrations `0003`, `0004` + test (trùng `(series_id, number)`, `slug`, `stream_video_id` bị chặn; tìm "nang tho" ra "Nàng Thơ" bằng truy vấn trigram; kiểm tra bằng `EXPLAIN` rằng truy vấn danh sách dùng đúng index).
 - [x] **Bước 5: Nhóm VIP & thanh toán** (xong; bổ sung: `subscriptions.payment_id` cho phép NULL khi admin tặng VIP thủ công; CHECK đơn `paid`/`refunded` phải có `paid_at`; CHECK `expires_at > starts_at`; `payment_events.processed_at`; index `payments(user_id, created_at DESC)` cho lịch sử thanh toán; gia hạn = thêm dòng subscription nối tiếp, không sửa dòng cũ) — models + migration `0005` + test (trùng `provider_order_id`, `(provider, event_id)`, `payment_id` trong subscriptions bị chặn; CHECK trạng thái; xóa user còn payments bị `RESTRICT`).
-- [ ] **Bước 6: Nhóm hoạt động** — models + migration `0006` + test (upsert `watch_history` ghi đè đúng một dòng; cascade).
+- [x] **Bước 6: Nhóm hoạt động** (xong; bỏ index `(user_id, updated_at DESC)` để giữ HOT update, có test đo HOT qua `pg_stat_xact_user_tables`; hàm upsert dùng chung ở `app/services/activity.py`) — models + migration `0006` + test (upsert `watch_history` ghi đè đúng một dòng; cascade).
 - [ ] **Bước 7: Tài liệu và dev compose** — cập nhật `.env.example`, compose dev (scheme `postgresql+psycopg://`), README, CLAUDE.md (lệnh migrate/test DB), `plan.md` mục 4; `alembic check` sạch; chạy lại `docker compose up`; CI xanh.
 
 ## Rủi ro
