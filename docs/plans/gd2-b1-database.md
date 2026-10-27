@@ -76,7 +76,7 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 - [x] **Bước 1: Hạ tầng kết nối async** (xong; thêm `connect_timeout` và `core/loop.py` cho Windows)
   - Việc: thêm dependency (`sqlalchemy[asyncio]`, `alembic`, `psycopg[binary]`; dev: `pytest-asyncio`); mở rộng `core/config.py`; `core/db.py` (engine lười, `get_db`, `Base` + naming convention, đóng pool khi shutdown); `GET /api/health/db`.
   - Hoàn thành khi: `pytest` pass **không cần** Postgres (`/api/health` không đụng DB; `/api/health/db` trả 503 khi chưa cấu hình DB); với Postgres local chạy, test `/api/health/db` trả `ok`, và trả 503 khi DB không với tới được; ruff sạch.
-- [ ] **Bước 2: Alembic + hạ tầng test DB**
+- [x] **Bước 2: Alembic + hạ tầng test DB** (xong; test dùng database tạm riêng cho mỗi test)
   - Việc: `alembic init`; `env.py` dùng `database_url_direct`, `Base.metadata`, `lock_timeout`; migration `0001` (extension); `conftest.py` (DB test riêng, dọn sạch giữa các test); CI thêm service Postgres và đặt `TEST_DATABASE_URL`.
   - Hoàn thành khi: `alembic upgrade head` / `downgrade base` chạy sạch trên Postgres compose; test up/down migration pass local và CI.
 - [ ] **Bước 3: Nhóm tài khoản** — models + migration `0002` + test ràng buộc (email trùng khác hoa/thường bị chặn; xóa user cascade sessions/email_tokens; CHECK role sai bị từ chối). `alembic check` không báo lệch.

@@ -18,6 +18,16 @@ cd apps/web && pnpm install && pnpm dev
 docker compose -f docker-compose.dev.yml up --build
 ```
 
+## Database
+
+```bash
+docker compose -f docker-compose.dev.yml up -d db
+cd apps/api
+export DATABASE_URL=postgresql://vdrama:vdrama@localhost:5432/vdrama
+uv run alembic upgrade head      # áp dụng migration
+curl localhost:8000/api/health/db
+```
+
 ## Kiểm tra
 
 ```bash

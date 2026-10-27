@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Mới xong Giai đoạn 1 (khung dự án); chưa có DB, auth hay tính năng. Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Mới xong Giai đoạn 1 (khung dự án) và nền DB (async + Alembic); chưa có bảng, auth hay tính năng. Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -38,6 +38,8 @@ API (chạy trong `apps/api`):
 - Kiểm tra: `uv run ruff check .`, `uv run ruff format --check .`, `uv run pytest -q`
 - Test cần Postgres: bật DB (`docker compose -f docker-compose.dev.yml up -d db`) rồi đặt `TEST_DATABASE_URL=postgresql://vdrama:vdrama@localhost:5432/vdrama`; thiếu biến này các test đó tự bỏ qua (CI luôn đặt)
 - Windows: psycopg async cần SelectorEventLoop, chạy server bằng `uv run uvicorn app.main:app --reload --loop app.core.loop:selector_loop_factory` (Linux/Docker không cần)
+- Migration (cần `DATABASE_URL` trỏ tới DB): `uv run alembic upgrade head`, `uv run alembic downgrade -1`, `uv run alembic revision --autogenerate -m "mô tả" --rev-id 000N`, `uv run alembic check`. Luôn đọc và chỉnh tay migration sinh ra. Migration đặt id `000N`, một nhóm bảng một file.
+- Fixture test DB: `empty_db_url` (database tạm trống, tự xóa), `migrated_db_url` (đã `upgrade head`) trong `app/tests/conftest.py`
 - Một test: `uv run pytest app/tests/test_health.py::test_health_ok`
 
 Web (chạy trong `apps/web`):
