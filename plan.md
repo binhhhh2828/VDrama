@@ -63,7 +63,7 @@ API → Neon PostgreSQL
 1. **Nội dung**: phim do team của bạn sản xuất nên không cần mua bản quyền bên thứ ba. Chỉ nên có một văn bản ngắn xác nhận bạn được quyền khai thác thương mại với team làm phim, để tránh tranh chấp về sau.
 2. **Chi phí video**: Stream tính phí theo phút lưu trữ + phút được xem. Ví dụ trong phân tích trước: 100 người × 30 phút/ngày ≈ 90.000 phút xem/tháng. Hãy **kiểm tra bảng giá Cloudflare Stream hiện hành** và tự tính lại trước khi mở bán. Nên đặt cảnh báo chi tiêu (billing alert).
 3. **Điều khoản dịch vụ**: kiểm tra điều khoản thương mại của Neon, Cloudflare, VPS. Không dùng gói cá nhân/phi thương mại cho sản phẩm bán tiền.
-4. **Thanh toán (MoMo, VNPay…)**: các cổng này thường yêu cầu pháp nhân (công ty hoặc hộ kinh doanh) có đăng ký kinh doanh, tài khoản ngân hàng tương ứng, và website đã có đủ trang pháp lý, giá, chính sách hoàn tiền. Thời gian duyệt production có thể kéo dài nhiều ngày đến vài tuần (tự xác minh với từng cổng). Đây là đường găng của lịch ra mắt: nếu chưa có pháp nhân, cần xử lý trước; nếu cần ra mắt sớm, có thể dùng cổng trung gian dễ đăng ký hơn (PayOS, SePay) cho giai đoạn đầu.
+4. **Thanh toán**: **đã chốt (2026-10-27) dùng SePay + VietQR trước** (xem Giai đoạn 5), MoMo/VNPay để sau. Lưu ý cho khi làm MoMo/VNPay: các cổng này thường yêu cầu pháp nhân (công ty hoặc hộ kinh doanh) có đăng ký kinh doanh, tài khoản ngân hàng tương ứng, và website đã có đủ trang pháp lý, giá, chính sách hoàn tiền. Thời gian duyệt production có thể kéo dài nhiều ngày đến vài tuần (tự xác minh với từng cổng). Đây là đường găng của lịch ra mắt: nếu chưa có pháp nhân, cần xử lý trước; nếu cần ra mắt sớm, có thể dùng cổng trung gian dễ đăng ký hơn (PayOS, SePay) cho giai đoạn đầu.
 5. **Pháp lý web** (nên hỏi luật sư hoặc cơ quan quản lý để xác minh, vì quy định thay đổi):
    - Chính sách bảo mật, Điều khoản sử dụng, Chính sách hoàn tiền; có ô đồng ý khi đăng ký.
    - Quy định về bảo vệ dữ liệu cá nhân (bạn thu thập email, lịch sử xem, thông tin thanh toán).
@@ -173,7 +173,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 - [ ] Hỏi luật sư/cơ quan quản lý về các mục ở Mục 2.5 (giấy phép dịch vụ, dữ liệu cá nhân, TMĐT)
 - [ ] Đăng ký domain `vdrama.vn`, chuyển nameserver sang Cloudflare
 - [ ] Tạo tài khoản: GitHub (repo private), Cloudflare (bật Stream), Neon, VPS, Sentry
-- [ ] Nộp hồ sơ merchant MoMo, VNPay (và PayOS/SePay làm phương án dự phòng) ngay trong tuần 1, lấy tài khoản sandbox để dev song song
+- [ ] Đăng ký SePay, liên kết tài khoản ngân hàng nhận tiền (nên là tài khoản của pháp nhân dùng để xuất hóa đơn), cấu hình tiền tố mã thanh toán và webhook; xác minh với SePay điều kiện dùng cho mục đích kinh doanh. MoMo/VNPay để sau khi đã kiểm chứng mô hình kinh doanh
 - [ ] Đặt billing alert cho Cloudflare và VPS
 
 ### Giai đoạn 1 — Khởi tạo codebase
@@ -216,14 +216,21 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 - [ ] Nhập thử nội dung thật (ít nhất 1–2 bộ hoàn chỉnh)
 
 ### Giai đoạn 5 — Thanh toán VIP
-- [ ] Chọn cổng thanh toán, tích hợp tạo đơn + trang kết quả
-- [ ] Webhook/IPN xác thực chữ ký, idempotent, kích hoạt/gia hạn subscription. Trang redirect sau thanh toán chỉ để hiển thị, chỉ tin IPN hoặc truy vấn lại cổng để xác nhận
-- [ ] Kiểm tra số tiền và mã đơn phía server; đơn pending quá hạn tự đóng
-- [ ] Job đối soát định kỳ: truy vấn lại các đơn pending/lỗi với MoMo/VNPay để không mất giao dịch khi IPN bị trượt
+**Phương thức: SePay + VietQR (chuyển khoản ngân hàng)**, quyết định 2026-10-27. Ít phải tích hợp, phù hợp để kiểm chứng mô hình kinh doanh trước. MoMo/VNPay thêm sau (Giai đoạn 9), dùng lại cùng bảng `payments`/`payment_events` với `provider` khác. Schema DB hiện tại (migration 0005) đã dùng được cho SePay, không cần đổi.
+
+Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sepay'`, `status='pending'`, mã đơn duy nhất làm nội dung chuyển khoản) → trang hiển thị ảnh VietQR (số tài khoản, số tiền, nội dung = mã đơn) → người dùng chuyển khoản → SePay gọi webhook → backend khớp mã đơn + số tiền → kích hoạt VIP → trang thanh toán thấy trạng thái đổi (hỏi lại backend định kỳ, không tin phía trình duyệt).
+
+- [ ] Tạo đơn: sinh mã đơn ngắn, khó đoán, đúng định dạng mã thanh toán đã cấu hình trên SePay (tiền tố + số/chữ); lưu số tiền tại thời điểm mua; đơn có hạn (ví dụ 15–30 phút)
+- [ ] Trang thanh toán: ảnh VietQR + thông tin chuyển khoản thủ công (ngân hàng, số tài khoản, số tiền, nội dung), đếm ngược hạn đơn, tự cập nhật khi đã nhận tiền
+- [ ] Webhook SePay: xác thực API key trong header (so sánh an toàn, sai thì 401), chỉ nhận giao dịch tiền vào; lưu mọi sự kiện vào `payment_events` (`event_id` = mã giao dịch SePay) trước khi xử lý; trùng thì trả thành công mà không làm gì thêm; trả 2xx nhanh. Đối chiếu tên trường payload với tài liệu SePay hiện hành khi tích hợp
+- [ ] Khớp giao dịch: tìm mã đơn trong nội dung chuyển khoản (người dùng hay gõ sai/thêm chữ, ngân hàng hay chèn tiền tố); khớp mã **và** đủ số tiền → `paid` + tạo subscription trong cùng transaction (unique `payment_id` chặn cộng hai lần)
+- [ ] Ca bất thường, đưa vào hàng chờ cho admin xử lý thay vì tự đoán: chuyển thiếu tiền, không có/không khớp mã đơn, chuyển hai lần cho một đơn. Chuyển **sau khi đơn hết hạn** mà đúng mã và đủ tiền thì vẫn kích hoạt (tiền đã nhận); chuyển dư thì kích hoạt và ghi chú để admin xem
+- [ ] Job đối soát định kỳ: gọi API giao dịch của SePay lấy các giao dịch gần đây, xử lý những giao dịch webhook bị trượt (cùng logic, idempotent); đóng đơn pending quá hạn
+- [ ] Rate limit tạo đơn (tránh spam đơn pending)
 - [ ] Giới hạn số thiết bị/phiên đăng nhập đồng thời (ví dụ 2) để hạn chế chia sẻ tài khoản VIP
 - [ ] Xuất hóa đơn điện tử cho đơn VIP (thủ công hoặc qua nhà cung cấp hóa đơn)
 - [ ] Email xác nhận thanh toán (Resend/Brevo/SMTP)
-- [ ] Test trên môi trường sandbox, sau đó test giao dịch thật số tiền nhỏ
+- [ ] Test: giả lập webhook SePay trong test tự động (đúng/sai API key, trùng sự kiện, thiếu/dư tiền, sai mã, quá hạn); sau đó chuyển khoản thật số tiền nhỏ
 - [ ] Quy trình xử lý khiếu nại/hoàn tiền (thủ công qua admin)
 
 ### Giai đoạn 6 — Hạ tầng & Deploy
@@ -257,6 +264,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 ### Giai đoạn 9 — Sau ra mắt (tùy chọn)
 - [ ] Bình luận/đánh giá, thông báo tập mới, gợi ý phim
 - [ ] Đăng nhập Google
+- [ ] Thêm MoMo, VNPay (dùng lại bảng payments/payment_events, thêm provider mới)
 - [ ] Hỗ trợ phụ đề nhiều ngôn ngữ
 - [ ] Khi tải tăng: nâng VPS, hoặc tách frontend/backend sang dịch vụ managed
 
@@ -273,7 +281,7 @@ Index cần có: `series.slug`, `episodes(series_id, number)`, `subscriptions(us
 | 5 | Giai đoạn 7 + 8 (backup, monitor, test, soft launch) |
 | 6 | Sửa lỗi, ra mắt, theo dõi chi phí |
 
-> Lưu ý lịch: thanh toán thật (MoMo/VNPay) phụ thuộc thời gian cổng duyệt hồ sơ, không phụ thuộc tốc độ code. Dev bằng sandbox trước, ngày ra mắt chính thức tính từ lúc có tài khoản production.
+> Lưu ý lịch: với SePay + VietQR, thời gian chờ duyệt ngắn hơn nhiều so với MoMo/VNPay, nhưng vẫn cần tài khoản ngân hàng nhận tiền và các việc pháp lý ở mục 2 (hóa đơn điện tử, trang chính sách) trước khi bán thật.
 
 > Mẹo: deploy một bản "hello world" lên VPS ngay cuối tuần 1 để phát hiện sớm vấn đề DNS/HTTPS/CI-CD, thay vì để đến cuối.
 
