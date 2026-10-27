@@ -11,6 +11,7 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
+from sqlalchemy.orm import Session
 
 from app.core.config import get_settings, to_psycopg_url
 from app.core.db import dispose_engine
@@ -96,3 +97,12 @@ def migrated_db_url(migration_env: str) -> str:
     """Database tạm đã chạy `upgrade head`."""
     command.upgrade(alembic_config(), "head")
     return migration_env
+
+
+@pytest.fixture
+def db(migrated_db_url: str) -> Iterator[Session]:
+    """Session sync trên database tạm đã migrate; dùng cho test ràng buộc ở tầng DB."""
+    engine = create_engine(migrated_db_url)
+    with Session(engine) as session:
+        yield session
+    engine.dispose()

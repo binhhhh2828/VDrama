@@ -47,8 +47,8 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 
 **Nhóm tài khoản** (migration `0002`)
 - **users**: id, email, password_hash, display_name, **avatar_url**, role (`user`|`admin`), is_active, **email_verified_at**, **last_login_at**, created_at, updated_at. Unique `lower(email)`.
-- **sessions**: id (uuid), user_id → users (cascade), refresh_token_hash (unique), **device_info, ip, expires_at**, created_at, last_seen_at, revoked_at. Index một phần `(user_id) WHERE revoked_at IS NULL` để đếm thiết bị đang hoạt động; index `expires_at` cho job dọn dẹp.
-- **email_tokens**: id, user_id (cascade, có index), purpose (`verify_email`|`reset_password`), token_hash (unique), expires_at, used_at.
+- **sessions**: id (uuid), user_id → users (cascade), refresh_token_hash (unique), **device_info, ip, expires_at**, created_at, last_seen_at, revoked_at. Index `user_id` **đầy đủ** (ban đầu định dùng index một phần `WHERE revoked_at IS NULL`, nhưng như vậy cascade khi xóa user không có index; mỗi user chỉ vài phiên nên index đầy đủ vẫn đếm phiên hoạt động nhanh); index `expires_at` cho job dọn dẹp.
+- **email_tokens**: id, user_id (cascade, có index), purpose (`verify_email`|`reset_password`), token_hash (unique), expires_at (có index cho job dọn dẹp), used_at, created_at.
 
 **Nhóm catalog** (migration `0003`)
 - **series**: id, slug (unique), title, description, poster_url, banner_url, year, country, status (`ongoing`|`completed`), **total_episodes**, is_published, **published_at**, created_at, updated_at. Index một phần `(published_at DESC, id DESC) WHERE is_published`.
@@ -79,7 +79,7 @@ Nền DB hoàn chỉnh cho backend: kết nối Postgres **async**, mô hình SQ
 - [x] **Bước 2: Alembic + hạ tầng test DB** (xong; test dùng database tạm riêng cho mỗi test)
   - Việc: `alembic init`; `env.py` dùng `database_url_direct`, `Base.metadata`, `lock_timeout`; migration `0001` (extension); `conftest.py` (DB test riêng, dọn sạch giữa các test); CI thêm service Postgres và đặt `TEST_DATABASE_URL`.
   - Hoàn thành khi: `alembic upgrade head` / `downgrade base` chạy sạch trên Postgres compose; test up/down migration pass local và CI.
-- [ ] **Bước 3: Nhóm tài khoản** — models + migration `0002` + test ràng buộc (email trùng khác hoa/thường bị chặn; xóa user cascade sessions/email_tokens; CHECK role sai bị từ chối). `alembic check` không báo lệch.
+- [x] **Bước 3: Nhóm tài khoản** (xong; thêm test chung bảo đảm mọi khóa ngoại đều có index, áp dụng tự động cho các nhóm bảng sau) — models + migration `0002` + test ràng buộc (email trùng khác hoa/thường bị chặn; xóa user cascade sessions/email_tokens; CHECK role sai bị từ chối). `alembic check` không báo lệch.
 - [ ] **Bước 4: Nhóm catalog + tìm kiếm** — models + migrations `0003`, `0004` + test (trùng `(series_id, number)`, `slug`, `stream_video_id` bị chặn; tìm "nang tho" ra "Nàng Thơ" bằng truy vấn trigram; kiểm tra bằng `EXPLAIN` rằng truy vấn danh sách dùng đúng index).
 - [ ] **Bước 5: Nhóm VIP & thanh toán** — models + migration `0005` + test (trùng `provider_order_id`, `(provider, event_id)`, `payment_id` trong subscriptions bị chặn; CHECK trạng thái; xóa user còn payments bị `RESTRICT`).
 - [ ] **Bước 6: Nhóm hoạt động** — models + migration `0006` + test (upsert `watch_history` ghi đè đúng một dòng; cascade).
