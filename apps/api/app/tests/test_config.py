@@ -25,17 +25,35 @@ def test_migration_url_falls_back_to_app_url():
     assert s.migration_db_url == "postgresql+psycopg://b@h2/db"
 
 
+PROD = {
+    "env": "prod",
+    "jwt_secret": SECRET,
+    "public_origin": "https://vdrama.vn",
+    "trust_cloudflare_ip": True,
+}
+
+
+def test_prod_valid_config():
+    make(**PROD)
+
+
 def test_prod_requires_jwt_secret():
     with pytest.raises(ValidationError, match="JWT_SECRET"):
-        make(env="prod", public_origin="https://vdrama.vn")
-    make(env="prod", jwt_secret=SECRET, public_origin="https://vdrama.vn")
+        make(**{**PROD, "jwt_secret": ""})
 
 
 def test_prod_requires_secure_cookie_and_https_origin():
     with pytest.raises(ValidationError, match="COOKIE_SECURE"):
-        make(env="prod", jwt_secret=SECRET, public_origin="https://vdrama.vn", cookie_secure=False)
+        make(**{**PROD, "cookie_secure": False})
     with pytest.raises(ValidationError, match="PUBLIC_ORIGIN"):
-        make(env="prod", jwt_secret=SECRET, public_origin="http://vdrama.vn")
+        make(**{**PROD, "public_origin": "http://vdrama.vn"})
+
+
+def test_prod_requires_trust_cloudflare_ip():
+    """Sau Caddy, không đọc CF-Connecting-IP thì mọi người dùng chung một IP (và một bộ đếm)."""
+    with pytest.raises(ValidationError, match="TRUST_CLOUDFLARE_IP"):
+        make(**{**PROD, "trust_cloudflare_ip": False})
+    make(env="dev", trust_cloudflare_ip=False)  # dev không bắt buộc
 
 
 def test_short_jwt_secret_rejected_everywhere():

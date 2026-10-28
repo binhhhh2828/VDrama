@@ -7,6 +7,7 @@ Khi chạy nhiều container, đổi `storage_from_string("memory://")` sang Red
 Khóa đếm là IP thật (app/core/client_ip.py) và, với đăng nhập, cả cặp IP + email.
 """
 
+import logging
 import math
 import time
 
@@ -15,6 +16,8 @@ from limits.storage import storage_from_string
 from limits.strategies import MovingWindowRateLimiter
 
 from app.core.errors import ApiError, ErrorCode
+
+logger = logging.getLogger(__name__)
 
 LOGIN_PER_IP = parse("10/minute")
 LOGIN_PER_IP_EMAIL = parse("5/minute")
@@ -35,8 +38,17 @@ def too_many(retry_after: int) -> ApiError:
 
 
 def hit(item: RateLimitItem, *keys: str | None) -> None:
-    """Tính một lần thử; vượt ngưỡng thì ném 429 kèm Retry-After (giây)."""
-    identifiers = [k or "-" for k in keys]
+    """Tính một lần thử; vượt ngưỡng thì ném 429 kèm Retry-After (giây).
+
+    Thiếu một khóa (thường là IP không xác định) thì bỏ qua, không đếm: gộp mọi request như vậy
+    vào một bộ đếm chung sẽ khiến người này chặn người kia. Qua TCP luôn có IP, nên trường hợp
+    này chỉ xảy ra khi chạy qua unix socket hoặc trong test.
+    """
+    if any(not k for k in keys):
+        # Không ghi giá trị khóa vào log: có thể chứa email.
+        logger.warning("Bỏ qua rate limit %s: thiếu khóa đếm (thường là IP)", item)
+        return
+    identifiers = [str(k) for k in keys]
     if _limiter.hit(item, *identifiers):
         return
     reset_at = _limiter.get_window_stats(item, *identifiers).reset_time

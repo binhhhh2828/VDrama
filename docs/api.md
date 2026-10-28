@@ -59,7 +59,7 @@ Request `POST/PUT/PATCH/DELETE` có header `Origin` (hoặc `Referer`) khác `PU
 | `POST /auth/register` | 5 lần/giờ theo IP |
 | `POST /auth/refresh` | 30 lần/phút theo IP |
 
-IP thật lấy từ `CF-Connecting-IP` khi `TRUST_CLOUDFLARE_IP=true` (chỉ bật khi API nằm sau Cloudflare).
+IP thật lấy từ `CF-Connecting-IP` khi `TRUST_CLOUDFLARE_IP=true` (bắt buộc ở prod, vì API nằm sau Cloudflare và Caddy). Request không xác định được IP thì không bị đếm.
 
 ## Auth
 

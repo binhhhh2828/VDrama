@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **Bước 1–6 xong (2026-10-28) trên branch `feat/auth`; đã review, đang sửa sau review (Bước 7–9).** Còn: xem CI trên GitHub sau khi push. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **xong (2026-10-28) trên branch `feat/auth`, gồm cả sửa sau review (Bước 7–9).** Còn: xem CI trên GitHub sau khi push; các mục review chưa sửa ghi ở mục "Sửa sau review". Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -172,7 +172,7 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 
 ### Sửa sau review (2026-10-28)
 
-Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi trung bình; ba bước dưới sửa các mục 1–3. Các mục còn lại (CGNAT, Next.js gửi `Origin`, khóa/mở tài khoản, mức thấp) để sau.
+Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi trung bình; ba bước dưới sửa các mục 1–3. Chưa sửa, để sau: ngưỡng đăng ký theo IP chặt với mạng di động dùng chung IP (CGNAT); Next.js gọi API từ server phải gửi `Origin` (Giai đoạn 3); khóa/mở tài khoản có nhật ký (Giai đoạn 4); lỗi 422 của `accept_terms`/mật khẩu trùng email chưa chỉ ra trường; đăng nhập lại không thu hồi phiên cũ; `grant_vip` chưa kiểm tra gói còn hoạt động.
 
 - [x] **Bước 7: Phát hiện token bị đánh cắp qua nhiều lần xoay** (xong; token dạng cũ không có id phiên bị từ chối, người dùng đăng nhập lại; chưa deploy nên không ảnh hưởng ai)
   - Lỗi: refresh chỉ tìm phiên theo hash token hiện tại/liền trước. Kẻ trộm xoay hai lần thì token gốc của chủ chỉ nhận 401, phiên **không** bị thu hồi, kẻ trộm giữ phiên 30 ngày (đã chạy thử xác nhận).
@@ -182,7 +182,7 @@ Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi tru
 - [x] **Bước 8: Phản hồi 500 có `X-Request-ID`** (middleware request context bắt lỗi, ghi log kèm request_id rồi trả 500; handler 500 ở `errors.py` chỉ còn là dự phòng)
   - Việc: middleware request context gắn header cả khi endpoint ném lỗi (bắt lỗi và trả 500 đúng định dạng, hoặc middleware ASGI thuần).
   - Hoàn thành khi: test 500 của app thật có `X-Request-ID` khớp với request, body đúng định dạng lỗi, không lộ chi tiết; log có traceback.
-- [ ] **Bước 9: IP sau reverse proxy và bộ đếm dùng chung**
+- [x] **Bước 9: IP sau reverse proxy và bộ đếm dùng chung** (thiếu khóa đếm thì bỏ qua và ghi cảnh báo, không ghi giá trị khóa vào log vì có thể là email; tài liệu và việc firewall ở Giai đoạn 6 đã cập nhật)
   - Việc: ở `ENV=prod` bắt buộc `TRUST_CLOUDFLARE_IP=true` (không thì app không khởi động, vì sau Caddy mọi request có cùng IP); IP không xác định thì không đếm chung vào một khóa `-`.
   - Hoàn thành khi: test prod thiếu `TRUST_CLOUDFLARE_IP` thì không khởi động; request không có IP không bị gộp bộ đếm với nhau.
 

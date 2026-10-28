@@ -258,7 +258,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 - [ ] `deploy.yml`: build image → đẩy lên GHCR → SSH vào VPS `pull && up -d` → chạy migration
 - [ ] Chạy migration Alembic an toàn khi deploy; có cách rollback
 - [ ] Biến môi trường production lưu ở GitHub Secrets + `.env` trên VPS
-- [ ] Bật `TRUST_CLOUDFLARE_IP=true` chỉ khi firewall VPS chỉ mở cổng 80/443 cho dải IP Cloudflare (nếu không, ai cũng giả được IP qua header `CF-Connecting-IP`)
+- [ ] Firewall VPS chỉ mở cổng 80/443 cho dải IP Cloudflare: API ở prod bắt buộc `TRUST_CLOUDFLARE_IP=true` (không thì không khởi động), nên nếu origin lộ ra ngoài Cloudflare thì ai cũng giả được IP qua header `CF-Connecting-IP`
 - [ ] Rate limit đang đếm trong RAM của một process (`app/core/rate_limit.py`): khi chạy nhiều container/worker API thì chuyển sang Redis (`storage_from_string("redis://...")`) hoặc rate limit ở Cloudflare
 
 ### Giai đoạn 7 — Vận hành

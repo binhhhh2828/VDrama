@@ -61,6 +61,14 @@ class Settings(BaseSettings):
                 raise ValueError("ENV=prod bắt buộc COOKIE_SECURE=true")
             if not self.public_origin.startswith("https://"):
                 raise ValueError("ENV=prod bắt buộc PUBLIC_ORIGIN dạng https://...")
+            # Prod chạy sau Cloudflare + Caddy: không đọc CF-Connecting-IP thì IP kết nối của mọi
+            # request là IP của Caddy, rate limit gộp cả site vào một bộ đếm (10 lần đăng nhập
+            # mỗi phút cho tất cả người dùng), sessions/audit_logs cũng mất IP thật.
+            if not self.trust_cloudflare_ip:
+                raise ValueError(
+                    "ENV=prod bắt buộc TRUST_CLOUDFLARE_IP=true (API chạy sau Cloudflare; "
+                    "firewall phải chỉ mở cho dải IP Cloudflare)"
+                )
         elif not secret:
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
         if self.access_token_ttl_minutes <= 0 or self.refresh_token_ttl_days <= 0:

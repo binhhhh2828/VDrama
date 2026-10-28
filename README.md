@@ -43,7 +43,7 @@ cd apps/api && TEST_DATABASE_URL=postgresql://vdrama:vdrama@localhost:5432/vdram
 
 Đăng ký, đăng nhập, refresh, đăng xuất, `/me` dưới `/api/v1`; cookie httpOnly, không CORS. Tài liệu cho frontend (định dạng lỗi, cookie, CSRF, rate limit, phân quyền): [docs/api.md](docs/api.md). Thiết kế và lý do: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md).
 
-Cấu hình trong `.env` (mẫu ở [.env.example](.env.example)): `JWT_SECRET` (bắt buộc ở prod), `PUBLIC_ORIGIN`, `COOKIE_SECURE` (dev đặt `false`), `TRUST_CLOUDFLARE_IP`. Ở `ENV=prod`, API không khởi động nếu thiếu `JWT_SECRET`, cookie không Secure hoặc origin không phải https.
+Cấu hình trong `.env` (mẫu ở [.env.example](.env.example)): `JWT_SECRET` (bắt buộc ở prod), `PUBLIC_ORIGIN`, `COOKIE_SECURE` (dev đặt `false`), `TRUST_CLOUDFLARE_IP`. Ở `ENV=prod`, API không khởi động nếu thiếu `JWT_SECRET`, cookie không Secure, origin không phải https hoặc chưa bật `TRUST_CLOUDFLARE_IP`.
 
 Tạo admin (chạy trên server, hỏi mật khẩu, ghi nhật ký):
 

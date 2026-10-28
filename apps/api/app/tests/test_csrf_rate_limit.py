@@ -211,3 +211,26 @@ def test_client_ip_ignores_cf_header_by_default():
 )
 def test_client_ip_trusts_cf_when_enabled(trust_cloudflare, header: str, expected: str):
     assert client_ip(make_request({"CF-Connecting-IP": header})) == expected
+
+
+# --- Bộ đếm khi thiếu IP ---
+
+
+def test_missing_key_is_not_counted_together(caplog):
+    """IP không xác định: không gộp mọi request như vậy vào một bộ đếm chung."""
+    from app.core import rate_limit
+
+    for _ in range(50):
+        rate_limit.hit(rate_limit.LOGIN_PER_IP, "login", None)
+        rate_limit.hit(rate_limit.LOGIN_PER_IP_EMAIL, "login", None, "a@example.com")
+    assert "a@example.com" not in caplog.text  # không ghi email vào log
+
+
+def test_known_key_still_limited():
+    from app.core import rate_limit
+
+    for _ in range(10):
+        rate_limit.hit(rate_limit.LOGIN_PER_IP, "login", "203.0.113.5")
+    with pytest.raises(rate_limit.ApiError) as exc:
+        rate_limit.hit(rate_limit.LOGIN_PER_IP, "login", "203.0.113.5")
+    assert exc.value.status_code == 429
