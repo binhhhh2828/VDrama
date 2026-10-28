@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **đã rà soát lại theo góp ý (2026-10-27), chờ duyệt lần cuối.** Chưa code. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **xong (2026-10-28) trên branch `feat/auth`, gồm cả sửa sau review (Bước 7–9).** Còn: xem CI trên GitHub sau khi push; các mục review chưa sửa ghi ở mục "Sửa sau review". Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -84,7 +84,7 @@ Cờ cookie: `HttpOnly`, `SameSite=Lax`, `Secure` (bật ở prod; tắt đượ
 
 Mỗi lần gọi `/auth/refresh`: cấp refresh token mới, token cũ hết hiệu lực.
 - Vấn đề thực tế: hai tab cùng refresh một lúc thì tab chậm hơn dùng token vừa bị xoay, nếu từ chối thẳng thì người dùng bị đăng xuất vô lý.
-- Giải pháp: lưu thêm hash token **liền trước** và thời điểm xoay. Token liền trước vẫn được chấp nhận trong **60 giây** (xoay tiếp, không lỗi).
+- Giải pháp: lưu thêm hash token **liền trước** và thời điểm xoay. Token liền trước vẫn được chấp nhận trong **60 giây**: cấp access token mới nhưng **không xoay tiếp** refresh token (giữ cookie tab kia vừa nhận; xoay tiếp thì phản hồi đến sau có thể ghi đè cookie bằng token đã cũ và người dùng bị đăng xuất oan).
 - Token cũ bị dùng lại **sau** 60 giây → coi là bị đánh cắp → **thu hồi cả session** (cả kẻ trộm lẫn chủ đều phải đăng nhập lại).
 - Cần migration `0010`: thêm `sessions.previous_refresh_token_hash` (unique, nullable) và `sessions.rotated_at` (cùng `users.terms_accepted_at`, `users.vip_expires_at` ở dưới).
 
@@ -133,7 +133,7 @@ Cookie `SameSite=Lax` đã chặn phần lớn. Thêm một lớp: với mọi r
 | POST | `/auth/logout` | thu hồi session hiện tại, xóa cookie | 204 | (luôn 204) |
 | GET | `/me` | user hiện tại | 200 + user | 401 `not_authenticated` |
 
-User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_verified`, `created_at`. Không bao giờ trả `password_hash`. (Trạng thái VIP thêm vào `/me` ở Giai đoạn 5.)
+User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_verified`, `created_at`, `vip_expires_at`, `is_vip`. Không bao giờ trả `password_hash`.
 
 ## Cấu hình mới (`.env`)
 
@@ -152,22 +152,39 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 
 ## Các bước (mỗi bước xong chạy được, test được, dừng cho bạn xem)
 
-- [ ] **Bước 1: Nền bảo mật + migration 0010**
+- [x] **Bước 1: Nền bảo mật + migration 0010** (`slowapi` thêm ở Bước 5 khi dùng đến; mã lỗi API là `ErrorCode` trong `app/core/errors.py`)
   - Việc: dependency mới; cấu hình; `security.py` (argon2id, JWT, refresh token + SHA-256); migration `0010` (`sessions.previous_refresh_token_hash`, `sessions.rotated_at`, `users.terms_accepted_at`, `users.vip_expires_at` + index một phần); `app/core/errors.py` + handler cho 422/HTTPException.
   - Hoàn thành khi: test đơn vị cho hash/verify/rehash, JWT hết hạn/sai chữ ký/sai loại bị từ chối, token sinh ra không trùng; app không khởi động ở `ENV=prod` nếu thiếu `JWT_SECRET`; migration lên/xuống sạch, `alembic check` sạch.
-- [ ] **Bước 2: Đăng ký, đăng nhập, đăng xuất**
+- [x] **Bước 2: Đăng ký, đăng nhập, đăng xuất** (cookie helper ở `app/api/cookies.py`; đăng xuất tìm phiên theo cookie refresh, thiếu thì theo id phiên trong access token)
   - Việc: `services/auth.py`, `routers/auth.py`, schema, đặt/xóa cookie; fixture client API trên DB tạm.
   - Hoàn thành khi: test đăng ký (thành công, trùng email khác hoa/thường, thiếu `accept_terms`, mật khẩu ngắn/dài, email sai định dạng); đăng nhập (đúng, sai mật khẩu, email không tồn tại cùng lỗi, tài khoản bị khóa); cookie có đủ cờ; đăng xuất thu hồi session; response không bao giờ chứa `password_hash`.
-- [ ] **Bước 3: Refresh có xoay vòng**
+- [x] **Bước 3: Refresh có xoay vòng** (trong 60 giây ân hạn, token liền trước chỉ nhận access mới, không xoay tiếp, để phản hồi đến sau không ghi đè cookie bằng token cũ; user bị khóa/xóa thì thu hồi phiên)
   - Việc: `/auth/refresh` theo thiết kế trên.
   - Hoàn thành khi: test refresh thành công đổi cả hai cookie; token cũ dùng lại trong 60 giây vẫn được; dùng lại sau 60 giây thì thu hồi cả session; session hết hạn/đã thu hồi → 401 và xóa cookie; hạn session trượt thêm 30 ngày.
-- [ ] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**
+- [x] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**
   - Việc: thêm `services/vip.py` với hai hàm duy nhất chạm vào VIP: `grant_vip(...)` (thêm subscription nối tiếp + cập nhật `users.vip_expires_at` trong cùng transaction) và `cancel_subscription(...)` (hủy + tính lại `vip_expires_at`); `is_vip(user)`. Giai đoạn 5 (thanh toán SePay, admin tặng VIP) gọi lại các hàm này.
   - Hoàn thành khi: test `/me` có/không cookie, access hết hạn, session bị thu hồi thì 401 ngay; user bị khóa thì 401; `OptionalUser` trả `None` cho khách thay vì lỗi; endpoint admin thử nghiệm trả 403 cho user thường, 200 cho admin; VIP đúng với các trường hợp chưa từng mua, còn hạn, vừa quá hạn một giây, mua lại sau khi quá hạn (tính từ lúc mua), gia hạn khi còn hạn (cộng nối tiếp), subscription bị hủy (hạn tính lại); `vip_expires_at` luôn khớp với `subscriptions`; lệnh `create-admin` tạo mới và nâng quyền user có sẵn.
-- [ ] **Bước 5: CSRF, rate limit, IP thật (dùng chung cho request_context)**
+  - Ghi chú khi làm: hủy gói thì các gói sau chưa bắt đầu được dời lên liền mạch (theo plan bổ sung schema), mỗi lần dời ghi `subscriptions.reschedule`. Hành động nhật ký: `subscriptions.grant_vip` (tặng, bắt buộc lý do), `subscriptions.create` (có payment), `subscriptions.cancel`, `users.create_admin` và `users.role_change` (đều bắt buộc lý do). Service tạo admin ở `app/services/admin_accounts.py`.
+- [x] **Bước 5: CSRF, rate limit, IP thật (dùng chung cho request_context)** (dùng thẳng thư viện `limits` thay `slowapi`, vì `slowapi` không đếm được theo IP + email trong body; Origin lạ bị chặn cả khi không có cookie, để chặn login CSRF; thiếu Origin thì dùng Referer; middleware ở `app/api/csrf.py`)
   - Hoàn thành khi: test POST có cookie mà `Origin` lạ → 403, đúng `Origin` → qua, request không cookie không bị chặn; login quá ngưỡng → 429 có `Retry-After`; `CF-Connecting-IP` chỉ được tin khi bật cấu hình.
-- [ ] **Bước 6: Tài liệu và kiểm tra cuối**
+- [x] **Bước 6: Tài liệu và kiểm tra cuối** (đã chạy compose + curl: đăng ký 201 → `/me` 200 → refresh 204 đổi token → thiếu Origin 403 → đăng xuất 204 → access cũ 401; 319 test qua trên Postgres; CI GitHub chưa chạy vì chưa push. Compose dev cho đổi cổng bằng `DB_PORT`/`API_PORT`/`WEB_PORT`)
   - Việc: `docs/api.md` (auth), `.env.example`, compose dev, CLAUDE.md, README; chạy thử bằng compose với curl (đăng ký → `/me` → refresh → đăng xuất); CI xanh.
+
+### Sửa sau review (2026-10-28)
+
+Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi trung bình; ba bước dưới sửa các mục 1–3. Chưa sửa, để sau: ngưỡng đăng ký theo IP chặt với mạng di động dùng chung IP (CGNAT); Next.js gọi API từ server phải gửi `Origin` (Giai đoạn 3); khóa/mở tài khoản có nhật ký (Giai đoạn 4); lỗi 422 của `accept_terms`/mật khẩu trùng email chưa chỉ ra trường; đăng nhập lại không thu hồi phiên cũ; `grant_vip` chưa kiểm tra gói còn hoạt động.
+
+- [x] **Bước 7: Phát hiện token bị đánh cắp qua nhiều lần xoay** (xong; token dạng cũ không có id phiên bị từ chối, người dùng đăng nhập lại; chưa deploy nên không ảnh hưởng ai)
+  - Lỗi: refresh chỉ tìm phiên theo hash token hiện tại/liền trước. Kẻ trộm xoay hai lần thì token gốc của chủ chỉ nhận 401, phiên **không** bị thu hồi, kẻ trộm giữ phiên 30 ngày (đã chạy thử xác nhận).
+  - Việc: refresh token dạng `<session_id>.<256 bit ngẫu nhiên>` (vẫn chỉ lưu SHA-256 của cả chuỗi). Refresh tra phiên theo id: khớp token hiện tại thì xoay; khớp token liền trước trong 60 giây thì ân hạn; còn lại (token cũ hơn, hoặc liền trước quá 60 giây) thì thu hồi cả phiên. Token không đúng dạng hoặc id không tồn tại: 401, không đụng phiên nào.
+  - Đánh đổi: ai biết id phiên của người khác có thể gửi token giả để thu hồi phiên đó (đăng xuất cưỡng bức). Id phiên là uuid ngẫu nhiên, chỉ nằm trong cookie httpOnly của chủ, nên chấp nhận.
+  - Hoàn thành khi: test kẻ trộm xoay hai lần rồi chủ dùng token gốc thì phiên bị thu hồi và token của kẻ trộm chết; token sai dạng/id lạ không ảnh hưởng phiên nào; mọi test refresh cũ vẫn qua.
+- [x] **Bước 8: Phản hồi 500 có `X-Request-ID`** (middleware request context bắt lỗi, ghi log kèm request_id rồi trả 500; handler 500 ở `errors.py` chỉ còn là dự phòng)
+  - Việc: middleware request context gắn header cả khi endpoint ném lỗi (bắt lỗi và trả 500 đúng định dạng, hoặc middleware ASGI thuần).
+  - Hoàn thành khi: test 500 của app thật có `X-Request-ID` khớp với request, body đúng định dạng lỗi, không lộ chi tiết; log có traceback.
+- [x] **Bước 9: IP sau reverse proxy và bộ đếm dùng chung** (thiếu khóa đếm thì bỏ qua và ghi cảnh báo, không ghi giá trị khóa vào log vì có thể là email; tài liệu và việc firewall ở Giai đoạn 6 đã cập nhật)
+  - Việc: ở `ENV=prod` bắt buộc `TRUST_CLOUDFLARE_IP=true` (không thì app không khởi động, vì sau Caddy mọi request có cùng IP); IP không xác định thì không đếm chung vào một khóa `-`.
+  - Hoàn thành khi: test prod thiếu `TRUST_CLOUDFLARE_IP` thì không khởi động; request không có IP không bị gộp bộ đếm với nhau.
 
 ## Rủi ro
 

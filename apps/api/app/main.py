@@ -4,10 +4,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
+from app.api.csrf import csrf_middleware
 from app.core.config import get_settings
 from app.core.db import DatabaseNotConfiguredError, dispose_engine
+from app.core.errors import register_error_handlers
 from app.core.request_context import request_context_middleware
-from app.routers import health
+from app.routers import auth, health, me
 
 settings = get_settings()
 
@@ -27,10 +29,20 @@ app = FastAPI(
     openapi_url="/api/openapi.json" if settings.env == "dev" else None,
 )
 
+# Middleware thêm sau chạy ngoài cùng: request context bọc ngoài CSRF, nên phản hồi 403 của
+# CSRF vẫn có X-Request-ID.
+# Chặn request thay đổi dữ liệu đến từ trang lạ (kiểm tra Origin, xem app/api/csrf.py).
+app.middleware("http")(csrf_middleware)
 # Gán request_id cho mọi request (header X-Request-ID), dùng cho nhật ký và log.
 app.middleware("http")(request_context_middleware)
 
 app.include_router(health.router, prefix="/api")
+# API nghiệp vụ có phiên bản: /api/v1/...
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(me.router, prefix="/api/v1")
+
+# Lỗi trả về dạng {"error": {"code", "message"}} (xem app/core/errors.py).
+register_error_handlers(app)
 
 
 @app.exception_handler(DatabaseNotConfiguredError)
