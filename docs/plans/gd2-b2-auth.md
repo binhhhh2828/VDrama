@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **đã duyệt (2026-10-28), đang làm trên branch `feat/auth`.** Xong Bước 1–3. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **đã duyệt (2026-10-28), đang làm trên branch `feat/auth`.** Xong Bước 1–4. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -133,7 +133,7 @@ Cookie `SameSite=Lax` đã chặn phần lớn. Thêm một lớp: với mọi r
 | POST | `/auth/logout` | thu hồi session hiện tại, xóa cookie | 204 | (luôn 204) |
 | GET | `/me` | user hiện tại | 200 + user | 401 `not_authenticated` |
 
-User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_verified`, `created_at`. Không bao giờ trả `password_hash`. (Trạng thái VIP thêm vào `/me` ở Giai đoạn 5.)
+User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_verified`, `created_at`, `vip_expires_at`, `is_vip`. Không bao giờ trả `password_hash`.
 
 ## Cấu hình mới (`.env`)
 
@@ -161,9 +161,10 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 - [x] **Bước 3: Refresh có xoay vòng** (trong 60 giây ân hạn, token liền trước chỉ nhận access mới, không xoay tiếp, để phản hồi đến sau không ghi đè cookie bằng token cũ; user bị khóa/xóa thì thu hồi phiên)
   - Việc: `/auth/refresh` theo thiết kế trên.
   - Hoàn thành khi: test refresh thành công đổi cả hai cookie; token cũ dùng lại trong 60 giây vẫn được; dùng lại sau 60 giây thì thu hồi cả session; session hết hạn/đã thu hồi → 401 và xóa cookie; hạn session trượt thêm 30 ngày.
-- [ ] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**
+- [x] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**
   - Việc: thêm `services/vip.py` với hai hàm duy nhất chạm vào VIP: `grant_vip(...)` (thêm subscription nối tiếp + cập nhật `users.vip_expires_at` trong cùng transaction) và `cancel_subscription(...)` (hủy + tính lại `vip_expires_at`); `is_vip(user)`. Giai đoạn 5 (thanh toán SePay, admin tặng VIP) gọi lại các hàm này.
   - Hoàn thành khi: test `/me` có/không cookie, access hết hạn, session bị thu hồi thì 401 ngay; user bị khóa thì 401; `OptionalUser` trả `None` cho khách thay vì lỗi; endpoint admin thử nghiệm trả 403 cho user thường, 200 cho admin; VIP đúng với các trường hợp chưa từng mua, còn hạn, vừa quá hạn một giây, mua lại sau khi quá hạn (tính từ lúc mua), gia hạn khi còn hạn (cộng nối tiếp), subscription bị hủy (hạn tính lại); `vip_expires_at` luôn khớp với `subscriptions`; lệnh `create-admin` tạo mới và nâng quyền user có sẵn.
+  - Ghi chú khi làm: hủy gói thì các gói sau chưa bắt đầu được dời lên liền mạch (theo plan bổ sung schema), mỗi lần dời ghi `subscriptions.reschedule`. Hành động nhật ký: `subscriptions.grant_vip` (tặng, bắt buộc lý do), `subscriptions.create` (có payment), `subscriptions.cancel`, `users.create_admin` và `users.role_change` (đều bắt buộc lý do). Service tạo admin ở `app/services/admin_accounts.py`.
 - [ ] **Bước 5: CSRF, rate limit, IP thật (dùng chung cho request_context)**
   - Hoàn thành khi: test POST có cookie mà `Origin` lạ → 403, đúng `Origin` → qua, request không cookie không bị chặn; login quá ngưỡng → 429 có `Retry-After`; `CF-Connecting-IP` chỉ được tin khi bật cấu hình.
 - [ ] **Bước 6: Tài liệu và kiểm tra cuối**

@@ -77,7 +77,10 @@ async def test_register_creates_user_and_logs_in(api: httpx.AsyncClient, db: Ses
         "role",
         "email_verified",
         "created_at",
+        "vip_expires_at",
+        "is_vip",
     }
+    assert body["vip_expires_at"] is None and body["is_vip"] is False
 
     user = db.get(User, body["id"])
     assert user.terms_accepted_at is not None

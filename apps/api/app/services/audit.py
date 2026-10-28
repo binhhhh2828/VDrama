@@ -42,7 +42,16 @@ IGNORED_FIELDS = frozenset({"updated_at", "search_text"})
 
 # Động từ bắt buộc nhập lý do (quyết định đã chốt ở plan bổ sung schema).
 REASON_REQUIRED_VERBS = frozenset(
-    {"delete", "restore", "role_change", "cancel", "refund", "grant_vip", "link_transaction"}
+    {
+        "delete",
+        "restore",
+        "role_change",
+        "create_admin",
+        "cancel",
+        "refund",
+        "grant_vip",
+        "link_transaction",
+    }
 )
 
 

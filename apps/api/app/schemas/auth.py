@@ -4,6 +4,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, model_validator
 
 from app.models import User
+from app.services.vip import is_vip
 
 # 8–128 ký tự: giới hạn trên chặn mật khẩu cực dài làm nghẽn CPU khi hash.
 PASSWORD_MIN = 8
@@ -48,6 +49,9 @@ class UserOut(BaseModel):
     role: str
     email_verified: bool
     created_at: datetime
+    # VIP: hạn cuối (None = chưa từng mua) và trạng thái tại thời điểm server trả lời.
+    vip_expires_at: datetime | None
+    is_vip: bool
 
     @classmethod
     def of(cls, user: User) -> "UserOut":
@@ -59,4 +63,6 @@ class UserOut(BaseModel):
             role=user.role,
             email_verified=user.email_verified_at is not None,
             created_at=user.created_at,
+            vip_expires_at=user.vip_expires_at,
+            is_vip=is_vip(user),
         )
