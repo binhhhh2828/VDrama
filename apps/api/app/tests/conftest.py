@@ -118,6 +118,20 @@ async def adb(migrated_db_url: str) -> AsyncIterator[AsyncSession]:
     await engine.dispose()
 
 
+@pytest_asyncio.fixture
+async def api(
+    migrated_db_url: str, set_database_url: Callable[[str], None]
+) -> AsyncIterator[httpx.AsyncClient]:
+    """Client gọi API thật trên database tạm đã migrate.
+
+    Dùng https để cookie Secure (mặc định như prod) được gửi lại như trên trình duyệt.
+    """
+    set_database_url(migrated_db_url)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="https://test") as c:
+        yield c
+
+
 def hard_delete(db: Session, table: str, id_: int) -> None:
     """Xóa thật một dòng (chỉ dùng trong test cascade/restrict, như script bảo trì).
 
