@@ -75,7 +75,7 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - [x] **Bước 4: Tìm kiếm** (trả `{"items": [...]}`; xếp theo `similarity` qua `series_search_rank()` ở `app/services/search.py`)
   - Việc: `GET /search?q=` qua `series_search_condition()`, sắp theo độ giống.
   - Hoàn thành khi: test "nang tho" ra "Nàng Thơ", tìm có dấu/không dấu/hoa thường như nhau; ký tự `%` `_` `\` được hiểu theo nghĩa đen; series chưa xuất bản/đã xóa không ra; `q` ngắn hơn 2 hoặc dài hơn 100 → 422; kết quả khớp tên gần hơn đứng trước.
-- [ ] **Bước 5: Dữ liệu mẫu**
+- [x] **Bước 5: Dữ liệu mẫu** (12 phim, 87 tập, 6 thể loại; ảnh giữ chỗ từ picsum.photos, id video giả nên chưa phát được; đã chạy thật trên compose: lần hai bỏ qua hết)
   - Việc: lệnh `seed-demo`.
   - Hoàn thành khi: test chạy hai lần không tạo trùng; `ENV=prod` bị từ chối; sau khi seed, `GET /series` và `/series/{slug}/episodes` trả dữ liệu đủ các trường hợp đã liệt kê.
 - [ ] **Bước 6: Tài liệu và kiểm tra cuối**
