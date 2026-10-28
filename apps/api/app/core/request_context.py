@@ -4,7 +4,7 @@ Middleware gán mỗi request một request_id (nhận từ header X-Request-ID 
 tự sinh) và trả lại trong header phản hồi. Nhật ký thao tác (audit_logs), log ứng dụng và Sentry
 dùng cùng mã này để nối các nguồn khi truy vết.
 
-IP: tạm lấy IP kết nối. Plan auth sẽ thêm đọc CF-Connecting-IP khi chạy sau Cloudflare.
+IP: lấy qua app/core/client_ip.py (đọc CF-Connecting-IP khi chạy sau Cloudflare).
 """
 
 import re
@@ -14,6 +14,8 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 
 from fastapi import Request, Response
+
+from app.core.client_ip import client_ip
 
 REQUEST_ID_HEADER = "X-Request-ID"
 _VALID_REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{8,64}$")
@@ -46,7 +48,7 @@ async def request_context_middleware(
 ) -> Response:
     info = RequestInfo(
         request_id=_pick_request_id(request.headers.get(REQUEST_ID_HEADER)),
-        ip=request.client.host if request.client else None,
+        ip=client_ip(request),
         user_agent=(request.headers.get("user-agent") or "")[:500] or None,
     )
     token = _current.set(info)

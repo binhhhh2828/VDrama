@@ -7,8 +7,10 @@ from app.api.cookies import (
     read_refresh_cookie,
     set_auth_cookies,
 )
+from app.core import rate_limit
 from app.core.db import DbSession
 from app.core.errors import ApiError, ErrorCode, error_body
+from app.core.request_context import current_request
 from app.core.security import InvalidTokenError, decode_access_token
 from app.schemas.auth import LoginIn, RegisterIn, UserOut
 from app.services import auth as auth_service
@@ -33,6 +35,7 @@ def account_disabled() -> ApiError:
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(data: RegisterIn, response: Response, db: DbSession) -> UserOut:
     """Tạo tài khoản và đăng nhập luôn."""
+    rate_limit.hit(rate_limit.REGISTER_PER_IP, "register", current_request().ip)
     try:
         user, issued = await auth_service.register(db, data)
     except auth_service.EmailTakenError:
@@ -44,6 +47,9 @@ async def register(data: RegisterIn, response: Response, db: DbSession) -> UserO
 
 @router.post("/login")
 async def login(data: LoginIn, response: Response, db: DbSession) -> UserOut:
+    ip = current_request().ip
+    rate_limit.hit(rate_limit.LOGIN_PER_IP, "login", ip)
+    rate_limit.hit(rate_limit.LOGIN_PER_IP_EMAIL, "login", ip, data.email.lower())
     try:
         user, issued = await auth_service.login(db, data.email, data.password)
     except auth_service.InvalidCredentialsError:
@@ -58,6 +64,7 @@ async def login(data: LoginIn, response: Response, db: DbSession) -> UserOut:
 @router.post("/refresh", status_code=status.HTTP_204_NO_CONTENT)
 async def refresh(request: Request, db: DbSession) -> Response:
     """Cấp access token mới từ cookie refresh, xoay vòng refresh token."""
+    rate_limit.hit(rate_limit.REFRESH_PER_IP, "refresh", current_request().ip)
     try:
         issued = await auth_service.refresh(db, read_refresh_cookie(request))
     except auth_service.SessionInvalidError:

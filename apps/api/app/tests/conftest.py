@@ -14,6 +14,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
 
+from app.core import rate_limit
 from app.core.config import get_settings, to_psycopg_url
 from app.core.db import dispose_engine
 from app.main import app
@@ -124,12 +125,24 @@ async def api(
 ) -> AsyncIterator[httpx.AsyncClient]:
     """Client gọi API thật trên database tạm đã migrate.
 
-    Dùng https để cookie Secure (mặc định như prod) được gửi lại như trên trình duyệt.
+    Dùng https để cookie Secure (mặc định như prod) được gửi lại như trên trình duyệt, và gửi
+    header Origin của site như trình duyệt (middleware CSRF kiểm tra header này).
     """
     set_database_url(migrated_db_url)
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="https://test") as c:
+    headers = {"Origin": get_settings().public_origin}
+    async with httpx.AsyncClient(
+        transport=transport, base_url="https://test", headers=headers
+    ) as c:
         yield c
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits() -> Iterator[None]:
+    """Mỗi test bắt đầu với bộ đếm rate limit trống (bộ đếm nằm trong RAM của process)."""
+    rate_limit.reset()
+    yield
+    rate_limit.reset()
 
 
 def hard_delete(db: Session, table: str, id_: int) -> None:
