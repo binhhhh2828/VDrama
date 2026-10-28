@@ -108,9 +108,16 @@ async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResp
     )
 
 
-async def _unhandled_error(_: Request, exc: Exception) -> JSONResponse:
-    logger.exception("Unhandled error", exc_info=exc)
+def internal_error_response() -> JSONResponse:
+    """500 đúng định dạng, không lộ chi tiết lỗi (chi tiết chỉ nằm trong log)."""
     return JSONResponse(status_code=500, content=error_body(*_INTERNAL))
+
+
+async def _unhandled_error(_: Request, exc: Exception) -> JSONResponse:
+    # Dự phòng: lỗi trong route đã được middleware request context bắt (để 500 có X-Request-ID);
+    # tới được đây chỉ khi lỗi xảy ra ngoài middleware đó.
+    logger.exception("Unhandled error", exc_info=exc)
+    return internal_error_response()
 
 
 def register_error_handlers(app: FastAPI) -> None:

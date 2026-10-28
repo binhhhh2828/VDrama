@@ -179,7 +179,7 @@ Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi tru
   - Việc: refresh token dạng `<session_id>.<256 bit ngẫu nhiên>` (vẫn chỉ lưu SHA-256 của cả chuỗi). Refresh tra phiên theo id: khớp token hiện tại thì xoay; khớp token liền trước trong 60 giây thì ân hạn; còn lại (token cũ hơn, hoặc liền trước quá 60 giây) thì thu hồi cả phiên. Token không đúng dạng hoặc id không tồn tại: 401, không đụng phiên nào.
   - Đánh đổi: ai biết id phiên của người khác có thể gửi token giả để thu hồi phiên đó (đăng xuất cưỡng bức). Id phiên là uuid ngẫu nhiên, chỉ nằm trong cookie httpOnly của chủ, nên chấp nhận.
   - Hoàn thành khi: test kẻ trộm xoay hai lần rồi chủ dùng token gốc thì phiên bị thu hồi và token của kẻ trộm chết; token sai dạng/id lạ không ảnh hưởng phiên nào; mọi test refresh cũ vẫn qua.
-- [ ] **Bước 8: Phản hồi 500 có `X-Request-ID`**
+- [x] **Bước 8: Phản hồi 500 có `X-Request-ID`** (middleware request context bắt lỗi, ghi log kèm request_id rồi trả 500; handler 500 ở `errors.py` chỉ còn là dự phòng)
   - Việc: middleware request context gắn header cả khi endpoint ném lỗi (bắt lỗi và trả 500 đúng định dạng, hoặc middleware ASGI thuần).
   - Hoàn thành khi: test 500 của app thật có `X-Request-ID` khớp với request, body đúng định dạng lỗi, không lộ chi tiết; log có traceback.
 - [ ] **Bước 9: IP sau reverse proxy và bộ đếm dùng chung**

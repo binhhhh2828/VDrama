@@ -1,10 +1,15 @@
 """Định dạng lỗi thống nhất {"error": {"code", "message"}}."""
 
+import logging
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
+from app.api.deps import get_current_user
 from app.core.errors import ApiError, ErrorCode, register_error_handlers
+from app.core.request_context import REQUEST_ID_HEADER
 from app.main import app as main_app
 
 
@@ -81,3 +86,34 @@ def test_main_app_uses_error_format():
     res = TestClient(main_app).get("/api/khong-co")
     assert res.status_code == 404
     assert res.json()["error"]["code"] == "not_found"
+
+
+@pytest.fixture
+def broken_me():
+    """/api/v1/me của app thật ném lỗi bất ngờ (thay dependency, không cần DB)."""
+
+    def boom():
+        raise RuntimeError("chi tiết nội bộ: mật khẩu DB")
+
+    main_app.dependency_overrides[get_current_user] = boom
+    yield
+    main_app.dependency_overrides.pop(get_current_user, None)
+
+
+async def test_500_has_request_id_and_is_logged(client, broken_me, caplog):
+    caplog.set_level(logging.ERROR)
+    res = await client.get("/api/v1/me", headers={REQUEST_ID_HEADER: "req-loi-500-abc"})
+
+    assert res.status_code == 500
+    assert res.json()["error"]["code"] == "internal_error"
+    assert "chi tiết nội bộ" not in res.text
+    assert res.headers[REQUEST_ID_HEADER] == "req-loi-500-abc"
+
+    [record] = [r for r in caplog.records if "req-loi-500-abc" in r.getMessage()]
+    assert record.exc_info and "chi tiết nội bộ" in str(record.exc_info[1])
+
+
+async def test_500_generates_request_id_when_missing(client, broken_me):
+    res = await client.get("/api/v1/me")
+    assert res.status_code == 500
+    assert len(res.headers[REQUEST_ID_HEADER]) == 32
