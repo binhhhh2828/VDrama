@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Catalog và tìm kiếm
 
-> Trạng thái: **đã duyệt (2026-10-28), đồng ý cả ba đề xuất ở mục Câu hỏi; đang làm.** Làm trên branch `feat/catalog` (tách từ `feat/auth`, đã merge vào `main` qua PR #1).
+> Trạng thái: **xong (2026-10-28) trên branch `feat/catalog`, chưa push.** Đã duyệt với cả ba đề xuất ở mục Câu hỏi. Còn: CI trên GitHub khi mở PR. Làm trên branch `feat/catalog` (tách từ `feat/auth`, đã merge vào `main` qua PR #1).
 > Liên quan: `plan.md` mục 5 (API Catalog), Giai đoạn 2 task "Catalog" và "Tìm kiếm"; ma trận phân quyền ở `docs/plans/gd2-b2-auth.md`. Bảng dùng: `series`, `series_stats`, `genres`, `series_genres`, `episodes` (migration 0003–0004, 0008).
 
 ## Mục tiêu và phạm vi
@@ -78,7 +78,7 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - [x] **Bước 5: Dữ liệu mẫu** (12 phim, 87 tập, 6 thể loại; ảnh giữ chỗ từ picsum.photos, id video giả nên chưa phát được; đã chạy thật trên compose: lần hai bỏ qua hết)
   - Việc: lệnh `seed-demo`.
   - Hoàn thành khi: test chạy hai lần không tạo trùng; `ENV=prod` bị từ chối; sau khi seed, `GET /series` và `/series/{slug}/episodes` trả dữ liệu đủ các trường hợp đã liệt kê.
-- [ ] **Bước 6: Tài liệu và kiểm tra cuối**
+- [x] **Bước 6: Tài liệu và kiểm tra cuối** (`docs/api.md` có mục Catalog kèm bảng hiện ổ khóa; chạy compose + seed + curl: thể loại, 2 trang `new`, chi tiết, 404 phim nháp/đã xóa, 422 đều đúng; 400 test qua; CI GitHub chưa chạy vì chưa push)
   - Việc: `docs/api.md` (Catalog: endpoint, tham số, ví dụ response, cách dùng con trỏ, cách hiện ổ khóa từ `access` + `/me.is_vip`), `plan.md`, CLAUDE.md, README; chạy compose + seed + curl các endpoint.
 
 ## Rủi ro
@@ -87,8 +87,10 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - **Lọc theo thể loại + sắp theo ngày** không có index ghép: với vài trăm series vẫn nhanh; ghi lại để thêm index khi catalog lớn.
 - **Admin xem trước qua API công khai**: phải chắc chắn danh sách và tìm kiếm không lộ phim chưa xuất bản kể cả với admin (có test).
 
-## Câu hỏi còn mở (cần bạn chốt)
+## Quyết định đã chốt (2026-10-28)
 
-1. **Banner trang chủ**: đề xuất lấy các series mới nhất **có `banner_url`** (`/series?with_banner=true&limit=5`), không thêm cột mới. Muốn admin tự chọn phim lên banner thì thêm cột (ví dụ `featured_rank`) bằng migration ở Giai đoạn 4.
-2. **Ổ khóa trên từng tập**: đề xuất catalog trả cùng nội dung cho mọi người (`access: free|vip`), frontend ghép với `/me.is_vip`. Cách khác: API trả sẵn `locked` theo người xem (tiện cho frontend nhưng không cache được).
-3. **Độ dài từ khóa tìm kiếm**: đề xuất tối thiểu 2 ký tự (tên phim tiếng Việt có từ 2 chữ cái). Từ khóa dưới 3 ký tự không dùng được index trigram nên quét cả bảng; với vài trăm series không đáng kể.
+Cả ba đã khớp với code đã làm, không cần sửa gì thêm trong plan này.
+
+1. **Banner trang chủ**: giai đoạn hiện tại dùng `/series?with_banner=true&limit=5` (phim mới nhất có `banner_url`), không đổi schema DB. Admin chủ động ghim và sắp thứ tự phim trên banner là nhu cầu chắc chắn: thêm cột `featured_rank` (hoặc `banner_priority`) bằng migration ở **Giai đoạn 4**, đã ghi vào `plan.md`.
+2. **Ổ khóa trên từng tập**: catalog trả `access: free | vip`, cùng nội dung cho mọi người để cache được (CDN/Redis). Frontend tự ghép với `is_vip` của user để hiện ổ khóa. Backend chỉ kiểm tra quyền xem khi user thật sự lấy đường phát (endpoint `play`, đã ghi vào task đó trong `plan.md`).
+3. **Từ khóa tìm kiếm**: tối thiểu 2 ký tự cho hợp tiếng Việt. Với vài trăm series, quét bảng khi từ khóa ngắn không đáng kể. Khi catalog lên hàng chục nghìn bản ghi thì tối ưu lại cơ chế tìm kiếm (ví dụ Full-text Search của Postgres hoặc Elasticsearch), đã ghi vào `plan.md` Giai đoạn 9.

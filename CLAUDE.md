@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án), phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009) và auth (`docs/plans/gd2-b2-auth.md`, migration 0010: đăng ký, đăng nhập, refresh xoay vòng, đăng xuất, `/me`, phân quyền admin, VIP, CSRF, rate limit). Việc kế tiếp của Giai đoạn 2 là xác thực email / quên mật khẩu; chưa có endpoint catalog, play, thanh toán. Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án), phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009) và auth (`docs/plans/gd2-b2-auth.md`, migration 0010: đăng ký, đăng nhập, refresh xoay vòng, đăng xuất, `/me`, phân quyền admin, VIP, CSRF, rate limit). Catalog và tìm kiếm cũng đã xong (`docs/plans/gd2-b3-catalog.md`: `/genres`, `/series`, `/series/{slug}`, `/series/{slug}/episodes`, `/search`, lệnh `seed-demo`). Còn lại của Giai đoạn 2: xác thực email / quên mật khẩu, Cloudflare Stream, `play`, lịch sử xem, yêu thích; chưa có endpoint thanh toán. Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -69,6 +69,12 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
   - Request thay đổi dữ liệu phải có `Origin` đúng `PUBLIC_ORIGIN` (`app/api/csrf.py`). Endpoint dễ bị dò thêm `rate_limit.hit(...)` (`app/core/rate_limit.py`, đếm trong RAM).
   - Service không commit; router commit sau khi mọi thứ thành công.
   - Test gọi API dùng fixture `api` (client https, có `Origin`, trên DB tạm đã migrate); bộ đếm rate limit tự reset mỗi test.
+- **Catalog** (`app/services/catalog.py`):
+  - Truy vấn công khai chỉ lấy phim/tập đã xuất bản và tự ẩn "theo cha" (tập của phim nháp/đã xóa không lộ ra). Admin chỉ xem trước được ở trang chi tiết và danh sách tập; danh sách và tìm kiếm không bao giờ có phim nháp.
+  - Lọc cờ boolean bằng `.where(Series.is_published)`, **không** dùng `.is_(True)`: index một phần khai báo `WHERE is_published`, Postgres không suy ra được từ `IS true` nên bỏ qua index. Truy vấn danh sách quan trọng có test `EXPLAIN` trên câu truy vấn thật của service.
+  - Phân trang danh sách bằng con trỏ keyset (giá trị sắp xếp + `id`), không dùng `OFFSET`.
+  - Response công khai không bao giờ có `stream_video_id`; đường phát chỉ cấp qua endpoint `play`.
+  - Dữ liệu mẫu cho dev: `uv run python -m app.cli seed-demo` (không chạy ở prod, chạy lại không trùng).
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

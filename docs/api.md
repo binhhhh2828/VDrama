@@ -117,6 +117,110 @@ Thu hồi phiên của thiết bị này và xóa cookie. Luôn **204**, kể c�
 - **200** + User hiện tại.
 - Lỗi: 401 `not_authenticated`.
 
+## Catalog
+
+Chỉ đọc, khách cũng gọi được. **Cùng một nội dung cho mọi người xem** (không có dữ liệu riêng của người dùng), nên sau này cache được. Chỉ có phim/tập đã xuất bản; phim/tập đã xóa không bao giờ hiện ra.
+
+### Đối tượng SeriesCard (thẻ phim trong danh sách)
+
+```json
+{
+  "id": 1,
+  "slug": "hen-uoc-mua-thu",
+  "title": "Hẹn Ước Mùa Thu",
+  "poster_url": "https://...",
+  "banner_url": null,
+  "year": 2026,
+  "country": "Việt Nam",
+  "status": "ongoing",
+  "total_episodes": 16,
+  "published_at": "2026-10-27T08:00:00Z",
+  "genres": [{ "slug": "tinh-cam", "name": "Tình cảm" }]
+}
+```
+
+`status`: `ongoing` (đang chiếu) hoặc `completed`. `total_episodes` là số tập dự kiến (có thể null), khác với số tập đã có (`episode_count` ở trang chi tiết).
+
+### `GET /api/v1/genres`
+
+Mọi thể loại, sắp theo tên: `[{ "slug": "hai", "name": "Hài" }, ...]`.
+
+### `GET /api/v1/series`
+
+Danh sách phim, phân trang bằng con trỏ.
+
+| Tham số | Mặc định | Ý nghĩa |
+|---|---|---|
+| `sort` | `new` | `new`: mới xuất bản trước. `hot`: nhiều lượt xem trước (lượt xem chưa được đếm cho tới khi có endpoint xem tập) |
+| `genre` | | Lọc theo slug thể loại; slug không có thì trả rỗng |
+| `with_banner` | `false` | `true`: chỉ phim có ảnh banner (slider trang chủ: `?with_banner=true&limit=5`) |
+| `limit` | `20` | 1–50 |
+| `cursor` | | Lấy trang sau: truyền `next_cursor` của trang trước, **giữ nguyên** các tham số khác |
+
+Phản hồi: `{ "items": [SeriesCard, ...], "next_cursor": "..." | null }`. `next_cursor` là null khi đã hết. Con trỏ là chuỗi mờ, không tự tạo; con trỏ hỏng hoặc dùng cho `sort` khác → 422 `validation_error` (`fields[].field = "cursor"`).
+
+Phân trang bằng con trỏ nên khi có phim mới xuất bản giữa chừng, trang sau không bị trùng hay sót; không có "nhảy tới trang N".
+
+### `GET /api/v1/series/{slug}`
+
+SeriesCard cộng thêm:
+
+```json
+{
+  "description": "...",
+  "episode_count": 11,
+  "latest_episode_number": 11,
+  "view_count": 5200,
+  "is_published": true
+}
+```
+
+`episode_count`, `latest_episode_number` chỉ tính tập đã xuất bản. Phim không có, chưa xuất bản hoặc đã xóa → 404 `not_found`. Admin (đã đăng nhập) xem trước được phim chưa xuất bản, khi đó `is_published` là `false`.
+
+### `GET /api/v1/series/{slug}/episodes`
+
+Mọi tập đã xuất bản, theo số tập tăng dần (không phân trang):
+
+```json
+[
+  {
+    "id": 10,
+    "number": 1,
+    "title": "Tập 1",
+    "duration_sec": 1297,
+    "thumbnail_url": "https://...",
+    "access": "free",
+    "published_at": "2026-10-27T09:00:00Z",
+    "is_published": true
+  }
+]
+```
+
+- `access`: `free` (đăng nhập là xem được) hoặc `vip` (cần VIP còn hạn). Không có id video: đường phát chỉ lấy qua endpoint xem tập (chưa làm).
+- **Hiện ổ khóa**: catalog không biết ai đang xem, frontend tự ghép với `GET /me`:
+
+| | Khách | User | `is_vip: true` |
+|---|---|---|---|
+| `access: free` | mời đăng nhập | xem được | xem được |
+| `access: vip` | mời đăng nhập | ổ khóa, mời mua VIP | xem được |
+
+- Phim không xem được → 404 như trang chi tiết. Admin thấy thêm tập chưa xuất bản (`is_published: false`).
+
+### `GET /api/v1/search?q=`
+
+Tìm phim theo tên, không dấu, không phân biệt hoa thường: `nang tho` ra "Nàng Thơ". Tìm được một phần tên.
+
+| Tham số | Ý nghĩa |
+|---|---|
+| `q` | 2–100 ký tự (sau khi bỏ khoảng trắng hai đầu); sai → 422 |
+| `limit` | 1–50, mặc định 20 |
+
+Phản hồi: `{ "items": [SeriesCard, ...] }` (chỉ trang đầu, không có con trỏ). Tên sát từ khóa hơn đứng trước; cùng mức thì phim mới hơn trước. Ký tự `%`, `_` được hiểu đúng nghĩa đen.
+
+### Dữ liệu mẫu (dev)
+
+`uv run python -m app.cli seed-demo` (hoặc `docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo`) thêm 12 phim mẫu đủ các trường hợp trên. Ảnh là ảnh giữ chỗ từ `picsum.photos` (cần cho phép domain này trong cấu hình ảnh của Next.js), id video giả nên chưa phát được. Không chạy ở `ENV=prod`; chạy lại không tạo trùng.
+
 ## Phân quyền
 
 | Hành động | Khách | User | VIP còn hạn | Admin |
