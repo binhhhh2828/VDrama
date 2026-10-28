@@ -200,10 +200,10 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), xong 2026-10-27, migration `0007`–`0009`) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
 - [x] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), xong 2026-10-28 trên branch `feat/auth`; tài liệu cho frontend: [docs/api.md](docs/api.md); có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
-- [ ] Catalog: series, episodes, thể loại, phân trang
-- [ ] Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
+- [x] (plan chi tiết: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md), xong 2026-10-28 trên branch `feat/catalog`; có lệnh `seed-demo` tạo dữ liệu mẫu cho frontend) Catalog: series, episodes, thể loại, phân trang
+- [x] (cùng plan catalog, Bước 4, xong 2026-10-28: `GET /api/v1/search`) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
 - [ ] Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
-- [ ] Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn)
+- [ ] Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn). Đây là **chỗ duy nhất** kiểm tra quyền xem: catalog chỉ trả `access: free | vip` giống nhau cho mọi người (để cache được), frontend tự hiện ổ khóa theo `/me.is_vip` (chốt 2026-10-28)
 - [ ] Watch history, favorites
 - [ ] Test tự động cho auth, play, phân quyền
 
@@ -219,6 +219,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 
 ### Giai đoạn 4 — Admin & nội dung
 - [ ] Trang admin (bảo vệ role admin): quản lý series, tập phim, gói VIP
+- [ ] Ghim và sắp thứ tự phim trên banner trang chủ: thêm cột `series.featured_rank` (hoặc `banner_priority`) bằng migration, admin chọn phim lên banner; API banner đổi từ `/series?with_banner=true` sang sắp theo cột này (chốt 2026-10-28, hiện tạm dùng phim mới nhất có banner)
 - [ ] Upload video trực tiếp lên Cloudflare Stream từ trình duyệt (tus/direct upload)
 - [ ] Theo dõi trạng thái chuyển mã, bật/tắt xuất bản
 - [ ] Nơi lưu poster/banner: Cloudflare R2 (hoặc Cloudflare Images) kèm upload từ admin; không lưu ảnh trên VPS
@@ -283,6 +284,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 - [ ] Thêm MoMo, VNPay (dùng lại bảng payments/payment_events, thêm provider mới)
 - [ ] Hỗ trợ phụ đề nhiều ngôn ngữ
 - [ ] Khi tải tăng: nâng VPS, hoặc tách frontend/backend sang dịch vụ managed
+- [ ] Khi catalog lên hàng chục nghìn phim: tối ưu lại tìm kiếm (Full-text Search của Postgres hoặc Elasticsearch). Hiện dùng trigram + `unaccent`, cho phép từ khóa từ 2 ký tự (chốt 2026-10-28)
 
 ---
 

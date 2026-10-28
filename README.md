@@ -60,6 +60,17 @@ curl -b jar http://localhost:8000/api/v1/me
 
 Cổng trên máy trùng với dự án khác thì đổi khi chạy compose: `DB_PORT=55432 API_PORT=8001 WEB_PORT=3001 docker compose -f docker-compose.dev.yml up --build`.
 
+## Catalog
+
+Danh sách phim, chi tiết, danh sách tập, thể loại, tìm kiếm không dấu dưới `/api/v1` (tài liệu: [docs/api.md](docs/api.md#catalog), thiết kế: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md)). Dữ liệu phim mẫu cho dev (12 phim, không chạy ở prod, chạy lại không trùng):
+
+```bash
+docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo
+# hoặc chạy trực tiếp: cd apps/api && uv run python -m app.cli seed-demo
+curl "http://localhost:8000/api/v1/series?sort=hot&limit=5"
+curl "http://localhost:8000/api/v1/search?q=nang%20tho"
+```
+
 ## Kiểm tra
 
 ```bash
