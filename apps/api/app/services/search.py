@@ -22,3 +22,12 @@ def series_search_condition(query: str) -> ColumnElement[bool]:
     """
     normalized = func.lower(func.immutable_unaccent(escape_like(query.strip())))
     return Series.search_text.ilike(func.concat("%", normalized, "%"), escape=LIKE_ESCAPE)
+
+
+def series_search_rank(query: str) -> ColumnElement[float]:
+    """Độ giống (pg_trgm, 0..1) giữa tên phim và từ khóa đã chuẩn hóa: tên càng sát càng cao.
+
+    Dùng để sắp xếp kết quả của series_search_condition(); bản thân nó không lọc.
+    """
+    normalized = func.lower(func.immutable_unaccent(query.strip()))
+    return func.similarity(Series.search_text, normalized)

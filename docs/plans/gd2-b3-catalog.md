@@ -72,7 +72,7 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - [x] **Bước 3: Phim hot** (`sort=hot` kết hợp được với `genre` và `with_banner`)
   - Việc: `sort=hot` (join trái `series_stats`), con trỏ theo lượt xem.
   - Hoàn thành khi: test thứ tự theo lượt xem, series không có `series_stats` tính 0 và vẫn có mặt; phân trang hot không trùng/sót; con trỏ của `new` dùng cho `hot` → 422.
-- [ ] **Bước 4: Tìm kiếm**
+- [x] **Bước 4: Tìm kiếm** (trả `{"items": [...]}`; xếp theo `similarity` qua `series_search_rank()` ở `app/services/search.py`)
   - Việc: `GET /search?q=` qua `series_search_condition()`, sắp theo độ giống.
   - Hoàn thành khi: test "nang tho" ra "Nàng Thơ", tìm có dấu/không dấu/hoa thường như nhau; ký tự `%` `_` `\` được hiểu theo nghĩa đen; series chưa xuất bản/đã xóa không ra; `q` ngắn hơn 2 hoặc dài hơn 100 → 422; kết quả khớp tên gần hơn đứng trước.
 - [ ] **Bước 5: Dữ liệu mẫu**

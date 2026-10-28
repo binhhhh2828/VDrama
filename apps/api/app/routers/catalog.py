@@ -10,7 +10,14 @@ from app.core.db import DbSession
 from app.core.errors import ApiError, ErrorCode
 from app.models import User
 from app.models.enums import UserRole
-from app.schemas.catalog import EpisodeOut, GenreOut, SeriesCard, SeriesDetail, SeriesPage
+from app.schemas.catalog import (
+    EpisodeOut,
+    GenreOut,
+    SearchResult,
+    SeriesCard,
+    SeriesDetail,
+    SeriesPage,
+)
 from app.services import catalog as catalog_service
 
 router = APIRouter(tags=["catalog"])
@@ -85,3 +92,16 @@ async def series_episodes(slug: SeriesSlug, db: DbSession, user: OptionalUser) -
     if episodes is None:
         raise series_not_found()
     return [EpisodeOut.of(ep) for ep in episodes]
+
+
+@router.get("/search")
+async def search(
+    db: DbSession,
+    q: Annotated[str, Query(max_length=catalog_service.SEARCH_MAX_LENGTH)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> SearchResult:
+    """Tìm phim theo tên, không dấu: "nang tho" ra "Nàng Thơ". Chỉ phim đã xuất bản."""
+    if len(q.strip()) < catalog_service.SEARCH_MIN_LENGTH:
+        raise invalid_query("q", f"Từ khóa cần ít nhất {catalog_service.SEARCH_MIN_LENGTH} ký tự")
+    rows = await catalog_service.search_series(db, q, limit=limit)
+    return SearchResult(items=[SeriesCard.model_validate(s) for s in rows])

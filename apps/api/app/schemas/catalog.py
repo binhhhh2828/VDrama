@@ -39,6 +39,12 @@ class SeriesPage(BaseModel):
     next_cursor: str | None
 
 
+class SearchResult(BaseModel):
+    """Kết quả tìm kiếm: chỉ trang đầu (tối đa 50), không có con trỏ."""
+
+    items: list[SeriesCard]
+
+
 class SeriesDetail(SeriesCard):
     """Trang chi tiết phim. Số tập chỉ tính tập đã xuất bản."""
 

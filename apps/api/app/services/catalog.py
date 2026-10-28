@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models import Episode, Genre, Series, SeriesStats, series_genres
+from app.services.search import series_search_condition, series_search_rank
 
 SeriesSort = Literal["new", "hot"]
 
@@ -131,6 +132,28 @@ async def list_series(
         last, last_key = rows[-1]
         next_cursor = SeriesCursor(sort=sort, value=_cursor_value(last_key), id=last.id).encode()
     return [series for series, _ in rows], next_cursor
+
+
+# --- Tìm kiếm ---
+
+SEARCH_MIN_LENGTH = 2
+SEARCH_MAX_LENGTH = 100
+
+
+async def search_series(db: AsyncSession, query: str, *, limit: int = 20) -> list[Series]:
+    """Series đã xuất bản có tên chứa từ khóa (không dấu, không phân biệt hoa thường).
+
+    Lọc qua series_search_condition() để dùng index trigram. Sắp theo độ giống tên (tên sát từ
+    khóa hơn đứng trước), cùng điểm thì phim mới hơn trước. Chỉ trả trang đầu, không con trỏ.
+    """
+    stmt = (
+        select(Series)
+        .where(Series.is_published, series_search_condition(query))
+        .order_by(series_search_rank(query).desc(), Series.published_at.desc(), Series.id.desc())
+        .limit(limit)
+        .options(selectinload(Series.genres))
+    )
+    return list((await db.execute(stmt)).scalars())
 
 
 # --- Chi tiết phim và danh sách tập ---
