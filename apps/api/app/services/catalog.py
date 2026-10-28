@@ -14,13 +14,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from sqlalchemy import Select, func, select, tuple_
+from sqlalchemy import ColumnElement, Select, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models import Episode, Genre, Series, SeriesStats, series_genres
 
-SeriesSort = Literal["new"]
+SeriesSort = Literal["new", "hot"]
 
 
 class InvalidCursorError(ValueError):
@@ -54,6 +54,21 @@ async def list_genres(db: AsyncSession) -> list[Genre]:
     return list((await db.execute(select(Genre).order_by(Genre.name, Genre.id))).scalars())
 
 
+def _sort_key(sort: SeriesSort) -> ColumnElement:
+    """Giá trị sắp xếp chính (giảm dần); `id` luôn đi kèm để phân định khi trùng."""
+    if sort == "hot":
+        # Series chưa có dòng series_stats (chưa ai xem) tính là 0 lượt xem.
+        return func.coalesce(SeriesStats.view_count, 0)
+    return Series.published_at
+
+
+def _parse_cursor_value(sort: SeriesSort, value: str) -> datetime | int:
+    try:
+        return int(value) if sort == "hot" else datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise InvalidCursorError("Con trỏ không hợp lệ") from exc
+
+
 def series_list_stmt(
     *,
     sort: SeriesSort = "new",
@@ -62,10 +77,19 @@ def series_list_stmt(
     limit: int = 20,
     cursor: SeriesCursor | None = None,
 ) -> Select:
-    """Câu truy vấn danh sách series (tách riêng để test kiểm tra được kế hoạch truy vấn)."""
+    """Câu truy vấn danh sách series, trả (Series, giá trị sắp xếp).
+
+    Tách riêng để test kiểm tra được kế hoạch truy vấn.
+    - new: (published_at DESC, id DESC), khớp index ix_series_published.
+    - hot: (lượt xem DESC, id DESC), join trái series_stats. Không có index ghép: với vài trăm
+      series vẫn nhanh (ghi ở mục Rủi ro của plan).
+    """
+    key = _sort_key(sort)
     # Viết `WHERE is_published` (không phải `IS true`): index một phần ix_series_published khai
     # báo điều kiện `WHERE is_published`, Postgres không suy ra được từ `IS true` nên bỏ qua index.
-    stmt = select(Series).where(Series.is_published)
+    stmt = select(Series, key.label("sort_key")).where(Series.is_published)
+    if sort == "hot":
+        stmt = stmt.outerjoin(SeriesStats, SeriesStats.series_id == Series.id)
     if genre_slug is not None:
         # Thể loại đã xóa mềm bị bộ lọc ORM loại khỏi phép join, nên lọc theo nó trả rỗng.
         stmt = (
@@ -75,15 +99,14 @@ def series_list_stmt(
         )
     if with_banner:
         stmt = stmt.where(Series.banner_url.is_not(None), Series.banner_url != "")
-
-    # sort == "new": khớp index ix_series_published (published_at DESC, id DESC).
     if cursor is not None:
-        try:
-            after = datetime.fromisoformat(cursor.value)
-        except ValueError as exc:
-            raise InvalidCursorError("Con trỏ không hợp lệ") from exc
-        stmt = stmt.where(tuple_(Series.published_at, Series.id) < (after, cursor.id))
-    return stmt.order_by(Series.published_at.desc(), Series.id.desc()).limit(limit + 1)
+        after = _parse_cursor_value(sort, cursor.value)
+        stmt = stmt.where(tuple_(key, Series.id) < (after, cursor.id))
+    return stmt.order_by(key.desc(), Series.id.desc()).limit(limit + 1)
+
+
+def _cursor_value(value: datetime | int) -> str:
+    return value.isoformat() if isinstance(value, datetime) else str(value)
 
 
 async def list_series(
@@ -100,16 +123,14 @@ async def list_series(
     stmt = series_list_stmt(
         sort=sort, genre_slug=genre_slug, with_banner=with_banner, limit=limit, cursor=after
     ).options(selectinload(Series.genres))
-    rows = list((await db.execute(stmt)).scalars().unique())
+    rows = list((await db.execute(stmt)).unique().all())
 
     next_cursor = None
     if len(rows) > limit:
         rows = rows[:limit]
-        last = rows[-1]
-        next_cursor = SeriesCursor(
-            sort=sort, value=last.published_at.isoformat(), id=last.id
-        ).encode()
-    return rows, next_cursor
+        last, last_key = rows[-1]
+        next_cursor = SeriesCursor(sort=sort, value=_cursor_value(last_key), id=last.id).encode()
+    return [series for series, _ in rows], next_cursor
 
 
 # --- Chi tiết phim và danh sách tập ---

@@ -377,3 +377,64 @@ async def test_admin_cannot_see_deleted_via_public_api(
 async def test_slug_too_long_422(api: httpx.AsyncClient):
     res = await api.get("/api/v1/series/" + "a" * 201)
     assert res.status_code == 422
+
+
+# --- Phim hot ---
+
+
+def add_views(db: Session, series: Series, views: int) -> None:
+    db.add(SeriesStats(series_id=series.id, view_count=views))
+    db.flush()
+
+
+async def test_hot_sorted_by_views_missing_stats_count_zero(api: httpx.AsyncClient, db: Session):
+    a = add_series(db, "a", days=1)
+    b = add_series(db, "b", days=2)
+    c = add_series(db, "c", days=3)
+    no_stats = add_series(db, "khong-so-lieu", days=4)  # chưa có dòng series_stats
+    add_views(db, a, 50)
+    add_views(db, b, 900)
+    add_views(db, c, 0)
+    add_series(db, "nhap", published=False)
+    db.commit()
+
+    got = await slugs(api, sort="hot")
+    # Cùng 0 lượt xem: id lớn hơn đứng trước.
+    zeros = [s.slug for s in sorted([c, no_stats], key=lambda s: s.id, reverse=True)]
+    assert got == ["b", "a", *zeros]
+
+
+async def test_hot_pagination_with_ties(api: httpx.AsyncClient, db: Session):
+    series = [add_series(db, f"s{i}", days=i) for i in range(7)]
+    for i, s in enumerate(series):
+        if i < 5:
+            add_views(db, s, 100 if i % 2 else 10)  # nhiều phim trùng lượt xem
+    db.commit()
+    expected = await slugs(api, sort="hot", limit=50)
+    assert len(expected) == 7
+    assert await all_pages(api, sort="hot", limit=2) == expected
+
+
+async def test_hot_with_genre_and_banner(api: httpx.AsyncClient, db: Session):
+    a = add_series(db, "a", days=1, banner_url="https://x/a.jpg")
+    b = add_series(db, "b", days=2)
+    c = add_series(db, "c", days=3, banner_url="https://x/c.jpg")
+    add_genre(db, "hai", "Hài", a, b)
+    add_views(db, a, 5)
+    add_views(db, b, 9)
+    add_views(db, c, 7)
+    db.commit()
+    assert await slugs(api, sort="hot", genre="hai") == ["b", "a"]
+    assert await slugs(api, sort="hot", with_banner="true") == ["c", "a"]
+
+
+async def test_cursor_not_shared_between_sorts(api: httpx.AsyncClient, db: Session):
+    for i in range(3):
+        add_series(db, f"s{i}", days=i)
+    db.commit()
+    new_cursor = (await api.get("/api/v1/series", params={"limit": 1})).json()["next_cursor"]
+    res = await api.get("/api/v1/series", params={"sort": "hot", "cursor": new_cursor})
+    assert res.status_code == 422
+    bad_hot = _cursor({"s": "hot", "v": "khong-phai-so", "i": 1})
+    res = await api.get("/api/v1/series", params={"sort": "hot", "cursor": bad_hot})
+    assert res.status_code == 422

@@ -69,7 +69,7 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - [x] **Bước 2: Chi tiết phim và danh sách tập** (series đã xóa mềm trả 404 với mọi người, kể cả admin: phim đã xóa xem ở thùng rác trang admin, Giai đoạn 4)
   - Việc: `GET /series/{slug}`, `GET /series/{slug}/episodes`, admin xem trước.
   - Hoàn thành khi: test series chưa xuất bản/đã xóa → 404 cho khách và user, admin xem được; chỉ tập đã xuất bản và chưa xóa hiện ra (admin thấy cả tập chưa xuất bản, có cờ `is_published`); tập sắp theo số; response không có `stream_video_id`; `access` đúng `free`/`vip`; số tập và tập mới nhất chỉ đếm tập đã xuất bản.
-- [ ] **Bước 3: Phim hot**
+- [x] **Bước 3: Phim hot** (`sort=hot` kết hợp được với `genre` và `with_banner`)
   - Việc: `sort=hot` (join trái `series_stats`), con trỏ theo lượt xem.
   - Hoàn thành khi: test thứ tự theo lượt xem, series không có `series_stats` tính 0 và vẫn có mặt; phân trang hot không trùng/sót; con trỏ của `new` dùng cho `hot` → 422.
 - [ ] **Bước 4: Tìm kiếm**
