@@ -14,11 +14,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal
 
-from sqlalchemy import Select, select, tuple_
+from sqlalchemy import Select, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import Genre, Series, series_genres
+from app.models import Episode, Genre, Series, SeriesStats, series_genres
 
 SeriesSort = Literal["new"]
 
@@ -110,3 +110,60 @@ async def list_series(
             sort=sort, value=last.published_at.isoformat(), id=last.id
         ).encode()
     return rows, next_cursor
+
+
+# --- Chi tiết phim và danh sách tập ---
+
+
+@dataclass(frozen=True)
+class SeriesDetailData:
+    series: Series
+    episode_count: int  # chỉ tập đã xuất bản
+    latest_episode_number: int | None
+    view_count: int
+
+
+async def _find_series(db: AsyncSession, slug: str, *, include_unpublished: bool) -> Series | None:
+    """Series theo slug. Đã xóa mềm thì luôn ẩn (kể cả admin: xem ở thùng rác trang admin)."""
+    stmt = select(Series).where(Series.slug == slug).options(selectinload(Series.genres))
+    if not include_unpublished:
+        stmt = stmt.where(Series.is_published)
+    return (await db.execute(stmt)).scalar_one_or_none()
+
+
+async def get_series_detail(
+    db: AsyncSession, slug: str, *, include_unpublished: bool = False
+) -> SeriesDetailData | None:
+    """None khi không có, đã xóa, hoặc chưa xuất bản (trừ khi admin xem trước)."""
+    series = await _find_series(db, slug, include_unpublished=include_unpublished)
+    if series is None:
+        return None
+    count, latest = (
+        await db.execute(
+            select(func.count(), func.max(Episode.number)).where(
+                Episode.series_id == series.id, Episode.is_published
+            )
+        )
+    ).one()
+    views = await db.scalar(
+        select(SeriesStats.view_count).where(SeriesStats.series_id == series.id)
+    )
+    return SeriesDetailData(
+        series=series, episode_count=count, latest_episode_number=latest, view_count=views or 0
+    )
+
+
+async def list_episodes(
+    db: AsyncSession, slug: str, *, include_unpublished: bool = False
+) -> list[Episode] | None:
+    """Các tập theo số tăng dần; None khi series không xem được (để trả 404).
+
+    Ẩn "theo cha": tập của series chưa xuất bản/đã xóa không lộ ra dù bản thân tập đã xuất bản.
+    """
+    series = await _find_series(db, slug, include_unpublished=include_unpublished)
+    if series is None:
+        return None
+    stmt = select(Episode).where(Episode.series_id == series.id).order_by(Episode.number)
+    if not include_unpublished:
+        stmt = stmt.where(Episode.is_published)
+    return list((await db.execute(stmt)).scalars())

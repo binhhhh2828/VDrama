@@ -2,11 +2,15 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Path, Query
 from fastapi.exceptions import RequestValidationError
 
+from app.api.deps import OptionalUser
 from app.core.db import DbSession
-from app.schemas.catalog import GenreOut, SeriesCard, SeriesPage
+from app.core.errors import ApiError, ErrorCode
+from app.models import User
+from app.models.enums import UserRole
+from app.schemas.catalog import EpisodeOut, GenreOut, SeriesCard, SeriesDetail, SeriesPage
 from app.services import catalog as catalog_service
 
 router = APIRouter(tags=["catalog"])
@@ -45,3 +49,39 @@ async def series_list(
     except catalog_service.InvalidCursorError as exc:
         raise invalid_query("cursor", str(exc)) from None
     return SeriesPage(items=[SeriesCard.model_validate(s) for s in rows], next_cursor=next_cursor)
+
+
+def series_not_found() -> ApiError:
+    return ApiError(404, ErrorCode.NOT_FOUND, "Không tìm thấy phim.")
+
+
+def _is_admin(user: User | None) -> bool:
+    """Admin xem trước được phim/tập chưa xuất bản (ma trận phân quyền)."""
+    return user is not None and user.role == UserRole.ADMIN
+
+
+SeriesSlug = Annotated[str, Path(min_length=1, max_length=200)]
+
+
+@router.get("/series/{slug}")
+async def series_detail(slug: SeriesSlug, db: DbSession, user: OptionalUser) -> SeriesDetail:
+    data = await catalog_service.get_series_detail(db, slug, include_unpublished=_is_admin(user))
+    if data is None:
+        raise series_not_found()
+    card = SeriesCard.model_validate(data.series)
+    return SeriesDetail(
+        **card.model_dump(),
+        description=data.series.description,
+        episode_count=data.episode_count,
+        latest_episode_number=data.latest_episode_number,
+        view_count=data.view_count,
+        is_published=data.series.is_published,
+    )
+
+
+@router.get("/series/{slug}/episodes")
+async def series_episodes(slug: SeriesSlug, db: DbSession, user: OptionalUser) -> list[EpisodeOut]:
+    episodes = await catalog_service.list_episodes(db, slug, include_unpublished=_is_admin(user))
+    if episodes is None:
+        raise series_not_found()
+    return [EpisodeOut.of(ep) for ep in episodes]

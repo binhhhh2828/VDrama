@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Catalog và tìm kiếm
 
-> Trạng thái: **đã duyệt (2026-10-28), đồng ý cả ba đề xuất ở mục Câu hỏi; đang làm.** Làm trên branch `feat/catalog` (tách từ `feat/auth`; PR #1 cần được merge vào `main` trước khi mở PR cho plan này).
+> Trạng thái: **đã duyệt (2026-10-28), đồng ý cả ba đề xuất ở mục Câu hỏi; đang làm.** Làm trên branch `feat/catalog` (tách từ `feat/auth`, đã merge vào `main` qua PR #1).
 > Liên quan: `plan.md` mục 5 (API Catalog), Giai đoạn 2 task "Catalog" và "Tìm kiếm"; ma trận phân quyền ở `docs/plans/gd2-b2-auth.md`. Bảng dùng: `series`, `series_stats`, `genres`, `series_genres`, `episodes` (migration 0003–0004, 0008).
 
 ## Mục tiêu và phạm vi
@@ -66,7 +66,7 @@ Lệnh `uv run python -m app.cli seed-demo`: tạo vài thể loại, ~12 series
 - [x] **Bước 1: Thể loại và danh sách phim mới** (test kế hoạch truy vấn bắt được lỗi: `is_published IS true` không khớp điều kiện của index một phần `WHERE is_published`, đã đổi thành `WHERE is_published`; quy ước này sẽ ghi vào CLAUDE.md ở Bước 6)
   - Việc: schema, `services/catalog.py`, `GET /genres`, `GET /series` với `sort=new`, lọc `genre`, `with_banner`, con trỏ keyset.
   - Hoàn thành khi: test chỉ trả series đã xuất bản và chưa xóa; thể loại đã xóa không hiện và lọc theo nó trả rỗng; đi hết các trang bằng con trỏ không trùng, không sót, kể cả khi có phim mới xuất bản giữa chừng; nhiều series cùng `published_at` vẫn đúng thứ tự (nhờ `id`); con trỏ hỏng → 422; `limit` ngoài 1–50 → 422; truy vấn dùng index `ix_series_published` (kiểm tra `EXPLAIN`).
-- [ ] **Bước 2: Chi tiết phim và danh sách tập**
+- [x] **Bước 2: Chi tiết phim và danh sách tập** (series đã xóa mềm trả 404 với mọi người, kể cả admin: phim đã xóa xem ở thùng rác trang admin, Giai đoạn 4)
   - Việc: `GET /series/{slug}`, `GET /series/{slug}/episodes`, admin xem trước.
   - Hoàn thành khi: test series chưa xuất bản/đã xóa → 404 cho khách và user, admin xem được; chỉ tập đã xuất bản và chưa xóa hiện ra (admin thấy cả tập chưa xuất bản, có cờ `is_published`); tập sắp theo số; response không có `stream_video_id`; `access` đúng `free`/`vip`; số tập và tập mới nhất chỉ đếm tập đã xuất bản.
 - [ ] **Bước 3: Phim hot**

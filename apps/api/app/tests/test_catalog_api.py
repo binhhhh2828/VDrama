@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from app.models import Genre, Series, series_genres
+from app.models import Episode, Genre, Series, SeriesStats, series_genres
 from app.services.audit import Actor
 from app.services.catalog import SeriesCursor, series_list_stmt
 from app.services.soft_delete import soft_delete
@@ -251,3 +251,129 @@ def test_list_query_uses_published_index(db: Session):
         r[0] for r in conn.exec_driver_sql("EXPLAIN " + str(compiled), compiled.params)
     )
     assert "ix_series_published" in plan
+
+
+# --- Chi tiết phim và danh sách tập ---
+
+
+def add_episode(
+    db: Session, series: Series, number: int, *, published: bool = True, free: bool = False, **kw
+) -> Episode:
+    ep = Episode(
+        series_id=series.id,
+        number=number,
+        is_free=free,
+        stream_video_id=f"vid-{series.slug}-{number}",
+        stream_status="ready" if published else kw.pop("stream_status", "processing"),
+        is_published=published,
+        published_at=BASE if published else None,
+        **kw,
+    )
+    db.add(ep)
+    db.flush()
+    return ep
+
+
+async def become_admin(api: httpx.AsyncClient, db: Session) -> None:
+    user_id, _ = await signed_up(api, email="admin@example.com")  # client giữ cookie
+    db.execute(text("UPDATE users SET role = 'admin' WHERE id = :id"), {"id": user_id})
+    db.commit()
+
+
+async def test_series_detail(api: httpx.AsyncClient, db: Session):
+    s = add_series(db, "nang-tho", title="Nàng Thơ", description="Mô tả")
+    add_genre(db, "tinh-cam", "Tình cảm", s)
+    add_episode(db, s, 1, free=True)
+    add_episode(db, s, 2)
+    add_episode(db, s, 3, published=False)  # chưa xuất bản: không tính
+    db.add(SeriesStats(series_id=s.id, view_count=123))
+    db.commit()
+
+    res = await api.get("/api/v1/series/nang-tho")
+    assert res.status_code == 200
+    body = res.json()
+    assert body["title"] == "Nàng Thơ" and body["description"] == "Mô tả"
+    assert body["genres"] == [{"slug": "tinh-cam", "name": "Tình cảm"}]
+    assert body["episode_count"] == 2 and body["latest_episode_number"] == 2
+    assert body["view_count"] == 123 and body["is_published"] is True
+
+
+async def test_series_detail_without_episodes_or_stats(api: httpx.AsyncClient, db: Session):
+    add_series(db, "trong")
+    db.commit()
+    body = (await api.get("/api/v1/series/trong")).json()
+    assert body["episode_count"] == 0
+    assert body["latest_episode_number"] is None and body["view_count"] == 0
+
+
+async def test_episodes_sorted_only_published(api: httpx.AsyncClient, db: Session, adb):
+    s = add_series(db, "a")
+    for n in (3, 1, 2):
+        add_episode(db, s, n, free=(n == 1), title=f"Tập {n}", duration_sec=1500)
+    add_episode(db, s, 4, published=False)
+    gone = add_episode(db, s, 5)
+    db.commit()
+    await soft_delete(adb, await adb.get(Episode, gone.id), actor=Actor.system(), reason="test")
+    await adb.commit()
+
+    res = await api.get("/api/v1/series/a/episodes")
+    assert res.status_code == 200
+    eps = res.json()
+    assert [e["number"] for e in eps] == [1, 2, 3]
+    assert [e["access"] for e in eps] == ["free", "vip", "vip"]
+    assert eps[0]["title"] == "Tập 1" and eps[0]["duration_sec"] == 1500
+    assert all(e["is_published"] for e in eps)
+    assert "stream_video_id" not in eps[0] and "vid-" not in res.text
+
+
+@pytest.mark.parametrize("path", ["/api/v1/series/{slug}", "/api/v1/series/{slug}/episodes"])
+async def test_hidden_series_404(api: httpx.AsyncClient, db: Session, adb, path: str):
+    """Chưa xuất bản, đã xóa, không tồn tại: 404 cho khách; tập của chúng cũng không lộ ra."""
+    draft = add_series(db, "nhap", published=False)
+    add_episode(db, draft, 1)  # tập đã xuất bản nhưng series thì chưa
+    gone = add_series(db, "xoa")
+    add_episode(db, gone, 1)
+    db.commit()
+    await soft_delete(adb, await adb.get(Series, gone.id), actor=Actor.system(), reason="test")
+    await adb.commit()
+
+    for slug in ("nhap", "xoa", "khong-co"):
+        res = await api.get(path.format(slug=slug))
+        assert res.status_code == 404, slug
+        assert error_code(res) == "not_found"
+
+
+async def test_logged_in_user_cannot_preview(api: httpx.AsyncClient, db: Session):
+    add_series(db, "nhap", published=False)
+    db.commit()
+    await signed_up(api)
+    assert (await api.get("/api/v1/series/nhap")).status_code == 404
+
+
+async def test_admin_previews_unpublished(api: httpx.AsyncClient, db: Session):
+    draft = add_series(db, "nhap", published=False)
+    add_episode(db, draft, 1)
+    add_episode(db, draft, 2, published=False)
+    db.commit()
+    await become_admin(api, db)
+
+    detail = (await api.get("/api/v1/series/nhap")).json()
+    assert detail["is_published"] is False and detail["episode_count"] == 1
+    eps = (await api.get("/api/v1/series/nhap/episodes")).json()
+    assert [(e["number"], e["is_published"]) for e in eps] == [(1, True), (2, False)]
+
+
+async def test_admin_cannot_see_deleted_via_public_api(
+    api: httpx.AsyncClient, db: Session, adb: AsyncSession
+):
+    gone = add_series(db, "xoa")
+    db.commit()
+    await soft_delete(adb, await adb.get(Series, gone.id), actor=Actor.system(), reason="test")
+    await adb.commit()
+    await become_admin(api, db)
+    assert (await api.get("/api/v1/series/xoa")).status_code == 404
+
+
+async def test_slug_too_long_422(api: httpx.AsyncClient):
+    res = await api.get("/api/v1/series/" + "a" * 201)
+    assert res.status_code == 422
