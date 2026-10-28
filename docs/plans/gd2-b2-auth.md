@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **đã duyệt (2026-10-28), đang làm trên branch `feat/auth`.** Xong Bước 1–2. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **đã duyệt (2026-10-28), đang làm trên branch `feat/auth`.** Xong Bước 1–3. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -84,7 +84,7 @@ Cờ cookie: `HttpOnly`, `SameSite=Lax`, `Secure` (bật ở prod; tắt đượ
 
 Mỗi lần gọi `/auth/refresh`: cấp refresh token mới, token cũ hết hiệu lực.
 - Vấn đề thực tế: hai tab cùng refresh một lúc thì tab chậm hơn dùng token vừa bị xoay, nếu từ chối thẳng thì người dùng bị đăng xuất vô lý.
-- Giải pháp: lưu thêm hash token **liền trước** và thời điểm xoay. Token liền trước vẫn được chấp nhận trong **60 giây** (xoay tiếp, không lỗi).
+- Giải pháp: lưu thêm hash token **liền trước** và thời điểm xoay. Token liền trước vẫn được chấp nhận trong **60 giây**: cấp access token mới nhưng **không xoay tiếp** refresh token (giữ cookie tab kia vừa nhận; xoay tiếp thì phản hồi đến sau có thể ghi đè cookie bằng token đã cũ và người dùng bị đăng xuất oan).
 - Token cũ bị dùng lại **sau** 60 giây → coi là bị đánh cắp → **thu hồi cả session** (cả kẻ trộm lẫn chủ đều phải đăng nhập lại).
 - Cần migration `0010`: thêm `sessions.previous_refresh_token_hash` (unique, nullable) và `sessions.rotated_at` (cùng `users.terms_accepted_at`, `users.vip_expires_at` ở dưới).
 
@@ -158,7 +158,7 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 - [x] **Bước 2: Đăng ký, đăng nhập, đăng xuất** (cookie helper ở `app/api/cookies.py`; đăng xuất tìm phiên theo cookie refresh, thiếu thì theo id phiên trong access token)
   - Việc: `services/auth.py`, `routers/auth.py`, schema, đặt/xóa cookie; fixture client API trên DB tạm.
   - Hoàn thành khi: test đăng ký (thành công, trùng email khác hoa/thường, thiếu `accept_terms`, mật khẩu ngắn/dài, email sai định dạng); đăng nhập (đúng, sai mật khẩu, email không tồn tại cùng lỗi, tài khoản bị khóa); cookie có đủ cờ; đăng xuất thu hồi session; response không bao giờ chứa `password_hash`.
-- [ ] **Bước 3: Refresh có xoay vòng**
+- [x] **Bước 3: Refresh có xoay vòng** (trong 60 giây ân hạn, token liền trước chỉ nhận access mới, không xoay tiếp, để phản hồi đến sau không ghi đè cookie bằng token cũ; user bị khóa/xóa thì thu hồi phiên)
   - Việc: `/auth/refresh` theo thiết kế trên.
   - Hoàn thành khi: test refresh thành công đổi cả hai cookie; token cũ dùng lại trong 60 giây vẫn được; dùng lại sau 60 giây thì thu hồi cả session; session hết hạn/đã thu hồi → 401 và xóa cookie; hạn session trượt thêm 30 ngày.
 - [ ] **Bước 4: `/me`, `CurrentUser`, `OptionalUser`, `require_admin`, VIP (`services/vip.py`), lệnh `create-admin` (ghi nhật ký)**

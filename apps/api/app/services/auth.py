@@ -41,11 +41,20 @@ class AccountDisabledError(Exception):
     pass
 
 
+class SessionInvalidError(Exception):
+    """Refresh token không dùng được nữa (không tồn tại, hết hạn, đã thu hồi, bị dùng lại)."""
+
+
+# Token liền trước còn được chấp nhận trong khoảng này sau khi xoay (hai tab refresh cùng lúc).
+REFRESH_REUSE_GRACE = timedelta(seconds=60)
+
+
 @dataclass(frozen=True)
 class IssuedSession:
     session_id: uuid.UUID
     access_token: str
-    refresh_token: str  # bản rõ chỉ tồn tại trong cookie; DB giữ SHA-256
+    # Bản rõ chỉ tồn tại trong cookie; DB giữ SHA-256. None: giữ nguyên cookie refresh hiện có.
+    refresh_token: str | None
     expires_at: datetime
 
 
@@ -145,3 +154,66 @@ async def revoke_session(
         .values(revoked_at=func.now())
     )
     return result.rowcount > 0
+
+
+async def refresh(db: AsyncSession, refresh_token: str | None) -> IssuedSession:
+    """Đổi refresh token lấy access token mới, xoay vòng refresh token.
+
+    - Token hiện tại: cấp token mới, token cũ thành "liền trước", gia hạn phiên thêm 30 ngày.
+    - Token liền trước, trong 60 giây sau khi xoay (tab khác vừa refresh xong): cấp access mới
+      nhưng KHÔNG xoay tiếp. Xoay tiếp thì phản hồi đến sau có thể ghi đè cookie bằng token đã
+      cũ, lần refresh sau bị coi là đánh cắp và người dùng bị đăng xuất oan.
+    - Token liền trước, quá 60 giây: coi là bị đánh cắp, thu hồi cả phiên.
+
+    Ném SessionInvalidError khi không dùng được. Người gọi vẫn phải commit trong trường hợp đó
+    để lưu việc thu hồi phiên.
+    """
+    if not refresh_token:
+        raise SessionInvalidError
+    token_hash = hash_refresh_token(refresh_token)
+    # Khóa dòng: hai request cùng token chạy nối tiếp, request sau thấy kết quả của request trước.
+    session = (
+        await db.execute(
+            select(UserSession)
+            .where(
+                or_(
+                    UserSession.refresh_token_hash == token_hash,
+                    UserSession.previous_refresh_token_hash == token_hash,
+                )
+            )
+            .with_for_update()
+        )
+    ).scalar_one_or_none()
+    now = datetime.now(UTC)
+    if session is None or session.revoked_at is not None or session.expires_at <= now:
+        raise SessionInvalidError
+
+    # Bộ lọc xóa mềm ẩn user đã xóa; user bị khóa cũng không được gia hạn phiên.
+    user = (await db.execute(select(User).where(User.id == session.user_id))).scalar_one_or_none()
+    if user is None or not user.is_active:
+        session.revoked_at = now
+        await db.flush()
+        raise SessionInvalidError
+
+    req = current_request()
+    session.last_seen_at = now
+    session.ip = req.ip or session.ip
+    if session.refresh_token_hash == token_hash:
+        new_token = new_refresh_token()
+        session.previous_refresh_token_hash = token_hash
+        session.refresh_token_hash = hash_refresh_token(new_token)
+        session.rotated_at = now
+        session.expires_at = now + timedelta(days=get_settings().refresh_token_ttl_days)
+    elif session.rotated_at is not None and now - session.rotated_at <= REFRESH_REUSE_GRACE:
+        new_token = None
+    else:
+        session.revoked_at = now
+        await db.flush()
+        raise SessionInvalidError
+    await db.flush()
+    return IssuedSession(
+        session_id=session.id,
+        access_token=create_access_token(user.id, session.id),
+        refresh_token=new_token,
+        expires_at=session.expires_at,
+    )

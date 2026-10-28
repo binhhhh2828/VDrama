@@ -198,7 +198,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 ### Giai đoạn 2 — Backend lõi
 - [x] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md); xong 2026-10-27 trên Postgres local, **chưa thử trên Neon thật** vì chưa có tài khoản) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
 - [x] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), xong 2026-10-27, migration `0007`–`0009`) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
-- [ ] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), đã duyệt, đang làm, xong Bước 2/6; có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
+- [ ] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), đã duyệt, đang làm, xong Bước 3/6; có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [ ] Catalog: series, episodes, thể loại, phân trang
 - [ ] Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)

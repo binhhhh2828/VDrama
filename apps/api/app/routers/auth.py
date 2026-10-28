@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Response, status
+from fastapi.responses import JSONResponse
 
 from app.api.cookies import (
     clear_auth_cookies,
@@ -7,7 +8,7 @@ from app.api.cookies import (
     set_auth_cookies,
 )
 from app.core.db import DbSession
-from app.core.errors import ApiError, ErrorCode
+from app.core.errors import ApiError, ErrorCode, error_body
 from app.core.security import InvalidTokenError, decode_access_token
 from app.schemas.auth import LoginIn, RegisterIn, UserOut
 from app.services import auth as auth_service
@@ -52,6 +53,27 @@ async def login(data: LoginIn, response: Response, db: DbSession) -> UserOut:
     await db.commit()
     set_auth_cookies(response, issued)
     return UserOut.of(user)
+
+
+@router.post("/refresh", status_code=status.HTTP_204_NO_CONTENT)
+async def refresh(request: Request, db: DbSession) -> Response:
+    """Cấp access token mới từ cookie refresh, xoay vòng refresh token."""
+    try:
+        issued = await auth_service.refresh(db, read_refresh_cookie(request))
+    except auth_service.SessionInvalidError:
+        await db.commit()  # lưu việc thu hồi phiên (token bị dùng lại, user bị khóa)
+        response = JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=error_body(
+                ErrorCode.SESSION_EXPIRED, "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại."
+            ),
+        )
+        clear_auth_cookies(response)
+        return response
+    await db.commit()
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
+    set_auth_cookies(response, issued)
+    return response
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

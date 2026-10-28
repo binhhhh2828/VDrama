@@ -32,6 +32,8 @@ def set_auth_cookies(response: Response, issued: IssuedSession) -> None:
         path="/",
         **_flags(),
     )
+    if issued.refresh_token is None:
+        return  # giữ nguyên cookie refresh đang có
     response.set_cookie(
         REFRESH_COOKIE,
         issued.refresh_token,
