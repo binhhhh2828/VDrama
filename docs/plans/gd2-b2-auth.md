@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **đã rà soát lại theo góp ý (2026-10-27), chờ duyệt lần cuối.** Chưa code. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **đã duyệt (2026-10-28), đang làm trên branch `feat/auth`.** Xong Bước 1. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -152,7 +152,7 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
 
 ## Các bước (mỗi bước xong chạy được, test được, dừng cho bạn xem)
 
-- [ ] **Bước 1: Nền bảo mật + migration 0010**
+- [x] **Bước 1: Nền bảo mật + migration 0010** (`slowapi` thêm ở Bước 5 khi dùng đến; mã lỗi API là `ErrorCode` trong `app/core/errors.py`)
   - Việc: dependency mới; cấu hình; `security.py` (argon2id, JWT, refresh token + SHA-256); migration `0010` (`sessions.previous_refresh_token_hash`, `sessions.rotated_at`, `users.terms_accepted_at`, `users.vip_expires_at` + index một phần); `app/core/errors.py` + handler cho 422/HTTPException.
   - Hoàn thành khi: test đơn vị cho hash/verify/rehash, JWT hết hạn/sai chữ ký/sai loại bị từ chối, token sinh ra không trùng; app không khởi động ở `ENV=prod` nếu thiếu `JWT_SECRET`; migration lên/xuống sạch, `alembic check` sạch.
 - [ ] **Bước 2: Đăng ký, đăng nhập, đăng xuất**

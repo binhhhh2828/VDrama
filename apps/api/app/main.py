@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from app.core.db import DatabaseNotConfiguredError, dispose_engine
+from app.core.errors import register_error_handlers
 from app.core.request_context import request_context_middleware
 from app.routers import health
 
@@ -31,6 +32,9 @@ app = FastAPI(
 app.middleware("http")(request_context_middleware)
 
 app.include_router(health.router, prefix="/api")
+
+# Lỗi trả về dạng {"error": {"code", "message"}} (xem app/core/errors.py).
+register_error_handlers(app)
 
 
 @app.exception_handler(DatabaseNotConfiguredError)

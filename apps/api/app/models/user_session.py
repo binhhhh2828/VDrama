@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Index, Text, func
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Text, func
 from sqlalchemy.dialects.postgresql import INET, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -22,6 +22,10 @@ class UserSession(CreatedAtMixin, Base):
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     refresh_token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    # Xoay vòng refresh token: hash của token liền trước vẫn được chấp nhận ngắn hạn sau
+    # rotated_at (hai tab refresh cùng lúc); dùng lại muộn hơn = bị đánh cắp, thu hồi phiên.
+    previous_refresh_token_hash: Mapped[str | None] = mapped_column(Text, unique=True)
+    rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     device_info: Mapped[str | None] = mapped_column(Text)
     ip: Mapped[str | None] = mapped_column(INET)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -32,6 +36,11 @@ class UserSession(CreatedAtMixin, Base):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
+        # Hai cột xoay vòng luôn đi cùng nhau.
+        CheckConstraint(
+            "(previous_refresh_token_hash IS NULL) = (rotated_at IS NULL)",
+            name="rotation_pair",
+        ),
         # Index đầy đủ (không partial): vừa phục vụ cascade khi xóa user,
         # vừa đếm phiên đang hoạt động (mỗi user chỉ vài dòng).
         Index("ix_sessions_user_id", "user_id"),

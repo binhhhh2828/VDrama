@@ -90,6 +90,54 @@ def test_session_ip_is_inet(db: Session):
         db.flush()
 
 
+def test_session_rotation_columns_go_together(db: Session):
+    """previous_refresh_token_hash và rotated_at cùng NULL hoặc cùng có giá trị (migration 0010)."""
+    user = make_user(db)
+    now = datetime.now(UTC)
+    for kw in ({"previous_refresh_token_hash": "old"}, {"rotated_at": now}):
+        db.add(UserSession(user_id=user.id, refresh_token_hash="h", expires_at=LATER, **kw))
+        with pytest.raises(IntegrityError, match="ck_sessions_rotation_pair"):
+            db.flush()
+        db.rollback()
+        user = make_user(db)
+    s = make_session(db, user, "new")
+    s.previous_refresh_token_hash, s.rotated_at = "old", now
+    db.flush()
+
+
+def test_previous_refresh_token_hash_unique(db: Session):
+    user = make_user(db)
+    now = datetime.now(UTC)
+    for token in ("a", "b"):
+        db.add(
+            UserSession(
+                user_id=user.id,
+                refresh_token_hash=token,
+                previous_refresh_token_hash="same",
+                rotated_at=now,
+                expires_at=LATER,
+            )
+        )
+    with pytest.raises(IntegrityError, match="uq_sessions_previous_refresh_token_hash"):
+        db.flush()
+
+
+def test_new_user_columns_default_null(db: Session):
+    user = make_user(db)
+    db.refresh(user)
+    assert user.terms_accepted_at is None
+    assert user.vip_expires_at is None
+
+
+def test_vip_expires_at_partial_index(db: Session):
+    """Index chỉ chứa user đã từng mua VIP (job nhắc hạn), không phình theo số user."""
+    indexdef = db.scalar(
+        text("SELECT indexdef FROM pg_indexes WHERE indexname = 'ix_users_vip_expires_at'")
+    )
+    assert indexdef is not None
+    assert "WHERE (vip_expires_at IS NOT NULL)" in indexdef
+
+
 def test_invalid_email_token_purpose_rejected(db: Session):
     user = make_user(db)
     db.add(EmailToken(user_id=user.id, purpose="login", token_hash="t", expires_at=LATER))
