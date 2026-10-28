@@ -200,8 +200,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), xong 2026-10-27, migration `0007`–`0009`) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
 - [x] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), xong 2026-10-28 trên branch `feat/auth`; tài liệu cho frontend: [docs/api.md](docs/api.md); có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
-- [ ] Catalog: series, episodes, thể loại, phân trang
-- [ ] Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
+- [ ] (plan chi tiết: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md), đã duyệt, đang làm) Catalog: series, episodes, thể loại, phân trang
+- [ ] (cùng plan catalog, Bước 4) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
 - [ ] Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
 - [ ] Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn)
 - [ ] Watch history, favorites

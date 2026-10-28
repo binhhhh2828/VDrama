@@ -9,7 +9,7 @@ from app.core.config import get_settings
 from app.core.db import DatabaseNotConfiguredError, dispose_engine
 from app.core.errors import register_error_handlers
 from app.core.request_context import request_context_middleware
-from app.routers import auth, health, me
+from app.routers import auth, catalog, health, me
 
 settings = get_settings()
 
@@ -40,6 +40,7 @@ app.include_router(health.router, prefix="/api")
 # API nghiệp vụ có phiên bản: /api/v1/...
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(me.router, prefix="/api/v1")
+app.include_router(catalog.router, prefix="/api/v1")
 
 # Lỗi trả về dạng {"error": {"code", "message"}} (xem app/core/errors.py).
 register_error_handlers(app)
