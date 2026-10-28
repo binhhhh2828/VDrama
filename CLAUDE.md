@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án) và phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009); việc kế tiếp là auth (`docs/plans/gd2-b2-auth.md`, migration 0010); chưa có endpoint nghiệp vụ (auth, catalog, play, thanh toán). Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án), phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009) và auth (`docs/plans/gd2-b2-auth.md`, migration 0010: đăng ký, đăng nhập, refresh xoay vòng, đăng xuất, `/me`, phân quyền admin, VIP, CSRF, rate limit). Việc kế tiếp của Giai đoạn 2 là xác thực email / quên mật khẩu; chưa có endpoint catalog, play, thanh toán. Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -60,7 +60,15 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
   - Mọi thao tác admin, thay đổi trạng thái tiền và quyền tài khoản phải ghi `audit_logs` qua `app/services/audit.py` trong **cùng transaction**: gọi `require_reason()` trước khi đổi dữ liệu, chụp `await load_snapshot()` trước/sau, rồi `record(...)`. Tên hành động dạng `<bảng>.<động từ>` (ví dụ `series.delete`). Người thực hiện truyền bằng `Actor.admin(id)` / `Actor.system()` / `Actor.webhook()`. Mật khẩu/token đã được che sẵn.
   - Đơn `paid` phải có `paid_event_id` (giao dịch ngân hàng thật từ SePay); không viết code đánh dấu đã thanh toán theo cách khác.
   - Service async đọc cột do DB tính (`now()`, cột sinh sẵn) phải nạp lại tường minh (`refresh`/`load_snapshot`), vì nạp ngầm trong async báo lỗi `MissingGreenlet`.
-- Mỗi request có `X-Request-ID` (`app/core/request_context.py`); `current_request()` trả request_id, IP, user agent cho nhật ký và log.
+- Mỗi request có `X-Request-ID` (`app/core/request_context.py`); `current_request()` trả request_id, IP, user agent cho nhật ký và log. IP luôn lấy qua `app/core/client_ip.py` (chỉ tin `CF-Connecting-IP` khi `TRUST_CLOUDFLARE_IP=true`).
+- **API và auth** (tài liệu cho frontend: `docs/api.md`):
+  - API nghiệp vụ dưới `/api/v1`. Lỗi luôn ném `ApiError(status, ErrorCode.X, "câu tiếng Việt")` (`app/core/errors.py`), không tự dựng JSON lỗi; mã lỗi mới thêm vào `ErrorCode`.
+  - Endpoint cần đăng nhập dùng `CurrentUser` / `OptionalUser` / `AdminUser` (`app/api/deps.py`); không tự đọc cookie hay JWT. Mỗi request kiểm tra phiên + user trong DB; role đọc từ DB, không từ token.
+  - Token chỉ nằm trong cookie httpOnly (`app/api/cookies.py`). Mật khẩu, JWT, refresh token chỉ qua `app/core/security.py` (argon2id chạy trong thread, các hàm là async).
+  - Phiên chỉ tạo qua `services/auth.create_session` (Giai đoạn 5 thêm giới hạn thiết bị ở đó). VIP chỉ đổi qua `services/vip.py` (`grant_vip`, `cancel_subscription`), không ghi tay `users.vip_expires_at`; kiểm tra VIP bằng `is_vip(user)`.
+  - Request thay đổi dữ liệu phải có `Origin` đúng `PUBLIC_ORIGIN` (`app/api/csrf.py`). Endpoint dễ bị dò thêm `rate_limit.hit(...)` (`app/core/rate_limit.py`, đếm trong RAM).
+  - Service không commit; router commit sau khi mọi thứ thành công.
+  - Test gọi API dùng fixture `api` (client https, có `Origin`, trên DB tạm đã migrate); bộ đếm rate limit tự reset mỗi test.
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

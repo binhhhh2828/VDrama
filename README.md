@@ -39,6 +39,27 @@ Test cần Postgres đọc `TEST_DATABASE_URL`; mỗi test tạo một database 
 cd apps/api && TEST_DATABASE_URL=postgresql://vdrama:vdrama@localhost:5432/vdrama uv run pytest -q
 ```
 
+## Auth
+
+Đăng ký, đăng nhập, refresh, đăng xuất, `/me` dưới `/api/v1`; cookie httpOnly, không CORS. Tài liệu cho frontend (định dạng lỗi, cookie, CSRF, rate limit, phân quyền): [docs/api.md](docs/api.md). Thiết kế và lý do: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md).
+
+Cấu hình trong `.env` (mẫu ở [.env.example](.env.example)): `JWT_SECRET` (bắt buộc ở prod), `PUBLIC_ORIGIN`, `COOKIE_SECURE` (dev đặt `false`), `TRUST_CLOUDFLARE_IP`. Ở `ENV=prod`, API không khởi động nếu thiếu `JWT_SECRET`, cookie không Secure hoặc origin không phải https.
+
+Tạo admin (chạy trên server, hỏi mật khẩu, ghi nhật ký):
+
+```bash
+cd apps/api && uv run python -m app.cli create-admin --email admin@vdrama.vn --reason "Admin đầu tiên"
+```
+
+Thử nhanh bằng curl khi chạy compose (lệnh thay đổi dữ liệu cần header `Origin`):
+
+```bash
+curl -i -c jar -b jar -H "Origin: http://localhost:3000" -H "Content-Type: application/json"   -d '{"email":"a@example.com","password":"mat-khau-dai","display_name":"A","accept_terms":true}'   http://localhost:8000/api/v1/auth/register
+curl -b jar http://localhost:8000/api/v1/me
+```
+
+Cổng trên máy trùng với dự án khác thì đổi khi chạy compose: `DB_PORT=55432 API_PORT=8001 WEB_PORT=3001 docker compose -f docker-compose.dev.yml up --build`.
+
 ## Kiểm tra
 
 ```bash

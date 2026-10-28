@@ -1,5 +1,6 @@
 # Môi trường local: Postgres + migration + api + web.
 # Chạy: docker compose -f docker-compose.dev.yml up --build
+# Cổng trên máy trùng với dự án khác thì đổi: DB_PORT=55432 API_PORT=8001 WEB_PORT=3001 docker compose ...
 services:
   db:
     image: postgres:16-alpine
@@ -7,7 +8,7 @@ services:
       POSTGRES_USER: vdrama
       POSTGRES_PASSWORD: vdrama
       POSTGRES_DB: vdrama
-    ports: ["5432:5432"]
+    ports: ["${DB_PORT:-5432}:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vdrama"]
@@ -31,7 +32,10 @@ services:
     environment:
       ENV: dev
       DATABASE_URL: postgresql://vdrama:vdrama@db:5432/vdrama
-    ports: ["8000:8000"]
+      # Dev chạy http://localhost: cookie không Secure. JWT_SECRET trống thì tự sinh mỗi lần chạy.
+      COOKIE_SECURE: "false"
+      PUBLIC_ORIGIN: http://localhost:${WEB_PORT:-3000}
+    ports: ["${API_PORT:-8000}:8000"]
     depends_on:
       migrate: { condition: service_completed_successfully }
 
@@ -39,7 +43,7 @@ services:
     build: ./apps/web
     environment:
       API_INTERNAL_URL: http://api:8000
-    ports: ["3000:3000"]
+    ports: ["${WEB_PORT:-3000}:3000"]
     depends_on: [api]
 
 volumes:
