@@ -17,6 +17,7 @@ from app.core.security import (
     hash_refresh_token,
     new_refresh_token,
     password_needs_rehash,
+    refresh_token_session_id,
     verify_password,
 )
 
@@ -142,14 +143,28 @@ def test_garbage_token_rejected():
 
 
 def test_refresh_tokens_unique_and_long():
-    tokens = {new_refresh_token() for _ in range(1000)}
+    tokens = {new_refresh_token(SID) for _ in range(1000)}
     assert len(tokens) == 1000
-    assert all(len(t) >= 43 for t in tokens)  # 32 byte base64url
+    assert all(len(t.split(".", 1)[1]) >= 43 for t in tokens)  # 32 byte base64url
+
+
+def test_refresh_token_carries_session_id():
+    token = new_refresh_token(SID)
+    assert token.startswith(SID.hex + ".")
+    assert refresh_token_session_id(token) == SID
+
+
+@pytest.mark.parametrize(
+    "token",
+    ["", "abc", "rac.rac", f"{SID.hex}.", f".{'x' * 43}", f"{SID.hex[:-1]}g.{'x' * 43}", SID.hex],
+)
+def test_refresh_token_session_id_rejects_malformed(token):
+    assert refresh_token_session_id(token) is None
 
 
 def test_refresh_token_hash_is_sha256():
-    t = new_refresh_token()
+    t = new_refresh_token(SID)
     h = hash_refresh_token(t)
     assert len(h) == 64 and h == hash_refresh_token(t)
     assert t not in h
-    assert hash_refresh_token(new_refresh_token()) != h
+    assert hash_refresh_token(new_refresh_token(SID)) != h

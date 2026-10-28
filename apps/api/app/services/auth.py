@@ -21,6 +21,7 @@ from app.core.security import (
     hash_refresh_token,
     new_refresh_token,
     password_needs_rehash,
+    refresh_token_session_id,
     verify_password,
 )
 from app.models import User, UserSession
@@ -70,10 +71,11 @@ async def email_taken(db: AsyncSession, email: str) -> bool:
 
 async def create_session(db: AsyncSession, user: User) -> IssuedSession:
     req = current_request()
-    refresh = new_refresh_token()
+    session_id = uuid.uuid4()  # sinh ở app để ký token ngay, không cần đọc lại từ DB
+    refresh = new_refresh_token(session_id)
     expires_at = datetime.now(UTC) + timedelta(days=get_settings().refresh_token_ttl_days)
     session = UserSession(
-        id=uuid.uuid4(),  # sinh ở app để ký access token ngay, không cần đọc lại từ DB
+        id=session_id,
         user_id=user.id,
         refresh_token_hash=hash_refresh_token(refresh),
         device_info=req.user_agent,
@@ -163,26 +165,20 @@ async def refresh(db: AsyncSession, refresh_token: str | None) -> IssuedSession:
     - Token liền trước, trong 60 giây sau khi xoay (tab khác vừa refresh xong): cấp access mới
       nhưng KHÔNG xoay tiếp. Xoay tiếp thì phản hồi đến sau có thể ghi đè cookie bằng token đã
       cũ, lần refresh sau bị coi là đánh cắp và người dùng bị đăng xuất oan.
-    - Token liền trước, quá 60 giây: coi là bị đánh cắp, thu hồi cả phiên.
+    - Token cũ khác của phiên này (liền trước quá 60 giây, hoặc cũ hơn nữa): coi là bị đánh cắp,
+      thu hồi cả phiên. Nhận ra được vì refresh token mang id phiên (xem new_refresh_token).
+    - Token sai dạng hoặc id phiên không tồn tại: từ chối, không đụng phiên nào.
 
     Ném SessionInvalidError khi không dùng được. Người gọi vẫn phải commit trong trường hợp đó
     để lưu việc thu hồi phiên.
     """
-    if not refresh_token:
+    session_id = refresh_token_session_id(refresh_token) if refresh_token else None
+    if session_id is None:
         raise SessionInvalidError
     token_hash = hash_refresh_token(refresh_token)
     # Khóa dòng: hai request cùng token chạy nối tiếp, request sau thấy kết quả của request trước.
     session = (
-        await db.execute(
-            select(UserSession)
-            .where(
-                or_(
-                    UserSession.refresh_token_hash == token_hash,
-                    UserSession.previous_refresh_token_hash == token_hash,
-                )
-            )
-            .with_for_update()
-        )
+        await db.execute(select(UserSession).where(UserSession.id == session_id).with_for_update())
     ).scalar_one_or_none()
     now = datetime.now(UTC)
     if session is None or session.revoked_at is not None or session.expires_at <= now:
@@ -199,14 +195,19 @@ async def refresh(db: AsyncSession, refresh_token: str | None) -> IssuedSession:
     session.last_seen_at = now
     session.ip = req.ip or session.ip
     if session.refresh_token_hash == token_hash:
-        new_token = new_refresh_token()
+        new_token = new_refresh_token(session.id)
         session.previous_refresh_token_hash = token_hash
         session.refresh_token_hash = hash_refresh_token(new_token)
         session.rotated_at = now
         session.expires_at = now + timedelta(days=get_settings().refresh_token_ttl_days)
-    elif session.rotated_at is not None and now - session.rotated_at <= REFRESH_REUSE_GRACE:
+    elif (
+        session.previous_refresh_token_hash == token_hash
+        and session.rotated_at is not None
+        and now - session.rotated_at <= REFRESH_REUSE_GRACE
+    ):
         new_token = None
     else:
+        # Token cũ của phiên này bị dùng lại: thu hồi cả phiên (kẻ trộm lẫn chủ đăng nhập lại).
         session.revoked_at = now
         await db.flush()
         raise SessionInvalidError

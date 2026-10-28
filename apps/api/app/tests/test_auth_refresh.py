@@ -1,6 +1,7 @@
 """/auth/refresh: xoay vòng refresh token, ân hạn 60 giây, phát hiện token bị dùng lại."""
 
 import asyncio
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import httpx
@@ -109,12 +110,40 @@ async def test_previous_token_after_grace_revokes_session(api: httpx.AsyncClient
     assert_session_expired(await refresh_with(api, t1))
 
 
-async def test_token_two_rotations_old_is_unknown(api: httpx.AsyncClient):
-    """Token cũ hơn "liền trước" không còn trong DB: từ chối."""
-    _, t0 = await signed_up(api)
+async def test_stolen_token_rotated_twice_revokes_session(api: httpx.AsyncClient, db: Session):
+    """Kẻ trộm lấy t0 rồi xoay hai lần; chủ dùng lại t0 thì cả phiên bị thu hồi.
+
+    Trước đây chỉ nhận ra token liền trước: token cũ hơn chỉ bị 401 và kẻ trộm giữ phiên 30 ngày.
+    """
+    user_id, t0 = await signed_up(api)
     t1 = set_cookies(await refresh_with(api, t0))[REFRESH]["value"]
-    await refresh_with(api, t1)
+    t2 = set_cookies(await refresh_with(api, t1))[REFRESH]["value"]
+
     assert_session_expired(await refresh_with(api, t0))
+    [session] = sessions_of(db, user_id)
+    assert session.revoked_at is not None
+    assert_session_expired(await refresh_with(api, t2))  # token của kẻ trộm cũng chết
+
+
+async def test_forged_secret_for_existing_session_revokes(api: httpx.AsyncClient, db: Session):
+    """Đúng id phiên, sai phần bí mật: coi như token cũ bị dùng lại (đánh đổi ghi ở plan)."""
+    user_id, t0 = await signed_up(api)
+    sid = t0.split(".", 1)[0]
+    assert_session_expired(await refresh_with(api, f"{sid}.{'x' * 43}"))
+    [session] = sessions_of(db, user_id)
+    assert session.revoked_at is not None
+
+
+async def test_malformed_or_unknown_session_token_touches_nothing(
+    api: httpx.AsyncClient, db: Session
+):
+    user_id, t0 = await signed_up(api)
+    secret = t0.split(".", 1)[1]
+    for token in (secret, f"{uuid.uuid4().hex}.{secret}", "rac.rac"):
+        assert_session_expired(await refresh_with(api, token))
+    [session] = sessions_of(db, user_id)
+    assert session.revoked_at is None
+    assert (await refresh_with(api, t0)).status_code == 204
 
 
 async def test_concurrent_refresh_same_token(api: httpx.AsyncClient, db: Session):

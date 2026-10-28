@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Auth — đăng ký, đăng nhập, refresh, đăng xuất, /me, phân quyền admin
 
-> Trạng thái: **xong (2026-10-28) trên branch `feat/auth`.** Còn: chạy `/review` riêng cho phần auth (mục Rủi ro) và xem CI trên GitHub sau khi push. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
+> Trạng thái: **Bước 1–6 xong (2026-10-28) trên branch `feat/auth`; đã review, đang sửa sau review (Bước 7–9).** Còn: xem CI trên GitHub sau khi push. Làm **sau** plan bổ sung schema (`gd2-b1b-trang-thai-xoa-mem-nhat-ky.md`: trạng thái, xóa mềm, nhật ký thao tác); vì vậy migration của auth là `0010`. User bị xóa mềm hoặc bị khóa đều không đăng nhập được; đổi quyền admin và lệnh `create-admin` đều ghi nhật ký.
 >
 > Đã chốt: đăng ký trùng email thì báo rõ "Email đã được sử dụng"; đăng nhập 30 ngày tự gia hạn. Nhắc hạn và gia hạn VIP thuộc Giai đoạn 5 (đã ghi vào `plan.md`), không thuộc plan này.
 > Liên quan: `plan.md` mục 5 (API), mục 6 (bảo mật), Giai đoạn 2 task "Auth", Giai đoạn 5 (giới hạn thiết bị). Bảng dùng: `users`, `sessions` (migration 0002), `audit_logs` (0009).
@@ -169,6 +169,22 @@ User trả về: `id`, `email`, `display_name`, `avatar_url`, `role`, `email_ver
   - Hoàn thành khi: test POST có cookie mà `Origin` lạ → 403, đúng `Origin` → qua, request không cookie không bị chặn; login quá ngưỡng → 429 có `Retry-After`; `CF-Connecting-IP` chỉ được tin khi bật cấu hình.
 - [x] **Bước 6: Tài liệu và kiểm tra cuối** (đã chạy compose + curl: đăng ký 201 → `/me` 200 → refresh 204 đổi token → thiếu Origin 403 → đăng xuất 204 → access cũ 401; 319 test qua trên Postgres; CI GitHub chưa chạy vì chưa push. Compose dev cho đổi cổng bằng `DB_PORT`/`API_PORT`/`WEB_PORT`)
   - Việc: `docs/api.md` (auth), `.env.example`, compose dev, CLAUDE.md, README; chạy thử bằng compose với curl (đăng ký → `/me` → refresh → đăng xuất); CI xanh.
+
+### Sửa sau review (2026-10-28)
+
+Review toàn bộ `feat/auth` tìm ra 1 lỗi nghiêm trọng và vài lỗi trung bình; ba bước dưới sửa các mục 1–3. Các mục còn lại (CGNAT, Next.js gửi `Origin`, khóa/mở tài khoản, mức thấp) để sau.
+
+- [x] **Bước 7: Phát hiện token bị đánh cắp qua nhiều lần xoay** (xong; token dạng cũ không có id phiên bị từ chối, người dùng đăng nhập lại; chưa deploy nên không ảnh hưởng ai)
+  - Lỗi: refresh chỉ tìm phiên theo hash token hiện tại/liền trước. Kẻ trộm xoay hai lần thì token gốc của chủ chỉ nhận 401, phiên **không** bị thu hồi, kẻ trộm giữ phiên 30 ngày (đã chạy thử xác nhận).
+  - Việc: refresh token dạng `<session_id>.<256 bit ngẫu nhiên>` (vẫn chỉ lưu SHA-256 của cả chuỗi). Refresh tra phiên theo id: khớp token hiện tại thì xoay; khớp token liền trước trong 60 giây thì ân hạn; còn lại (token cũ hơn, hoặc liền trước quá 60 giây) thì thu hồi cả phiên. Token không đúng dạng hoặc id không tồn tại: 401, không đụng phiên nào.
+  - Đánh đổi: ai biết id phiên của người khác có thể gửi token giả để thu hồi phiên đó (đăng xuất cưỡng bức). Id phiên là uuid ngẫu nhiên, chỉ nằm trong cookie httpOnly của chủ, nên chấp nhận.
+  - Hoàn thành khi: test kẻ trộm xoay hai lần rồi chủ dùng token gốc thì phiên bị thu hồi và token của kẻ trộm chết; token sai dạng/id lạ không ảnh hưởng phiên nào; mọi test refresh cũ vẫn qua.
+- [ ] **Bước 8: Phản hồi 500 có `X-Request-ID`**
+  - Việc: middleware request context gắn header cả khi endpoint ném lỗi (bắt lỗi và trả 500 đúng định dạng, hoặc middleware ASGI thuần).
+  - Hoàn thành khi: test 500 của app thật có `X-Request-ID` khớp với request, body đúng định dạng lỗi, không lộ chi tiết; log có traceback.
+- [ ] **Bước 9: IP sau reverse proxy và bộ đếm dùng chung**
+  - Việc: ở `ENV=prod` bắt buộc `TRUST_CLOUDFLARE_IP=true` (không thì app không khởi động, vì sau Caddy mọi request có cùng IP); IP không xác định thì không đếm chung vào một khóa `-`.
+  - Hoàn thành khi: test prod thiếu `TRUST_CLOUDFLARE_IP` thì không khởi động; request không có IP không bị gộp bộ đếm với nhau.
 
 ## Rủi ro
 

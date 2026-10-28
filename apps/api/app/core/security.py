@@ -110,10 +110,26 @@ def decode_access_token(token: str) -> AccessClaims:
 # --- Refresh token ---
 
 
-def new_refresh_token() -> str:
-    return secrets.token_urlsafe(REFRESH_TOKEN_BYTES)
+def new_refresh_token(session_id: uuid.UUID) -> str:
+    """Token dạng `<session_id hex>.<256 bit ngẫu nhiên>`.
+
+    Gắn id phiên để mọi token từng cấp cho một phiên đều trỏ về phiên đó: token cũ (kể cả cũ hơn
+    nhiều lần xoay) bị dùng lại vẫn nhận ra được và thu hồi phiên. Phần ngẫu nhiên mới là bí mật.
+    """
+    return f"{session_id.hex}.{secrets.token_urlsafe(REFRESH_TOKEN_BYTES)}"
+
+
+def refresh_token_session_id(token: str) -> uuid.UUID | None:
+    """Id phiên trong refresh token; None nếu token sai dạng."""
+    sid, sep, secret = token.partition(".")
+    if not sep or not secret or len(sid) != 32:
+        return None
+    try:
+        return uuid.UUID(hex=sid)
+    except ValueError:
+        return None
 
 
 def hash_refresh_token(token: str) -> str:
-    """SHA-256 là đủ (không cần argon2): token đã ngẫu nhiên 256 bit, không dò được."""
+    """SHA-256 của cả chuỗi là đủ (không cần argon2): phần bí mật ngẫu nhiên 256 bit."""
     return hashlib.sha256(token.encode()).hexdigest()
