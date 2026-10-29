@@ -10,6 +10,8 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 KEY_ID = "test-signing-key-id"
 CUSTOMER_CODE = "testcode123"
 WEBHOOK_SECRET = "test-webhook-secret"
+ACCOUNT_ID = "test-account-id"
+API_TOKEN = "test-cf-api-token"
 
 
 @lru_cache
@@ -35,12 +37,14 @@ def pem_b64(bits: int = 2048) -> str:
 
 
 def stream_settings() -> dict[str, str]:
-    """Các trường Settings tối thiểu để cấp được URL phát."""
+    """Các trường Settings để cấp URL phát và gọi API Cloudflare (giả)."""
     return {
         "cf_stream_customer_code": CUSTOMER_CODE,
         "cf_stream_signing_key_id": KEY_ID,
         "cf_stream_signing_key_pem": pem_b64(),
         "cf_stream_webhook_secret": WEBHOOK_SECRET,
+        "cf_account_id": ACCOUNT_ID,
+        "cf_stream_api_token": API_TOKEN,
     }
 
 

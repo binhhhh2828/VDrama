@@ -1,6 +1,5 @@
 """GET /episodes/{id}/play: ma trận quyền xem, URL có token, đếm lượt xem, rate limit."""
 
-from collections.abc import Iterator
 from datetime import UTC, datetime
 from urllib.parse import urlsplit
 
@@ -22,20 +21,7 @@ from app.tests.test_auth_api import error_code
 from app.tests.test_catalog_api import add_episode, add_series, become_admin
 from app.tests.test_me_admin import signed_up
 
-
-@pytest.fixture(autouse=True)
-def stream_on(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
-    """Cấu hình Stream đầy đủ bằng khóa test (test nào cần tắt thì tự đặt lại).
-
-    Cố định JWT_SECRET: dev để trống thì mỗi lần dựng lại Settings sinh khóa mới, cookie đăng
-    nhập đã cấp sẽ mất hiệu lực khi test đổi cấu hình giữa chừng.
-    """
-    monkeypatch.setenv("JWT_SECRET", "test-jwt-secret-" + "x" * 32)
-    for key, value in stream_keys.stream_env().items():
-        monkeypatch.setenv(key, value)
-    get_settings.cache_clear()
-    yield
-    get_settings.cache_clear()
+pytestmark = pytest.mark.usefixtures("stream_on")
 
 
 def url(episode: Episode) -> str:

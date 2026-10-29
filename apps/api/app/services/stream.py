@@ -1,14 +1,21 @@
-"""Cloudflare Stream: ký token xem phim và dựng URL phát.
+"""Cloudflare Stream: ký token xem phim, dựng URL phát, gọi API Cloudflare.
 
-Token ký ngay trong backend bằng khóa riêng (RS256), không gọi API Cloudflare mỗi lượt xem.
-Video phải đặt `requireSignedURLs = true`, nếu không ai biết id video đều xem được.
-Tài liệu: https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/
+- Token ký ngay trong backend bằng khóa riêng (RS256), không gọi API Cloudflare mỗi lượt xem.
+  Video phải đặt `requireSignedURLs = true`, nếu không ai biết id video đều xem được.
+  https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/
+- API Cloudflare chỉ gọi cho việc của admin (upload, đồng bộ trạng thái) và lệnh cài đặt.
+  https://developers.cloudflare.com/stream/uploading-videos/direct-creator-uploads/
 """
 
+import base64
+import logging
 import math
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlsplit
 
+import httpx
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
@@ -21,8 +28,26 @@ DURATION_BUFFER = timedelta(minutes=30)
 NOT_BEFORE_SKEW = timedelta(seconds=60)
 
 
+logger = logging.getLogger(__name__)
+
+CF_API = "https://api.cloudflare.com/client/v4"
+# Ngắn: gọi Cloudflare nằm trong request của admin, không để treo lâu.
+API_TIMEOUT = httpx.Timeout(15.0, connect=5.0)
+# Tập phim dài nhất Cloudflare chấp nhận khi upload (video dài hơn bị báo lỗi chuyển mã).
+MAX_VIDEO_DURATION_SEC = 4 * 3600
+# Id video (UID) của Cloudflare: 32 ký tự hex.
+VIDEO_ID_PATTERN = re.compile(r"^[0-9a-f]{32}$")
+
+# Test thay bằng httpx.MockTransport để không gọi Cloudflare thật.
+transport: httpx.AsyncBaseTransport | None = None
+
+
 class StreamNotConfiguredError(Exception):
-    """Thiếu khóa ký hoặc customer code (thường gặp ở dev)."""
+    """Thiếu cấu hình Stream cần cho việc đang làm (thường gặp ở dev)."""
+
+
+class StreamProviderError(Exception):
+    """Cloudflare lỗi, hết thời gian, hoặc trả về dữ liệu không như mong đợi."""
 
 
 @dataclass(frozen=True)
@@ -88,3 +113,78 @@ def playback_urls(
         iframe_url=f"{base}/iframe",
         expires_at=expires_at,
     )
+
+
+# --- API Cloudflare ---
+
+
+def _account_url(settings: Settings, path: str = "") -> str:
+    token = settings.cf_stream_api_token.get_secret_value()
+    if not settings.cf_account_id or not token:
+        raise StreamNotConfiguredError
+    return f"{CF_API}/accounts/{settings.cf_account_id}/stream{path}"
+
+
+def _client(settings: Settings) -> httpx.AsyncClient:
+    token = settings.cf_stream_api_token.get_secret_value()
+    return httpx.AsyncClient(
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=API_TIMEOUT,
+        transport=transport,
+    )
+
+
+def _b64(value: str) -> str:
+    return base64.b64encode(value.encode()).decode()
+
+
+def tus_metadata(*, max_duration_sec: int = MAX_VIDEO_DURATION_SEC) -> str:
+    """Header Upload-Metadata: "khóa giá_trị_base64" nối bằng dấu phẩy, không dấu cách thừa.
+
+    `requiresignedurls` là khóa không có giá trị: video chỉ phát được bằng token đã ký.
+    """
+    return f"maxDurationSeconds {_b64(str(max_duration_sec))},requiresignedurls"
+
+
+def _video_id_from(location: str, header_id: str | None) -> str | None:
+    """Id video: header `stream-media-id`, thiếu thì lấy phần cuối đường dẫn của Location.
+
+    Tài liệu Cloudflare chỉ nêu Location; khi thử thật sẽ ghi lại cách nào đúng.
+    """
+    candidate = (header_id or "").strip() or urlsplit(location).path.rstrip("/").rsplit("/")[-1]
+    return candidate if VIDEO_ID_PATTERN.match(candidate) else None
+
+
+@dataclass(frozen=True)
+class UploadTicket:
+    upload_url: str  # URL tus dùng một lần, trình duyệt upload thẳng lên Cloudflare
+    video_id: str
+
+
+async def create_upload(size_bytes: int, *, settings: Settings | None = None) -> UploadTicket:
+    """Tạo video mới trên Cloudflare và URL upload tus (cho file lớn hơn 200 MB)."""
+    settings = settings or get_settings()
+    url = _account_url(settings)
+    headers = {
+        "Tus-Resumable": "1.0.0",
+        "Upload-Length": str(size_bytes),
+        "Upload-Metadata": tus_metadata(),
+    }
+    try:
+        async with _client(settings) as client:
+            res = await client.post(url, params={"direct_user": "true"}, headers=headers)
+    except httpx.HTTPError as exc:
+        logger.warning("Không gọi được Cloudflare Stream để tạo upload: %r", exc)
+        raise StreamProviderError("Không kết nối được Cloudflare Stream") from exc
+    if not res.is_success:
+        # Thân lỗi của Cloudflare không chứa token; cắt ngắn cho gọn log.
+        logger.warning(
+            "Cloudflare Stream từ chối tạo upload: %s %s", res.status_code, res.text[:500]
+        )
+        raise StreamProviderError(f"Cloudflare Stream trả {res.status_code}")
+    location = res.headers.get("location", "")
+    video_id = _video_id_from(location, res.headers.get("stream-media-id"))
+    if not location.startswith("https://") or video_id is None:
+        logger.warning("Phản hồi tạo upload thiếu Location/id video: %s", dict(res.headers))
+        raise StreamProviderError("Cloudflare Stream không trả URL upload hợp lệ")
+    return UploadTicket(upload_url=location, video_id=video_id)

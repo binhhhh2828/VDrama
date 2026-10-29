@@ -38,6 +38,7 @@ class ErrorCode(StrEnum):
     # Xem phim
     VIDEO_NOT_READY = "video_not_ready"
     STREAM_UNAVAILABLE = "stream_unavailable"
+    STREAM_PROVIDER_ERROR = "stream_provider_error"
 
 
 # Lỗi HTTP chung (route không tồn tại, sai method...) đổi về code + câu tiếng Việt.

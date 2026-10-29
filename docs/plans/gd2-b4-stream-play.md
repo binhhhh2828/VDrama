@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Cloudflare Stream và endpoint `play`
 
-> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–2. Bốn câu hỏi mở chốt theo đề xuất. Làm trên branch `feat/stream`, tách từ `feat/catalog` (catalog chưa merge vào `main`).
+> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–3. Bốn câu hỏi mở chốt theo đề xuất. Làm trên branch `feat/stream`, tách từ `feat/catalog` (catalog chưa merge vào `main`).
 > Liên quan: `plan.md` mục 1 (Luồng xem video có kiểm soát quyền), mục 5 (Play, Admin upload-url), Giai đoạn 2 task "Service Cloudflare Stream" và "Endpoint `play`"; ma trận phân quyền ở `docs/plans/gd2-b2-auth.md`. Bảng dùng: `episodes` (`stream_video_id`, `stream_status`, `duration_sec`, `thumbnail_url`), `series_stats`.
 
 ## Vì sao làm phần này trước xác thực email
@@ -115,7 +115,7 @@ Phản hồi 200 (header `Cache-Control: no-store`):
 
 - `pyproject.toml`, `uv.lock` (`cryptography`, `httpx` thành dependency chính)
 - `app/core/config.py`, `.env.example`, `app/core/errors.py`, `app/core/rate_limit.py` (ngưỡng mới)
-- Mới: `app/services/stream.py` (ký token, gọi API Cloudflare, áp trạng thái video), `app/services/play.py` (kiểm tra quyền, đếm lượt xem), `app/routers/play.py`, `app/routers/admin_stream.py`, `app/routers/webhooks.py`, `app/schemas/stream.py`
+- Mới: `app/services/stream.py` (ký token, gọi API Cloudflare), `app/services/episode_video.py` (gắn video vào tập, áp trạng thái), `app/services/play.py` (kiểm tra quyền, đếm lượt xem), `app/routers/play.py`, `app/routers/admin_stream.py`, `app/routers/webhooks.py`, `app/schemas/stream.py`
 - `app/main.py` (gắn router), `app/cli.py` (hai lệnh cài đặt)
 - Test mới: `test_stream_signing.py`, `test_play_api.py`, `test_stream_upload_api.py`, `test_stream_webhook.py`
 - `docs/api.md` (Play, Upload, Webhook), `plan.md`, `CLAUDE.md`, README (lệnh cài đặt Stream)
@@ -130,11 +130,12 @@ Phản hồi 200 (header `Cache-Control: no-store`):
 - [x] **Bước 2: Endpoint `play`** (xong 2026-10-29: tập/series ẩn trả 404 trước 401 để khách không dò được tập ẩn; lỗi xin URL không cộng lượt xem; rate limit tính theo user, khách không bị đếm vì đằng nào cũng 401; chống đếm trùng qua `rate_limit.first_in_window()`; mã lỗi `stream_provider_error`, `invalid_signature` để Bước 3–4 thêm khi dùng)
   - Việc: `services/play.py`, `routers/play.py`, mã lỗi, rate limit, đếm lượt xem chống trùng.
   - Hoàn thành khi: test đủ ma trận: khách 401 (cả tập free); user thường xem tập free, tập VIP 403 `vip_required`; VIP còn hạn xem được, VIP vừa hết hạn 403; admin xem mọi tập và xem trước tập chưa xuất bản; tập/series nháp hoặc đã xóa 404 với người thường; video chưa ready 409; thiếu cấu hình 503; có `Cache-Control: no-store`; gọi 2 lần liền chỉ cộng 1 lượt xem, admin không cộng; vượt 60 lần/phút → 429.
-- [ ] **Bước 3: Upload trực tiếp cho admin**
+- [x] **Bước 3: Upload trực tiếp cho admin** (xong 2026-10-29: body chỉ còn `size_bytes`, bỏ `filename` vì tus của Cloudflare không có khóa `name`; trả 201; khóa dòng tập trong lúc gọi Cloudflare để hai admin bấm cùng lúc hoặc vừa upload vừa xuất bản không ghi đè nhau; id video lấy từ `stream-media-id`, thiếu thì từ `Location`, phải đúng 32 ký tự hex; `Location` phải là https; 409 không gọi Cloudflare nên không tạo video thừa; giới hạn `STREAM_MAX_UPLOAD_BYTES`; phần DB ở `app/services/episode_video.py`)
   - Việc: client Cloudflare (httpx async, timeout ngắn), `POST /admin/episodes/{id}/upload`, audit.
   - Hoàn thành khi: test với `httpx.MockTransport`: gửi đúng header tus + metadata `requiresignedurls`; lưu id video và trạng thái `uploading`; có dòng `audit_logs` chứa id video cũ; tập đang xuất bản 409; user thường 403, khách 401; Cloudflare trả lỗi hoặc timeout → 502 và DB không đổi; thiếu CSRF Origin → 403.
 - [ ] **Bước 4: Webhook và đồng bộ tay**
-  - Việc: `POST /webhooks/stream`, `POST /admin/episodes/{id}/stream-sync`, hàm áp trạng thái dùng chung.
+  - Việc: `POST /webhooks/stream`, `POST /admin/episodes/{id}/stream-sync`, hàm áp trạng thái dùng chung (đặt ở `app/services/episode_video.py`).
+  - Thêm (phát hiện ở Bước 3): video báo `ready` mà `requireSignedURLs` là false thì **không** đánh dấu `ready` (đặt `error`, ghi log cảnh báo), vì xuất bản video công khai là lộ phim VIP. `allowedOrigins` không đặt được qua tus: khi `ready` gọi API sửa video đặt `allowedOrigins` = host của `PUBLIC_ORIGIN` (lỗi thì vẫn `ready`, ghi log).
   - Hoàn thành khi: test chữ ký đúng → tập `ready` có `duration_sec`, `thumbnail_url`; sai chữ ký, thiếu header, lệch giờ > 5 phút → 401 và DB không đổi; gửi lại cùng sự kiện không ghi thêm audit; id video lạ → 200 không đổi gì; `error` → `stream_status = error`; sau `ready` admin xuất bản được tập (CHECK DB cho qua); đồng bộ tay cho cùng kết quả với webhook.
 - [ ] **Bước 5: Lệnh cài đặt, tài liệu, khép plan**
   - Việc: hai lệnh CLI, `docs/api.md`, README, `CLAUDE.md` (quy ước: quyền xem chỉ ở `play`, không gọi API Cloudflare khi xem), đánh dấu `plan.md`.

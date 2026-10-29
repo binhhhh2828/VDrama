@@ -88,6 +88,8 @@ class Settings(BaseSettings):
     cf_stream_webhook_secret: SecretStr = SecretStr("")
     # Hạn token xem phim; tự kéo dài nếu tập dài hơn (tối đa 24 giờ).
     stream_token_ttl_minutes: int = 180
+    # Kích thước file video tối đa admin được upload (byte), mặc định 10 GB.
+    stream_max_upload_bytes: int = 10 * 1024**3
 
     _stream_signing_key: RSAPrivateKey | None = PrivateAttr(default=None)
 
@@ -128,6 +130,8 @@ class Settings(BaseSettings):
             raise ValueError(
                 f"STREAM_TOKEN_TTL_MINUTES phải trong khoảng 1–{MAX_STREAM_TOKEN_TTL_MINUTES}"
             )
+        if self.stream_max_upload_bytes <= 0:
+            raise ValueError("STREAM_MAX_UPLOAD_BYTES phải lớn hơn 0")
         code = self.cf_stream_customer_code
         if code and not _CUSTOMER_CODE.match(code):
             raise ValueError("CF_STREAM_CUSTOMER_CODE chỉ gồm chữ thường và số")
