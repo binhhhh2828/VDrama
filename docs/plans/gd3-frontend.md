@@ -191,7 +191,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - `sitemap.xml` (phim lấy từ API), `robots.txt`, Open Graph mặc định.
   - Hoàn thành khi:
   - Hoàn thành khi: `sitemap.xml` liệt kê phim đã xuất bản (không có `/admin`); `robots.txt` chặn `/admin`, `/account`; build xanh.
-- [ ] **Bước 12: Admin: khung, phim, tập, upload video**
+- [x] **Bước 12: Admin: khung, phim, tập, upload video** (xong 2026-10-29; `viewer@` thấy "Admins only", khách bị chuyển sang đăng nhập; tổng quan: số liệu Preview + số phim thật; danh sách phim thật (chỉ phim đã xuất bản, phim nháp mở bằng slug); chi tiết phim thấy cả tập nháp; upload tập nháp báo 503 "chưa cấu hình Stream", tập đã xuất bản báo 409. **Ghi chú backend**: `stream-sync` với id video giả của seed trả 502 (kiểm định dạng id trước khi kiểm cấu hình) thay vì 503)
   - Việc:
     - Khung `/admin` (thanh bên, chặn theo vai trò), tổng quan `/admin` với số liệu mẫu (Preview).
     - `/admin/series`: danh sách thật từ catalog, tìm theo tên; nút New / Edit / Publish / Delete mở form Preview (lưu bị tắt; xóa có ô Reason).
