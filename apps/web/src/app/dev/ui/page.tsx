@@ -8,6 +8,7 @@ import { Chip, GenreTag } from "@/components/ui/Chip";
 import { EpisodeThumb } from "@/components/ui/EpisodeThumb";
 import { Field } from "@/components/ui/Field";
 import * as Icons from "@/components/ui/icons";
+import { PosterArt } from "@/components/ui/PosterArt";
 import { PosterCard } from "@/components/ui/PosterCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
@@ -15,8 +16,15 @@ import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
 export const metadata: Metadata = { title: "UI kit", robots: { index: false } };
 
 // Trang xem nhanh các thành phần, chỉ có khi `next dev`. Bản build production trả 404.
-export default function DevUiPage() {
+export default async function DevUiPage() {
   if (process.env.NODE_ENV !== "development") notFound();
+
+  // Nạp động sau khi kiểm tra NODE_ENV để dữ liệu demo không vào bản build.
+  const [{ default: demoData }, { demoExtras }] = await Promise.all([
+    import("@/lib/demo/data.json"),
+    import("@/lib/demo/extras"),
+  ]);
+  const demoSeries = demoData.series;
 
   const colors: Array<[string, string]> = [
     ["canvas", "#0B0709"],
@@ -178,6 +186,48 @@ export default function DevUiPage() {
           />
           <EpisodeThumb href="/dev/ui" title="Episode 1" meta="21 min" access="free" current />
           <EpisodeThumb href="/dev/ui" title="Episode 8" meta="23 min" access="vip" locked />
+        </div>
+      </Section>
+
+      <Section title="Demo posters (3:4) and hero (4:5)">
+        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
+          {demoSeries.map((s) => {
+            const extras = demoExtras(s.slug);
+            return (
+              <div key={s.slug} className="flex flex-col gap-1.5">
+                <PosterArt
+                  src={s.poster_url}
+                  title={s.title}
+                  sizes="(min-width: 640px) 200px, 33vw"
+                  className="rounded-[10px]"
+                >
+                  {extras.badge ? (
+                    <Badge
+                      kind={extras.badge === "hot" ? "top" : "new"}
+                      className="absolute top-1.5 left-1.5 scale-90"
+                    >
+                      {extras.badge === "hot" ? "HOT" : "ORIGINAL"}
+                    </Badge>
+                  ) : null}
+                </PosterArt>
+                <span className="text-xs text-muted">
+                  ♥ {extras.likes.toLocaleString("en-US")} · {extras.reviews.length} reviews
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {demoSeries.map((s) => (
+            <PosterArt
+              key={s.slug}
+              src={s.banner_url}
+              title={s.title}
+              ratio="hero"
+              sizes="300px"
+              className="w-[300px] shrink-0 rounded-card"
+            />
+          ))}
         </div>
       </Section>
 
