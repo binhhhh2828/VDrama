@@ -6,6 +6,7 @@ import { EpisodeThumb } from "@/components/ui/EpisodeThumb";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api/client";
 import type { HistoryItem } from "@/lib/api/types";
+import { copy } from "@/lib/copy";
 import { progressRatio, timeLeft } from "@/lib/format";
 import { SectionHeader } from "./SectionHeader";
 
@@ -35,10 +36,10 @@ export function ContinueWatching() {
   if (items !== null && items.length === 0) return null;
 
   return (
-    <section aria-labelledby="continue-h" className="flex flex-col gap-3 md:gap-4">
-      <SectionHeader id="continue-h" title="Continue watching" href="/account/history" />
+    <section aria-labelledby="continue-h" className="flex flex-col gap-8">
+      <SectionHeader id="continue-h" title={copy.home.continueWatching} href="/account/history" />
       {/* Điện thoại: trượt ngang; desktop: lưới. */}
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-5 sm:overflow-visible sm:px-0">
+      <div className="-mx-4 flex gap-2.5 overflow-x-auto px-[22px] pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-5 sm:overflow-visible sm:px-0">
         {items === null
           ? Array.from({ length: 4 }, (_, i) => (
               <div

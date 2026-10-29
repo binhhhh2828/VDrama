@@ -1,19 +1,21 @@
-import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { ContinueWatching } from "@/components/home/ContinueWatching";
 import { HeroCarousel, HeroFallback, HeroSkeleton } from "@/components/home/HeroCarousel";
 import type { HeroSlide } from "@/components/home/HeroCarousel";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { PosterRow } from "@/components/series/PosterRow";
-import { ButtonLink } from "@/components/ui/Button";
-import { Chip } from "@/components/ui/Chip";
 import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
-import { listGenres, listSeries } from "@/lib/api/catalog";
+import { listSeries } from "@/lib/api/catalog";
+import type { SeriesCard } from "@/lib/api/types";
+import { copy } from "@/lib/copy";
 import { IS_DEMO } from "@/lib/demo/config";
 
-// Trang chủ. Phần catalog lấy trên server (HTML có sẵn tên phim, cache vài phút); phần riêng của
-// người xem (Continue watching) lấy trên trình duyệt. Mỗi mục có Suspense riêng để mục nào xong
-// trước hiện trước.
+// Trang chủ theo NetShort (ảnh 01–04). Phần catalog lấy trên server (HTML có sẵn tên phim, cache vài
+// phút); phần riêng của người xem (Continue watching) lấy trên trình duyệt. Mỗi hàng có Suspense
+// riêng để hàng nào xong trước hiện trước.
+
+/** Mỗi hàng 6 phim; "You May Like" lấy các phim hot xếp sau 6 phim đầu. */
+const ROW = 6;
 
 export default function HomePage() {
   return (
@@ -23,33 +25,24 @@ export default function HomePage() {
       <Suspense fallback={<HeroSkeleton />}>
         <Hero />
       </Suspense>
-      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-8 px-4 pt-6 pb-16 sm:px-6 md:gap-12">
+      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-16 px-4 pt-8 pb-16 sm:px-6">
         <ContinueWatching />
 
-        <section aria-labelledby="trending-h" className="flex flex-col gap-3 md:gap-4">
-          <SectionHeader id="trending-h" title="Trending now" href="/browse?sort=hot" />
-          <Suspense fallback={<PosterRowSkeleton />}>
-            <Trending />
+        <Suspense fallback={<RowSkeleton />}>
+          <HotRow />
+        </Suspense>
+        <Suspense fallback={<RowSkeleton />}>
+          <NewRow />
+        </Suspense>
+        <Suspense fallback={<RowSkeleton />}>
+          <ForYouRow />
+        </Suspense>
+        {/* Cờ "độc quyền" chỉ có ở dữ liệu demo (API thật chưa có) nên hàng này chỉ có ở bản demo. */}
+        {IS_DEMO ? (
+          <Suspense fallback={<RowSkeleton />}>
+            <OriginalsRow />
           </Suspense>
-        </section>
-
-        <section aria-labelledby="genres-h" className="flex flex-col gap-3 md:gap-4">
-          <h2 id="genres-h" className="text-xl font-extrabold md:text-2xl">
-            Browse by genre
-          </h2>
-          <Suspense fallback={<Skeleton className="h-11 w-full max-w-xl rounded-full" />}>
-            <Genres />
-          </Suspense>
-        </section>
-
-        <section aria-labelledby="new-h" className="flex flex-col gap-3 md:gap-4">
-          <SectionHeader id="new-h" title="New releases" href="/browse?sort=new" />
-          <Suspense fallback={<PosterRowSkeleton />}>
-            <NewReleases />
-          </Suspense>
-        </section>
-
-        <VipBand />
+        ) : null}
       </div>
     </main>
   );
@@ -69,53 +62,56 @@ async function Hero() {
   return <HeroCarousel slides={slides} />;
 }
 
-async function Trending() {
-  const { items } = await listSeries({ sort: "hot", limit: 6 });
-  return <PosterRow series={items} ranked preloadFirst={4} />;
-}
-
-async function NewReleases() {
-  const { items } = await listSeries({ sort: "new", limit: 6 });
-  return <PosterRow series={items} markNew />;
-}
-
-async function Genres() {
-  const genres = await listGenres();
+/** Một hàng trang chủ: tiêu đề + hàng poster. Không có phim thì không vẽ gì (cả tiêu đề). */
+function HomeRow({
+  id,
+  title,
+  items,
+  preloadFirst,
+}: {
+  id: string;
+  title: string;
+  items: SeriesCard[];
+  preloadFirst?: number;
+}): ReactNode {
+  if (items.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-2 md:gap-2.5">
-      <Chip href="/browse" active>
-        All
-      </Chip>
-      {genres.map((g) => (
-        <Chip key={g.slug} href={`/browse?genre=${g.slug}`}>
-          {g.name}
-        </Chip>
-      ))}
+    <section aria-labelledby={id} className="flex flex-col gap-8">
+      <SectionHeader id={id} title={title} />
+      <PosterRow series={items} preloadFirst={preloadFirst} />
+    </section>
+  );
+}
+
+function RowSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <Skeleton className="ml-4 h-6 w-44 rounded-md sm:ml-0" />
+      <PosterRowSkeleton />
     </div>
   );
 }
 
-function VipBand() {
-  return (
-    <section
-      aria-labelledby="vip-band-h"
-      className="flex flex-wrap items-center justify-between gap-5 rounded-panel border border-vip-line bg-vip-panel px-6 py-7 md:px-9 md:py-8"
-    >
-      <div className="flex max-w-[640px] flex-col gap-1.5">
-        <span className="text-[13px] font-extrabold tracking-[0.1em] text-vip">VDRAMA VIP</span>
-        <h2 id="vip-band-h" className="text-[22px] font-extrabold md:text-[26px]">
-          Unlock every episode, ad-free, in Full HD
-        </h2>
-        <p className="text-[15px] text-muted">
-          Your plan starts the moment payment goes through.{" "}
-          <Link href="/vip" className="font-semibold">
-            Compare plans
-          </Link>
-        </p>
-      </div>
-      <ButtonLink href="/vip" variant="vip">
-        See plans
-      </ButtonLink>
-    </section>
-  );
+async function HotRow() {
+  const { items } = await listSeries({ sort: "hot", limit: ROW * 2 });
+  return <HomeRow id="hot-h" title={copy.home.hot} items={items.slice(0, ROW)} preloadFirst={3} />;
+}
+
+async function NewRow() {
+  const { items } = await listSeries({ sort: "new", limit: ROW });
+  return <HomeRow id="new-h" title={copy.home.newReleases} items={items} />;
+}
+
+async function ForYouRow() {
+  const { items } = await listSeries({ sort: "hot", limit: ROW * 2 });
+  return <HomeRow id="foryou-h" title={copy.home.forYou} items={items.slice(ROW)} />;
+}
+
+async function OriginalsRow() {
+  const [{ items }, { demoExtras }] = await Promise.all([
+    listSeries({ sort: "hot", limit: 50 }),
+    import("@/lib/demo/extras"),
+  ]);
+  const originals = items.filter((s) => demoExtras(s.slug).badge === "original").slice(0, ROW);
+  return <HomeRow id="originals-h" title={copy.home.originals} items={originals} />;
 }

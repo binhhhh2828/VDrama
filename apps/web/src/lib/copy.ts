@@ -28,6 +28,7 @@ export const copy = {
     forYou: "You May Like",
     originals: "Originals",
     continueWatching: "Continue Watching",
+    seeAll: "See all",
   },
   series: {
     playNow: "Play now",
