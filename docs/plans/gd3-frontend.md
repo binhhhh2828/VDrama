@@ -160,7 +160,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
   - Hoàn thành khi:
     - Khách thấy nhãn FREE / VIP; user thường thấy ổ khóa ở tập VIP; VIP không thấy ổ khóa.
     - Thêm / bỏ My List cập nhật ngay; Continue đúng tập đang xem dở.
-- [ ] **Bước 8: Xem phim**
+- [x] **Bước 8: Xem phim** (xong 2026-10-29; trang xem nằm ở nhóm route `(watch)` có header gọn; đã thử trên luồng HLS mẫu: phát, tua bằng phím, lưu khi dừng, mở lại tua đúng 200 giây, hết tập đếm ngược 5 giây rồi sang tập sau; viewer ở tập VIP thấy màn mời VIP, khách thấy mời đăng nhập và không gọi `play`; bản build prod không chứa URL mẫu. **Chưa thử được**: xin URL mới khi token hết hạn, phát HLS sẵn có của Safari/iPhone, URL thật của Cloudflare Stream)
   - Việc:
     - `/series/[slug]/episode/[number]`: player hls.js, điều khiển tự vẽ, lưu tiến độ, tua tới chỗ cũ, tập kế tiếp.
     - Màn hình cho các trường hợp 401 / 403 / 409 / 503; lấy URL mới khi token hết hạn; danh sách tập bên cạnh.

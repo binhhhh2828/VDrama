@@ -64,7 +64,7 @@ export function SeriesActions({
   );
 }
 
-function MyListButton({ seriesId }: { seriesId: number }) {
+export function MyListButton({ seriesId }: { seriesId: number }) {
   const session = useSession();
   const viewer = useSeriesViewer();
   const router = useRouter();
@@ -116,7 +116,7 @@ function MyListButton({ seriesId }: { seriesId: number }) {
   );
 }
 
-function ShareButton({ title }: { title: string }) {
+export function ShareButton({ title }: { title: string }) {
   const [copied, setCopied] = useState(false);
 
   async function share() {
