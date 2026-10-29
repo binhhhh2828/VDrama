@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Trạng thái dự án
 
-Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án), phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009) và auth (`docs/plans/gd2-b2-auth.md`, migration 0010: đăng ký, đăng nhập, refresh xoay vòng, đăng xuất, `/me`, phân quyền admin, VIP, CSRF, rate limit). Catalog và tìm kiếm cũng đã xong (`docs/plans/gd2-b3-catalog.md`: `/genres`, `/series`, `/series/{slug}`, `/series/{slug}/episodes`, `/search`, lệnh `seed-demo`). Còn lại của Giai đoạn 2: xác thực email / quên mật khẩu, Cloudflare Stream, `play`, lịch sử xem, yêu thích; chưa có endpoint thanh toán. Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
+Monorepo VDrama (kế hoạch đầy đủ ở `plan.md`): `apps/api` (FastAPI, Python 3.12, uv) và `apps/web` (Next.js, TypeScript, Tailwind, pnpm). Đã xong Giai đoạn 1 (khung dự án), phần DB của Giai đoạn 2 (toàn bộ bảng, trạng thái có kiểm soát, xóa mềm, nhật ký thao tác; migration 0001–0009) và auth (`docs/plans/gd2-b2-auth.md`, migration 0010: đăng ký, đăng nhập, refresh xoay vòng, đăng xuất, `/me`, phân quyền admin, VIP, CSRF, rate limit). Catalog và tìm kiếm cũng đã xong (`docs/plans/gd2-b3-catalog.md`: `/genres`, `/series`, `/series/{slug}`, `/series/{slug}/episodes`, `/search`, lệnh `seed-demo`). Cloudflare Stream và xem tập đã xong (`docs/plans/gd2-b4-stream-play.md`: `play`, upload tus cho admin, webhook, đồng bộ tay, lệnh `stream-*`; chưa thử với tài khoản Cloudflare thật). Còn lại của Giai đoạn 2: xác thực email / quên mật khẩu, lịch sử xem, yêu thích; chưa có endpoint thanh toán. Thanh toán dùng SePay + VietQR trước (xem `plan.md` Giai đoạn 5). Chi tiết stack và các quyết định kiến trúc nằm trong `plan.md`, không lặp lại ở đây.
 
 ## Quy trình làm việc (bắt buộc)
 
@@ -75,6 +75,11 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
   - Phân trang danh sách bằng con trỏ keyset (giá trị sắp xếp + `id`), không dùng `OFFSET`.
   - Response công khai không bao giờ có `stream_video_id`; đường phát chỉ cấp qua endpoint `play`.
   - Dữ liệu mẫu cho dev: `uv run python -m app.cli seed-demo` (không chạy ở prod, chạy lại không trùng).
+- **Video / Cloudflare Stream** (`app/services/stream.py`, `play.py`, `episode_video.py`):
+  - Quyền xem chỉ kiểm tra ở `services/play.py` (`GET /episodes/{id}/play`); nơi khác không tự cấp URL phát. Token ký cục bộ (RS256), **không gọi API Cloudflare khi người xem bấm xem**.
+  - Mọi gọi API Cloudflare đi qua `services/stream.py` (`_call`, timeout ngắn); test thay `stream.transport` bằng `httpx.MockTransport`, không bao giờ gọi Cloudflare thật. Lỗi mạng/HTTP thành `StreamProviderError` (502), thiếu cấu hình thành `StreamNotConfiguredError` (503).
+  - Trạng thái video của tập chỉ đổi qua `episode_video.apply_video_state()` (webhook và đồng bộ tay dùng chung, idempotent, có audit). Video không bật `requireSignedURLs` không bao giờ thành `ready`.
+  - Test cần cấu hình Stream dùng fixture `stream_on` (khóa thật sinh trong test, ở `app/tests/stream_keys.py`).
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
 
 ## Điều không được làm

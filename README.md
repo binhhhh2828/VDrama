@@ -71,6 +71,25 @@ curl "http://localhost:8000/api/v1/series?sort=hot&limit=5"
 curl "http://localhost:8000/api/v1/search?q=nang%20tho"
 ```
 
+## Video (Cloudflare Stream)
+
+Xem tập `GET /api/v1/episodes/{id}/play` (chỗ duy nhất kiểm tra quyền xem), upload video cho admin, webhook chuyển mã (tài liệu: [docs/api.md](docs/api.md#xem-tập), thiết kế: [docs/plans/gd2-b4-stream-play.md](docs/plans/gd2-b4-stream-play.md)). Dev chưa có tài khoản Cloudflare vẫn chạy được: `play` trả 503 `stream_unavailable`.
+
+Cài đặt một lần cho mỗi môi trường:
+
+1. Trên Cloudflare: lấy Account ID, tạo API token có quyền **Stream: Edit**, xem customer code (phần `customer-<code>` trong URL phát của một video bất kỳ). Đặt `CF_ACCOUNT_ID`, `CF_STREAM_API_TOKEN`, `CF_STREAM_CUSTOMER_CODE` trong `.env`.
+2. Tạo khóa ký token, dán hai dòng in ra vào `.env` (khóa chỉ hiện một lần):
+
+   ```bash
+   cd apps/api && uv run python -m app.cli stream-create-signing-key
+   ```
+
+3. Prod: đăng ký webhook, dán `CF_STREAM_WEBHOOK_SECRET` in ra vào `.env`. Mỗi tài khoản Cloudflare chỉ có **một** URL webhook: đừng đăng ký từ dev nếu dùng chung tài khoản với prod; dev dùng nút đồng bộ tay (`POST /api/v1/admin/episodes/{id}/stream-sync`).
+
+   ```bash
+   cd apps/api && uv run python -m app.cli stream-set-webhook https://vdrama.vn/api/v1/webhooks/stream
+   ```
+
 ## Kiểm tra
 
 ```bash

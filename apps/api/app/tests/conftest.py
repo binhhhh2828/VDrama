@@ -18,6 +18,7 @@ from app.core import rate_limit
 from app.core.config import get_settings, to_psycopg_url
 from app.core.db import dispose_engine
 from app.main import app
+from app.tests import stream_keys
 
 
 def pytest_asyncio_loop_factories(config, item):
@@ -135,6 +136,21 @@ async def api(
         transport=transport, base_url="https://test", headers=headers
     ) as c:
         yield c
+
+
+@pytest.fixture
+def stream_on(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Cấu hình Stream đầy đủ bằng khóa test (test nào cần tắt thì tự đặt lại).
+
+    Cố định JWT_SECRET: dev để trống thì mỗi lần dựng lại Settings sinh khóa mới, cookie đăng
+    nhập đã cấp sẽ mất hiệu lực khi test đổi cấu hình giữa chừng.
+    """
+    monkeypatch.setenv("JWT_SECRET", "test-jwt-secret-" + "x" * 32)
+    for key, value in stream_keys.stream_env().items():
+        monkeypatch.setenv(key, value)
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 @pytest.fixture(autouse=True)
