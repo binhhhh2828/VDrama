@@ -67,6 +67,8 @@ Request `POST/PUT/PATCH/DELETE` có header `Origin` (hoặc `Referer`) khác `PU
 | `POST /auth/register` | 5 lần/giờ theo IP |
 | `POST /auth/refresh` | 30 lần/phút theo IP |
 | `GET /episodes/{id}/play` | 60 lần/phút theo user |
+| `PUT /me/history/{episode_id}` | 30 lần/phút theo user |
+| `PUT/DELETE /me/favorites/{series_id}` | 60 lần/phút theo user (thêm và bỏ chung bộ đếm) |
 
 IP thật lấy từ `CF-Connecting-IP` khi `TRUST_CLOUDFLARE_IP=true` (bắt buộc ở prod, vì API nằm sau Cloudflare và Caddy). Request không xác định được IP thì không bị đếm.
 
@@ -160,7 +162,7 @@ Danh sách phim, phân trang bằng con trỏ.
 
 | Tham số | Mặc định | Ý nghĩa |
 |---|---|---|
-| `sort` | `new` | `new`: mới xuất bản trước. `hot`: nhiều lượt xem trước (lượt xem chưa được đếm cho tới khi có endpoint xem tập) |
+| `sort` | `new` | `new`: mới xuất bản trước. `hot`: nhiều lượt xem trước (lượt xem đếm ở `GET /episodes/{id}/play`) |
 | `genre` | | Lọc theo slug thể loại; slug không có thì trả rỗng |
 | `with_banner` | `false` | `true`: chỉ phim có ảnh banner (slider trang chủ: `?with_banner=true&limit=5`) |
 | `limit` | `20` | 1–50 |
@@ -180,11 +182,12 @@ SeriesCard cộng thêm:
   "episode_count": 11,
   "latest_episode_number": 11,
   "view_count": 5200,
+  "favorite_count": 87,
   "is_published": true
 }
 ```
 
-`episode_count`, `latest_episode_number` chỉ tính tập đã xuất bản. Phim không có, chưa xuất bản hoặc đã xóa → 404 `not_found`. Admin (đã đăng nhập) xem trước được phim chưa xuất bản, khi đó `is_published` là `false`.
+`episode_count`, `latest_episode_number` chỉ tính tập đã xuất bản. Trang này giống nhau cho mọi người (không có "tôi đã yêu thích chưa"): hỏi `GET /api/v1/me/favorites/{series_id}` để tô nút yêu thích. Phim không có, chưa xuất bản hoặc đã xóa → 404 `not_found`. Admin (đã đăng nhập) xem trước được phim chưa xuất bản, khi đó `is_published` là `false`.
 
 ### `GET /api/v1/series/{slug}/episodes`
 
@@ -261,6 +264,60 @@ Phản hồi: `{ "items": [SeriesCard, ...] }` (chỉ trang đầu, không có c
 | Chưa cấu hình Stream | 503 `stream_unavailable` |
 | Quá 60 lần/phút | 429 `rate_limited` |
 
+## Lịch sử xem
+
+Cần đăng nhập. **Xóa là xóa mềm**: người dùng không thấy nữa ở mọi API, hệ thống vẫn giữ dữ liệu (xem Chính sách bảo mật). Xem lại tập đã xóa thì tập đó hiện lại trong lịch sử.
+
+### `PUT /api/v1/me/history/{episode_id}`
+
+Player báo tiến độ mỗi 15–30 giây và khi tạm dừng/đóng trang. Body `{ "progress_sec": 754 }` (0–86400; lớn hơn thời lượng tập thì được cắt bằng thời lượng). Trả 204. Quyền giống hệt `play`: tập ẩn → 404, tập VIP khi không có/hết VIP → 403 `vip_required`.
+
+### `GET /api/v1/me/history`
+
+"Xem tiếp": mỗi phim **một dòng** là tập xem gần nhất, phim xem gần nhất trước. `limit` 1–50 (mặc định 20), không phân trang.
+
+```json
+{
+  "items": [
+    {
+      "series": { "...": "SeriesCard" },
+      "episode": { "id": 12, "number": 3, "title": "Tập 3", "duration_sec": 1500, "thumbnail_url": "...", "access": "vip", "published_at": "...", "is_published": true },
+      "progress_sec": 754,
+      "updated_at": "2026-10-29T12:00:00Z"
+    }
+  ]
+}
+```
+
+Tập/phim bị gỡ hoặc xóa thì ẩn (tập gần nhất bị gỡ thì phim đó lùi về tập còn xem được gần nhất); xuất bản lại thì hiện lại. Tự tính "đã xem xong" bằng `progress_sec / episode.duration_sec`.
+
+### `GET /api/v1/me/history/series/{slug}`
+
+Tiến độ các tập đã xem của một phim, theo số tập (thanh tiến độ trong danh sách tập, nút "Xem tiếp tập N"):
+
+```json
+{ "items": [ { "episode_id": 10, "number": 1, "progress_sec": 1500, "updated_at": "..." } ] }
+```
+
+Phim không xem được → 404. Admin xem trước được như catalog.
+
+### `DELETE /api/v1/me/history/{episode_id}` và `DELETE /api/v1/me/history`
+
+Xóa một tập / toàn bộ lịch sử xem của chính mình. Luôn 204 (gọi lại, hoặc tập chưa từng xem, vẫn 204).
+
+## Yêu thích
+
+Cần đăng nhập. Dùng **id phim** (`SeriesCard.id`), không dùng slug. Bỏ yêu thích cũng là xóa mềm.
+
+| Method | Đường dẫn | Kết quả |
+|---|---|---|
+| PUT | `/api/v1/me/favorites/{series_id}` | Thêm. 204; bấm lại vẫn 204, không đếm thêm. Phim không có/chưa xuất bản/đã xóa → 404 |
+| DELETE | `/api/v1/me/favorites/{series_id}` | Bỏ. 204; chưa yêu thích vẫn 204 |
+| GET | `/api/v1/me/favorites/{series_id}` | `{ "favorited": true }` |
+| GET | `/api/v1/me/favorites` | `{ "items": [SeriesCard, ...], "next_cursor": ... }`, mới yêu thích trước; `limit` 1–50, `cursor` như `GET /series` |
+
+Thêm lại phim đã bỏ thì phim lên đầu danh sách. Phim bị gỡ sau khi đã yêu thích thì ẩn khỏi danh sách (và `favorited: false`), xuất bản lại thì hiện lại. `favorite_count` ở trang chi tiết phim chỉ đổi khi trạng thái thật sự đổi.
+
 ## Phân quyền
 
 | Hành động | Khách | User | VIP còn hạn | Admin |
@@ -269,9 +326,11 @@ Phản hồi: `{ "items": [SeriesCard, ...] }` (chỉ trang đầu, không có c
 | Xem tập miễn phí | 401 `not_authenticated` | được | được | được |
 | Xem tập VIP | 401 `not_authenticated` | 403 `vip_required` | được | được |
 | Tập/phim chưa xuất bản | 404 | 404 | 404 | được |
+| Lịch sử xem, yêu thích (của chính mình) | 401 `not_authenticated` | được | được | được |
+| Báo tiến độ tập VIP | 401 `not_authenticated` | 403 `vip_required` | được | được |
 | API admin | 401 | 403 `forbidden` | 403 `forbidden` | được |
 
-Trong code: `CurrentUser`, `OptionalUser`, `AdminUser` ở `app/api/deps.py`.
+Trong code: `CurrentUser`, `OptionalUser`, `AdminUser` ở `app/api/deps.py`. Bảng này có test tương ứng (`app/tests/test_permissions.py`, ma trận quyền); test đó cũng tự quét mọi route để bắt endpoint admin/ghi dữ liệu quên bảo vệ.
 
 ## Admin
 
