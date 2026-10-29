@@ -9,6 +9,10 @@ RUN corepack enable
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Quy tắc chuyển /api/* của Next.js được chốt lúc build. Prod để trống (Caddy chuyển /api);
+# compose dev truyền http://api:8000.
+ARG API_PROXY_TARGET=
+ENV API_PROXY_TARGET=$API_PROXY_TARGET
 RUN pnpm build
 
 FROM node:24-alpine AS run

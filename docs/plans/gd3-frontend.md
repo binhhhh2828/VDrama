@@ -121,7 +121,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
   - Hoàn thành khi:
     - `test_demo_seed.py` cập nhật và xanh; thêm test: 3 tài khoản đúng vai trò, tài khoản VIP có `is_vip`, chạy lại không trùng, thiếu `DEMO_PASSWORD` thì bỏ qua tài khoản và báo rõ.
     - Tìm `city` ra đúng phim mẫu; ruff, pytest xanh.
-- [ ] **Bước 3: Tầng dữ liệu**
+- [x] **Bước 3: Tầng dữ liệu** (xong 2026-10-29; 16 test Vitest, thêm `pnpm test` vào CI; build xanh khi API tắt, đã thử bằng trang tạm đọc catalog trong `<Suspense>`. Sửa thêm: compose dev truyền `API_PROXY_TARGET` lúc build image web, trước đó trình duyệt gọi `/api` trong Docker bị 404)
   - Việc:
     - `src/lib/api/`: kiểu dữ liệu, hàm gọi catalog phía server (cache), client phía trình duyệt (refresh một lần, gom request), ánh xạ mã lỗi sang câu tiếng Anh.
     - `src/lib/preview-data.ts`: dữ liệu mẫu cho màn hình tĩnh (gói VIP, thông tin chuyển khoản mẫu, số liệu và bảng của admin).
