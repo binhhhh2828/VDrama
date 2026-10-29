@@ -1,7 +1,7 @@
 """Lệnh quản trị chạy trên server.
 
     uv run python -m app.cli create-admin --email admin@vdrama.vn --reason "Admin đầu tiên"
-    uv run python -m app.cli seed-demo      # dữ liệu phim mẫu cho dev
+    DEMO_PASSWORD=... uv run python -m app.cli seed-demo   # dữ liệu mẫu + tài khoản demo (dev)
     uv run python -m app.cli stream-create-signing-key
     uv run python -m app.cli stream-set-webhook https://vdrama.vn/api/v1/webhooks/stream
 
@@ -17,6 +17,7 @@ buộc lý do).
 import argparse
 import asyncio
 import getpass
+import os
 import sys
 from collections.abc import Awaitable, Callable
 
@@ -68,13 +69,24 @@ async def create_admin(
 
 
 async def seed_demo() -> str:
+    # Mật khẩu tài khoản demo lấy từ biến môi trường (không nhận qua tham số dòng lệnh).
+    password = os.environ.get("DEMO_PASSWORD") or None
     async with get_sessionmaker()() as db:
-        result = await demo_seed.seed_demo(db)
+        result = await demo_seed.seed_demo(db, password=password)
         await db.commit()
-    return (
+    lines = [
         f"Dữ liệu mẫu: thêm {result.genres_created} thể loại, {result.series_created} phim "
-        f"({result.episodes_created} tập); bỏ qua {result.series_skipped} phim đã có"
-    )
+        f"({result.episodes_created} tập), {result.plans_created} gói VIP; "
+        f"bỏ qua {result.series_skipped} phim đã có"
+    ]
+    if result.accounts_skipped_no_password:
+        lines.append("Bỏ qua tài khoản demo: đặt biến DEMO_PASSWORD (8–128 ký tự) rồi chạy lại")
+    else:
+        emails = ", ".join(a.email for a in demo_seed.ACCOUNTS)
+        lines.append(
+            f"Tài khoản demo: thêm {result.accounts_created} ({emails}; mật khẩu = DEMO_PASSWORD)"
+        )
+    return "\n".join(lines)
 
 
 async def stream_create_signing_key() -> str:
@@ -107,7 +119,9 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.g
     p.add_argument("--email", required=True)
     p.add_argument("--reason", required=True, help="Lý do (ghi vào nhật ký thao tác)")
     p.add_argument("--display-name", default=None)
-    sub.add_parser("seed-demo", help="Thêm dữ liệu phim mẫu cho dev (không chạy ở ENV=prod)")
+    sub.add_parser(
+        "seed-demo", help="Thêm dữ liệu mẫu và tài khoản demo cho dev (không chạy ở ENV=prod)"
+    )
     sub.add_parser("stream-create-signing-key", help="Tạo khóa ký token xem phim trên Cloudflare")
     p = sub.add_parser("stream-set-webhook", help="Đăng ký URL webhook Stream, in secret")
     p.add_argument("url", help="Ví dụ https://vdrama.vn/api/v1/webhooks/stream")

@@ -231,7 +231,7 @@ Phản hồi: `{ "items": [SeriesCard, ...] }` (chỉ trang đầu, không có c
 
 ### Dữ liệu mẫu (dev)
 
-`uv run python -m app.cli seed-demo` (hoặc `docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo`) thêm 12 phim mẫu đủ các trường hợp trên. Ảnh là ảnh giữ chỗ từ `picsum.photos` (cần cho phép domain này trong cấu hình ảnh của Next.js), id video giả nên chưa phát được. Không chạy ở `ENV=prod`; chạy lại không tạo trùng.
+`DEMO_PASSWORD=... uv run python -m app.cli seed-demo` (hoặc `docker compose -f docker-compose.dev.yml exec -e DEMO_PASSWORD=... api python -m app.cli seed-demo`) thêm 12 phim mẫu tiếng Anh đủ các trường hợp trên, 3 gói VIP và 3 tài khoản demo (`viewer@example.com`, `vip@example.com`, `admin@example.com`, mật khẩu là `DEMO_PASSWORD`; thiếu biến thì bỏ qua phần tài khoản). Ảnh là ảnh giữ chỗ từ `picsum.photos` (cần cho phép domain này trong cấu hình ảnh của Next.js), id video giả nên chưa phát được. Không chạy ở `ENV=prod`; chạy lại không tạo trùng.
 
 ## Xem tập
 

@@ -1,0 +1,13 @@
+# Bản demo tĩnh trên Netlify (docs/plans/gd3-netlify-demo.md): chỉ có giao diện, API giả chạy
+# ngay trong trình duyệt, không cần backend hay database. Netlify tự nhận Next.js và dùng runtime của nó.
+# Chạy lệnh netlify từ thư mục apps/web. Deploy từ Git thì đặt "Base directory" = apps/web trong Netlify.
+
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # Bật chế độ demo (API giả, tài khoản demo, "mua VIP" giả, noindex). Bỏ dòng này thì web cần API thật.
+  NEXT_PUBLIC_DEMO = "true"
+  PUBLIC_ORIGIN = "https://vdramademo.netlify.app"

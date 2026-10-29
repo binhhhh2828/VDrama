@@ -2,9 +2,75 @@
 
 Website xem phim bộ có tài khoản và gói VIP. Kế hoạch đầy đủ: [plan.md](plan.md). Quy trình làm việc với Claude Code: [CLAUDE.md](CLAUDE.md).
 
+## Mở bản demo
+
+Bản demo gồm cả phía người xem và phía admin, giao diện tiếng Anh. Màn hình nào chưa có API thì là giao diện tĩnh có nhãn **PREVIEW** màu vàng: bấm thử được, nhưng nút lưu bị tắt và không gửi gì đi. Plan frontend: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md), hệ thống thiết kế: [docs/design.md](docs/design.md).
+
+Cần Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm. Mở 3 terminal:
+
+```bash
+# 1. Database + bảng
+docker compose -f docker-compose.dev.yml up -d db
+cd apps/api && cp ../../.env.example .env && uv sync && uv run alembic upgrade head
+
+# 2. Dữ liệu mẫu (12 phim, 3 gói VIP, 3 tài khoản demo), rồi chạy API
+#    DEMO_PASSWORD là mật khẩu chung bạn tự đặt cho 3 tài khoản demo (8–128 ký tự)
+cd apps/api && DEMO_PASSWORD='mật-khẩu-demo' PYTHONUTF8=1 uv run python -m app.cli seed-demo
+cd apps/api && uv run uvicorn app.main:app --port 8000
+#    Windows: thêm  --loop app.core.loop:selector_loop_factory
+
+# 3. Web → http://localhost:3000
+cd apps/web && pnpm install
+cd apps/web && API_PROXY_TARGET=http://localhost:8000 API_INTERNAL_URL=http://localhost:8000 \
+  NEXT_PUBLIC_DEV_SAMPLE_HLS=https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8 pnpm dev
+```
+
+`NEXT_PUBLIC_DEV_SAMPLE_HLS` chỉ có tác dụng ở `pnpm dev`. Khi máy chủ chưa cấu hình Cloudflare Stream, trình phát dùng một video mẫu công khai để thấy được cách xem phim, có nhãn "SAMPLE VIDEO" ở góc trình phát. Chạy cả bộ bằng `docker compose ... up --build` thì web là bản build thật, nên tập phim báo "Video playback isn't set up on this server yet".
+
+Tài khoản demo (cùng mật khẩu `DEMO_PASSWORD`):
+
+| Email | Dùng để xem |
+|---|---|
+| `viewer@example.com` | Người xem thường: tập free xem được, tập VIP mời mua VIP |
+| `vip@example.com` | Người xem có VIP 30 ngày: xem được mọi tập |
+| `admin@example.com` | Khu admin ở `/admin` (nút "Admin" trong menu tài khoản) |
+
+Luồng gợi ý:
+
+- **Người xem:** trang chủ → mở một phim → Create account (hoặc đăng nhập `viewer@`) → xem tập 1 (free) → bấm tập VIP: thấy mời mua VIP → Get VIP → chọn gói → trang chuyển khoản (Preview) → thêm phim vào My List → Account → History (tiếp tục xem đúng chỗ đã dừng).
+- **Admin:** đăng nhập `admin@` → `/admin` tổng quan → Series & episodes → mở một phim (thấy cả tập nháp) → bấm "Video" của một tập (upload, Sync status) → Users → Payments → VIP plans → Audit log.
+
+### Bản demo trực tuyến (Netlify, không cần API)
+
+Cho người không chạy được máy: bản này chỉ gồm giao diện, **API giả chạy ngay trong trình duyệt** (dữ liệu phim chụp từ DB demo, tài khoản và VIP lưu trong trình duyệt của từng người). Cấu hình ở [apps/web/netlify.toml](apps/web/netlify.toml); biến `NEXT_PUBLIC_DEMO=true` bật chế độ này, bỏ đi thì web lại cần API thật. Kế hoạch: [docs/plans/gd3-netlify-demo.md](docs/plans/gd3-netlify-demo.md).
+
+- Tài khoản demo (mật khẩu `Demo1234!`, giả và công khai): `viewer@example.com`, `vip@example.com`, `admin@example.com`. Trang đăng nhập có sẵn nút bấm một chạm.
+- Nút **I've paid (demo)** ở trang thanh toán cấp VIP giả. Nút **Reset demo** ở dải đầu trang xóa mọi thứ về ban đầu.
+- Mọi tập phát cùng một video mẫu công khai; trang tự chặn công cụ tìm kiếm (`noindex`).
+- Chạy thử local, không cần API: `cd apps/web && NEXT_PUBLIC_DEMO=true pnpm dev`.
+- Chụp lại dữ liệu phim khi seed đổi (cần API đang chạy): `cd apps/web && DEMO_PASSWORD='...' node scripts/capture-demo-data.mjs the-one-in-my-dream`, rồi commit `src/lib/demo/data.json`.
+- Deploy (chạy trong `apps/web`): `npx netlify-cli login`, `npx netlify-cli link` (chọn site `vdramademo`), rồi `npx netlify-cli deploy --build` (bản nháp, có link riêng để kiểm tra) và `npx netlify-cli deploy --build --prod` khi ổn. Deploy từ Git thì đặt Base directory = `apps/web`.
+
+Phần nào thật, phần nào Preview:
+
+| Chức năng | Trạng thái |
+|---|---|
+| Trang chủ, duyệt và lọc phim, tìm kiếm, chi tiết phim | Thật (API catalog) |
+| Đăng ký, đăng nhập, đăng xuất, giữ phiên | Thật |
+| Xem tập, khóa tập VIP, lưu tiến độ, tiếp tục xem | Thật (video là video mẫu khi chưa có Cloudflare Stream) |
+| My List, lịch sử xem, xóa lịch sử | Thật |
+| Admin: danh sách phim, chi tiết phim, bảng tập kể cả tập nháp | Thật (chỉ đọc) |
+| Admin: upload video lên Cloudflare Stream, Sync status | Thật (cần cấu hình Stream, nếu chưa có thì báo rõ lý do) |
+| Quên mật khẩu, xác thực email, đổi mật khẩu | Preview (chưa có API) |
+| Trang VIP chọn gói, chuyển khoản VietQR | Preview (thanh toán SePay ở Giai đoạn 5) |
+| Admin: tổng quan, sửa/tạo/xóa phim và tập | Preview (API admin ở Giai đoạn 4) |
+| Admin: người dùng, thanh toán, gói VIP, nhật ký | Preview (dữ liệu mẫu, thao tác cần lý do và đang tắt) |
+
 ## Chạy local
 
 Cần: Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm, Docker (tùy chọn).
+
+Trong VS Code, cài extension Python của Microsoft. Workspace đã cấu hình để tự kích hoạt môi trường `apps\api\.venv` trong terminal mới. Lần đầu mở dự án, chạy `uv sync` trong thư mục `apps\api` để tạo môi trường; nếu terminal đã mở trước đó, hãy mở terminal mới.
 
 ```bash
 # API  → http://localhost:8000/api/health
@@ -62,14 +128,22 @@ Cổng trên máy trùng với dự án khác thì đổi khi chạy compose: `D
 
 ## Catalog
 
-Danh sách phim, chi tiết, danh sách tập, thể loại, tìm kiếm không dấu dưới `/api/v1` (tài liệu: [docs/api.md](docs/api.md#catalog), thiết kế: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md)). Dữ liệu phim mẫu cho dev (12 phim, không chạy ở prod, chạy lại không trùng):
+Danh sách phim, chi tiết, danh sách tập, thể loại, tìm kiếm không dấu dưới `/api/v1` (tài liệu: [docs/api.md](docs/api.md#catalog), thiết kế: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md)). Dữ liệu mẫu cho dev và demo (tiếng Anh: 12 phim, 3 gói VIP, 3 tài khoản demo; không chạy ở prod, chạy lại không trùng). Tài khoản demo dùng chung mật khẩu lấy từ biến `DEMO_PASSWORD` (8–128 ký tự, tự đặt); thiếu biến này thì chỉ bỏ qua phần tài khoản:
+
+| Email | Vai trò |
+|---|---|
+| `viewer@example.com` | Người xem thường (tập VIP bị khóa) |
+| `vip@example.com` | Người xem có VIP 30 ngày |
+| `admin@example.com` | Admin |
 
 ```bash
-docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo
-# hoặc chạy trực tiếp: cd apps/api && uv run python -m app.cli seed-demo
+docker compose -f docker-compose.dev.yml exec -e DEMO_PASSWORD='mật-khẩu-demo' api python -m app.cli seed-demo
+# hoặc chạy trực tiếp: cd apps/api && DEMO_PASSWORD='mật-khẩu-demo' uv run python -m app.cli seed-demo
 curl "http://localhost:8000/api/v1/series?sort=hot&limit=5"
-curl "http://localhost:8000/api/v1/search?q=nang%20tho"
+curl "http://localhost:8000/api/v1/search?q=city"
 ```
+
+Seed chỉ thêm phần còn thiếu (theo slug phim, tên gói, email). DB dev đã có dữ liệu mẫu tiếng Việt cũ (trước 2026-10-29) thì xóa DB rồi seed lại: `docker compose -f docker-compose.dev.yml down -v` (xóa **toàn bộ** dữ liệu dev), rồi `up` và chạy lệnh trên.
 
 ## Video (Cloudflare Stream)
 

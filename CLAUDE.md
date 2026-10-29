@@ -75,7 +75,7 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
   - Lọc cờ boolean bằng `.where(Series.is_published)`, **không** dùng `.is_(True)`: index một phần khai báo `WHERE is_published`, Postgres không suy ra được từ `IS true` nên bỏ qua index. Truy vấn danh sách quan trọng có test `EXPLAIN` trên câu truy vấn thật của service.
   - Phân trang danh sách bằng con trỏ keyset (giá trị sắp xếp + `id`), không dùng `OFFSET`.
   - Response công khai không bao giờ có `stream_video_id`; đường phát chỉ cấp qua endpoint `play`.
-  - Dữ liệu mẫu cho dev: `uv run python -m app.cli seed-demo` (không chạy ở prod, chạy lại không trùng).
+  - Dữ liệu mẫu cho dev: `DEMO_PASSWORD=... uv run python -m app.cli seed-demo` (tiếng Anh, có 3 tài khoản demo viewer/vip/admin `@example.com`; không chạy ở prod, chạy lại không trùng).
 - **Video / Cloudflare Stream** (`app/services/stream.py`, `play.py`, `episode_video.py`):
   - Quyền xem chỉ kiểm tra ở `services/play.py` (`GET /episodes/{id}/play`); nơi khác không tự cấp URL phát. Token ký cục bộ (RS256), **không gọi API Cloudflare khi người xem bấm xem**.
   - Mọi gọi API Cloudflare đi qua `services/stream.py` (`_call`, timeout ngắn); test thay `stream.transport` bằng `httpx.MockTransport`, không bao giờ gọi Cloudflare thật. Lỗi mạng/HTTP thành `StreamProviderError` (502), thiếu cấu hình thành `StreamNotConfiguredError` (503).

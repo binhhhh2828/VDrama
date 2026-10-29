@@ -2,6 +2,7 @@
 
 > Mục tiêu: website xem phim bộ có tài khoản, gói VIP, video bảo vệ quyền xem, chạy production thật trên VPS.
 > Quy mô khởi điểm: < 100 người xem/ngày. Ưu tiên: đơn giản, rẻ, dễ vận hành, dễ nâng cấp.
+> **Thị trường (chốt 2026-10-29): quốc tế, không phải Việt Nam. Ngôn ngữ ưu tiên tiếng Anh** cho giao diện, thông báo của API và email. Domain `vdrama.com`. Thiết kế giao diện: canvas [VDrama Web Design](https://claude.ai/artifact/Kto2QDvHNF4qtuLEAXUja2) (nền tối, gradient hồng → cam theo logo, Be Vietnam Pro + Playfair Display như web tĩnh mẫu https://vdramademo.netlify.app/).
 
 ---
 
@@ -25,7 +26,7 @@ Kiến trúc và bảo mật ổn. Đã sửa/bổ sung:
 
 | Thành phần | Lựa chọn | Ghi chú |
 |---|---|---|
-| Domain + DNS | `vdrama.vn` + Cloudflare DNS | Bật proxy (CDN/WAF cơ bản), SSL Full (strict) |
+| Domain + DNS | `vdrama.com` + Cloudflare DNS | Thị trường quốc tế nên dùng `.com` (chốt 2026-10-29, trước đó ghi `vdrama.vn`). Bật proxy (CDN/WAF cơ bản), SSL Full (strict) |
 | Server | 1 VPS Linux (Ubuntu 24.04 LTS), 2 vCPU / 2–4 GB RAM | Đặt VPS ở Singapore, cùng vùng với Neon để API↔DB độ trễ thấp (video đi qua Cloudflare nên không phụ thuộc vị trí VPS). Thêm swap 2 GB |
 | Frontend | Next.js (App Router, TypeScript) | Chạy container riêng |
 | Backend | FastAPI (Python 3.12) + SQLAlchemy 2 + Alembic | Chạy container riêng |
@@ -40,8 +41,8 @@ Kiến trúc và bảo mật ổn. Đã sửa/bổ sung:
 ```
 Người dùng → Cloudflare DNS/CDN → VPS
                                    ├─ Caddy (443)
-                                   │    ├─ vdrama.vn/*      → web (Next.js :3000)
-                                   │    └─ vdrama.vn/api/*  → api (FastAPI :8000)
+                                   │    ├─ vdrama.com/*      → web (Next.js :3000)
+                                   │    └─ vdrama.com/api/*  → api (FastAPI :8000)
                                    └─ Docker Compose
 Người dùng ←— video (HLS) ←— Cloudflare Stream (signed token do API cấp)
 API → Neon PostgreSQL
@@ -63,7 +64,7 @@ API → Neon PostgreSQL
 1. **Nội dung**: phim do team của bạn sản xuất nên không cần mua bản quyền bên thứ ba. Chỉ nên có một văn bản ngắn xác nhận bạn được quyền khai thác thương mại với team làm phim, để tránh tranh chấp về sau.
 2. **Chi phí video**: Stream tính phí theo phút lưu trữ + phút được xem. Ví dụ trong phân tích trước: 100 người × 30 phút/ngày ≈ 90.000 phút xem/tháng. Hãy **kiểm tra bảng giá Cloudflare Stream hiện hành** và tự tính lại trước khi mở bán. Nên đặt cảnh báo chi tiêu (billing alert).
 3. **Điều khoản dịch vụ**: kiểm tra điều khoản thương mại của Neon, Cloudflare, VPS. Không dùng gói cá nhân/phi thương mại cho sản phẩm bán tiền.
-4. **Thanh toán**: **đã chốt (2026-10-27) dùng SePay + VietQR trước** (xem Giai đoạn 5), MoMo/VNPay để sau. Lưu ý cho khi làm MoMo/VNPay: các cổng này thường yêu cầu pháp nhân (công ty hoặc hộ kinh doanh) có đăng ký kinh doanh, tài khoản ngân hàng tương ứng, và website đã có đủ trang pháp lý, giá, chính sách hoàn tiền. Thời gian duyệt production có thể kéo dài nhiều ngày đến vài tuần (tự xác minh với từng cổng). Đây là đường găng của lịch ra mắt: nếu chưa có pháp nhân, cần xử lý trước; nếu cần ra mắt sớm, có thể dùng cổng trung gian dễ đăng ký hơn (PayOS, SePay) cho giai đoạn đầu.
+4. **Thanh toán**: **đã chốt (2026-10-27) dùng SePay + VietQR trước** (xem Giai đoạn 5), MoMo/VNPay để sau. **Cập nhật 2026-10-29 (thị trường quốc tế)**: tạm thời vẫn làm SePay; **PayPal** cho khách nước ngoài triển khai sau (Giai đoạn 9). Lưu ý: SePay + VietQR là chuyển khoản ngân hàng trong Việt Nam, khách nước ngoài gần như không dùng được, nên trước khi bán thật cho thị trường quốc tế cần có PayPal (hoặc cổng quốc tế khác). Lưu ý cho khi làm MoMo/VNPay: các cổng này thường yêu cầu pháp nhân (công ty hoặc hộ kinh doanh) có đăng ký kinh doanh, tài khoản ngân hàng tương ứng, và website đã có đủ trang pháp lý, giá, chính sách hoàn tiền. Thời gian duyệt production có thể kéo dài nhiều ngày đến vài tuần (tự xác minh với từng cổng). Đây là đường găng của lịch ra mắt: nếu chưa có pháp nhân, cần xử lý trước; nếu cần ra mắt sớm, có thể dùng cổng trung gian dễ đăng ký hơn (PayOS, SePay) cho giai đoạn đầu.
 5. **Pháp lý web** (nên hỏi luật sư hoặc cơ quan quản lý để xác minh, vì quy định thay đổi):
    - Chính sách bảo mật, Điều khoản sử dụng, Chính sách hoàn tiền; có ô đồng ý khi đăng ký.
    - Quy định về bảo vệ dữ liệu cá nhân (bạn thu thập email, lịch sử xem, thông tin thanh toán).
@@ -186,7 +187,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [ ] Có văn bản xác nhận quyền khai thác thương mại phim với team sản xuất
 - [ ] Xác định pháp nhân (công ty/hộ kinh doanh) dùng để đăng ký cổng thanh toán và xuất hóa đơn
 - [ ] Hỏi luật sư/cơ quan quản lý về các mục ở Mục 2.5 (giấy phép dịch vụ, dữ liệu cá nhân, TMĐT)
-- [ ] Đăng ký domain `vdrama.vn`, chuyển nameserver sang Cloudflare
+- [ ] Đăng ký domain `vdrama.com` (thị trường quốc tế), chuyển nameserver sang Cloudflare
 - [ ] Tạo tài khoản: GitHub (repo private), Cloudflare (bật Stream), Neon, VPS, Sentry
 - [ ] Đăng ký SePay, liên kết tài khoản ngân hàng nhận tiền (nên là tài khoản của pháp nhân dùng để xuất hóa đơn), cấu hình tiền tố mã thanh toán và webhook; xác minh với SePay điều kiện dùng cho mục đích kinh doanh. MoMo/VNPay để sau khi đã kiểm chứng mô hình kinh doanh
 - [ ] Đặt billing alert cho Cloudflare và VPS
@@ -204,7 +205,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (plan chi tiết: [docs/plans/gd2-b1-database.md](docs/plans/gd2-b1-database.md); xong 2026-10-27 trên Postgres local, **chưa thử trên Neon thật** vì chưa có tài khoản) Kết nối Neon, SQLAlchemy + Alembic, migration đầu tiên (toàn bộ bảng mục 4); dùng chuỗi kết nối pooled cho app, chuỗi direct cho migration, và cấu hình driver tương thích với pooler
 - [x] (plan chi tiết: [docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md](docs/plans/gd2-b1b-trang-thai-xoa-mem-nhat-ky.md), xong 2026-10-27, migration `0007`–`0009`) Bổ sung schema: trạng thái đơn/gói VIP có kiểm soát, `payments.failure_code/detail`, xóa mềm (không mất dữ liệu khi admin xóa nhầm), nhật ký thao tác `audit_logs` để truy vết
 - [x] (plan chi tiết: [docs/plans/gd2-b2-auth.md](docs/plans/gd2-b2-auth.md), xong 2026-10-28 trên branch `feat/auth`; tài liệu cho frontend: [docs/api.md](docs/api.md); có ma trận phân quyền khách/user/VIP/admin) Auth: đăng ký, đăng nhập, refresh, `/me`, phân quyền admin
-- [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
+- [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain; nội dung email tiếng Anh)
+- [ ] **Chuyển thông báo của API sang tiếng Anh** (chốt 2026-10-29, thị trường quốc tế): mọi `message` trong `ApiError` và lỗi validate, tài liệu `docs/api.md` phần nội dung trả về; frontend vẫn xử lý theo `code` (không đổi). Ví dụ domain trong code, tài liệu, `.env.example` đổi sang `vdrama.com`. Dời ra sau bản demo frontend (Bước 15 của `docs/plans/gd3-frontend.md`), vì frontend hiện câu lỗi theo `code`
 - [x] (plan chi tiết: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md), xong 2026-10-28 trên branch `feat/catalog`; có lệnh `seed-demo` tạo dữ liệu mẫu cho frontend) Catalog: series, episodes, thể loại, phân trang
 - [x] (cùng plan catalog, Bước 4, xong 2026-10-28: `GET /api/v1/search`) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
 - [x] (plan chi tiết: [docs/plans/gd2-b4-stream-play.md](docs/plans/gd2-b4-stream-play.md), xong 2026-10-29 trên branch `feat/stream`; **chưa thử với tài khoản Cloudflare thật**, danh sách cần xác nhận ở Bước 5 của plan; lệnh cài đặt `stream-create-signing-key`, `stream-set-webhook`; làm trước xác thực email vì `play` chặn frontend/admin và test được khi chưa có tài khoản Cloudflare) Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
@@ -213,6 +215,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (cùng plan activity ở trên, Bước 5, xong 2026-10-29: `app/tests/test_permissions.py` kiểm kê route, ma trận quyền, tài liệu khớp mã lỗi, luồng đầu-cuối mức API) Test tự động cho auth, play, phân quyền
 
 ### Giai đoạn 3 — Frontend
+Giao diện tiếng Anh, theo canvas thiết kế [VDrama Web Design](https://claude.ai/artifact/Kto2QDvHNF4qtuLEAXUja2) (7 bảng: trang chủ, chi tiết phim, xem phim, VIP, đăng nhập, mobile, style guide). Duyệt xong thì ghi hệ thiết kế (màu, font, bo góc, thành phần) vào `docs/design.md` và lưu logo vào repo trước khi code. **Font chốt 2026-10-29: 100% sans-serif, Inter** (tiêu đề 800–900, menu/phụ đề 400–500; Geist dự phòng). Plan chi tiết: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md) (duyệt 2026-10-29, 15 bước; ưu tiên bản demo đủ mọi chức năng **cho cả người xem và admin** ở Bước 1–13, dữ liệu mẫu tiếng Anh và 3 tài khoản demo; chức năng chưa có API làm giao diện tĩnh có nhãn Preview; thông báo API tiếng Anh dời xuống Bước 15).
+
 - [ ] Layout, header, footer, responsive mobile-first
 - [ ] Trang chủ (banner, danh sách mới/hot), trang thể loại, trang tìm kiếm
 - [ ] Trang chi tiết phim + danh sách tập
@@ -223,7 +227,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [ ] Trang tĩnh: Điều khoản, Bảo mật, Hoàn tiền, Liên hệ
 
 ### Giai đoạn 4 — Admin & nội dung
-- [ ] Trang admin (bảo vệ role admin): quản lý series, tập phim, gói VIP
+- [ ] Trang admin (bảo vệ role admin): quản lý series, tập phim, gói VIP. Giao diện đã làm sẵn ở Giai đoạn 3 (Bước 12–13 của `docs/plans/gd3-frontend.md`, phần chưa có API là Preview); giai đoạn này làm API admin rồi nối vào
 - [ ] Ghim và sắp thứ tự phim trên banner trang chủ: thêm cột `series.featured_rank` (hoặc `banner_priority`) bằng migration, admin chọn phim lên banner; API banner đổi từ `/series?with_banner=true` sang sắp theo cột này (chốt 2026-10-28, hiện tạm dùng phim mới nhất có banner)
 - [ ] Upload video trực tiếp lên Cloudflare Stream từ trình duyệt (tus/direct upload)
 - [ ] Theo dõi trạng thái chuyển mã, bật/tắt xuất bản
@@ -256,7 +260,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 ### Giai đoạn 6 — Hạ tầng & Deploy
 - [ ] Dựng VPS: tạo user không root, SSH key, ufw, fail2ban, Docker, Docker Compose
 - [ ] `docker-compose.yml` production (web, api, caddy), restart policy, healthcheck, giới hạn log
-- [ ] Caddyfile: `vdrama.vn` → web, `vdrama.vn/api/*` → api (một domain, không cần CORS)
+- [ ] Caddyfile: `vdrama.com` → web, `vdrama.com/api/*` → api (một domain, không cần CORS)
 - [ ] Cloudflare DNS trỏ về VPS, SSL Full (strict) với Cloudflare Origin Certificate cài trên Caddy (tránh lỗi cấp chứng chỉ qua proxy), bật cache cho static
 - [ ] Next.js build chế độ `standalone` để image nhỏ; build image trên CI, không build trên VPS
 - [ ] Mỗi lần deploy gắn tag image theo commit để rollback nhanh bằng cách chạy lại tag cũ
@@ -286,6 +290,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 ### Giai đoạn 9 — Sau ra mắt (tùy chọn)
 - [ ] Bình luận/đánh giá, thông báo tập mới, gợi ý phim
 - [ ] Đăng nhập Google
+- [ ] **PayPal cho khách quốc tế** (chốt 2026-10-29, triển khai sau SePay): dùng lại bảng `payments`/`payment_events` với `provider='paypal'`; xác thực webhook theo chữ ký PayPal, idempotent như SePay; giá theo USD
 - [ ] Thêm MoMo, VNPay (dùng lại bảng payments/payment_events, thêm provider mới)
 - [ ] Hỗ trợ phụ đề nhiều ngôn ngữ
 - [ ] Khi tải tăng: nâng VPS, hoặc tách frontend/backend sang dịch vụ managed
@@ -313,7 +318,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 
 ## 9. Definition of Done cho bản production
 
-- [ ] Truy cập `https://vdrama.vn` qua HTTPS, API tại `https://vdrama.vn/api`; truy cập thẳng IP VPS bị chặn
+- [ ] Truy cập `https://vdrama.com` qua HTTPS, API tại `https://vdrama.com/api`; truy cập thẳng IP VPS bị chặn
 - [ ] Đăng ký có xác thực email, quên mật khẩu hoạt động, email không vào spam
 - [ ] Push vào `main` tự deploy, có thể rollback
 - [ ] Chỉ người có quyền mới xem được video (đã kiểm chứng)

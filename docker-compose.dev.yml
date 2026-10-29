@@ -40,7 +40,11 @@ services:
       migrate: { condition: service_completed_successfully }
 
   web:
-    build: ./apps/web
+    build:
+      context: ./apps/web
+      args:
+        # Không có Caddy ở dev: Next.js chuyển /api/* của trình duyệt sang API.
+        API_PROXY_TARGET: http://api:8000
     environment:
       API_INTERNAL_URL: http://api:8000
     ports: ["${WEB_PORT:-3000}:3000"]
