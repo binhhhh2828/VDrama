@@ -5,35 +5,56 @@
 export type PreviewPlan = {
   id: string;
   name: string;
+  days: number;
   priceUsd: string;
+  /** Giá chuyển khoản trong nước (khớp gói mẫu của seed-demo). */
+  priceVnd: number;
   period: string;
-  note?: string;
+  note: string;
   featured?: boolean;
 };
 
 export const PREVIEW_PLANS: PreviewPlan[] = [
-  { id: "monthly", name: "Monthly", priceUsd: "$4.99", period: "/ month" },
+  {
+    id: "monthly",
+    name: "1 month",
+    days: 30,
+    priceUsd: "$4.99",
+    priceVnd: 99_000,
+    period: "month",
+    note: "30 days of VIP",
+  },
   {
     id: "quarterly",
-    name: "Quarterly",
+    name: "3 months",
+    days: 90,
     priceUsd: "$12.99",
-    period: "/ 3 months",
-    note: "Save 13%",
+    priceVnd: 259_000,
+    period: "3 months",
+    note: "90 days · save 13%",
     featured: true,
   },
-  { id: "yearly", name: "Yearly", priceUsd: "$44.99", period: "/ year", note: "Save 25%" },
+  {
+    id: "yearly",
+    name: "12 months",
+    days: 365,
+    priceUsd: "$44.99",
+    priceVnd: 899_000,
+    period: "year",
+    note: "365 days · save 25%",
+  },
 ];
 
 export const VIP_PERKS = [
-  "Every episode, including VIP-only ones",
-  "Full HD streaming",
+  "All VIP episodes, every series",
+  "Full HD 1080p",
   "No ads",
-  "Watch on up to 2 devices",
+  "New episodes the day they drop",
 ];
 
 /** Thông tin chuyển khoản MẪU cho trang thanh toán. Không phải tài khoản thật. */
 export const PREVIEW_TRANSFER = {
-  bank: "Sample Bank",
+  bank: "Sample Bank (not a real account)",
   accountName: "VDRAMA DEMO",
   accountNumber: "0000 0000 0000",
   orderCode: "VD7K2QX9",

@@ -183,7 +183,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - `/account/list`: yêu thích, Load more.
     - `/account/history`: Xem tiếp, xóa một tập, xóa tất cả có hỏi lại.
   - Hoàn thành khi: xóa / bỏ thì giao diện cập nhật ngay; khách vào đây bị chuyển sang đăng nhập.
-- [ ] **Bước 11: VIP, thanh toán, trang tĩnh, SEO**
+- [x] **Bước 11: VIP, thanh toán, trang tĩnh, SEO** (xong 2026-10-29; /vip theo canvas, giá USD mẫu; /vip/checkout Preview có hai cách trả: chuyển khoản QR (số tiền VND khớp gói mẫu của seed) và PayPal/thẻ "coming later", mã QR là hình giữ chỗ có chữ SAMPLE, không quét được, không gọi API; trang pháp lý có khung + chỗ trống và nhãn Draft; ảnh chia sẻ mặc định 1200×630 từ logo; sitemap chỉ có 10 phim đã xuất bản, đọc lúc request (build không cần API); robots chặn /account, /admin, /api, trang đăng nhập, checkout, search. FAQ trang VIP nói "tối đa 2 thiết bị" theo kế hoạch Giai đoạn 5, backend chưa giới hạn)
   - Việc:
     - `/vip` theo canvas với giá mẫu từ `preview-data.ts`, nhãn Preview.
     - `/vip/checkout?plan=`: VietQR mẫu (ảnh QR giữ chỗ, không phải tài khoản thật), thông tin chuyển khoản mẫu, đếm ngược hạn đơn; nút "I've paid" bị tắt, ghi "Payments are not live yet".
