@@ -23,6 +23,10 @@ LOGIN_PER_IP = parse("10/minute")
 LOGIN_PER_IP_EMAIL = parse("5/minute")
 REGISTER_PER_IP = parse("5/hour")
 REFRESH_PER_IP = parse("30/minute")
+# Xin URL xem phim: người xem bình thường chỉ vài lần mỗi tập; chặn script xin token hàng loạt.
+PLAY_PER_USER = parse("60/minute")
+# Chống đếm trùng lượt xem: mỗi (user, tập) tối đa 1 lượt mỗi 6 giờ.
+VIEW_COUNT_WINDOW = parse("1/6 hours")
 
 _storage = storage_from_string("memory://")
 _limiter = MovingWindowRateLimiter(_storage)
@@ -53,6 +57,11 @@ def hit(item: RateLimitItem, *keys: str | None) -> None:
         return
     reset_at = _limiter.get_window_stats(item, *identifiers).reset_time
     raise too_many(max(1, math.ceil(reset_at - time.time())))
+
+
+def first_in_window(item: RateLimitItem, *keys: str) -> bool:
+    """Tính một lần; True nếu còn trong ngưỡng. Không ném lỗi (dùng để chống đếm trùng)."""
+    return _limiter.hit(item, *(str(k) for k in keys))
 
 
 def reset() -> None:

@@ -35,6 +35,9 @@ class ErrorCode(StrEnum):
     EMAIL_TAKEN = "email_taken"
     SESSION_EXPIRED = "session_expired"
     VIP_REQUIRED = "vip_required"
+    # Xem phim
+    VIDEO_NOT_READY = "video_not_ready"
+    STREAM_UNAVAILABLE = "stream_unavailable"
 
 
 # Lỗi HTTP chung (route không tồn tại, sai method...) đổi về code + câu tiếng Việt.
