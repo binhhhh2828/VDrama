@@ -1,4 +1,14 @@
-// Trang xem phim có khung riêng (header gọn, không có footer và thanh dưới đáy) để tập trung vào video.
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+
+// Trang xem phim: header của site (trong suốt như các trang khác), nội dung tập trung vào video, chân
+// trang ở cuối. Không có thanh Get VIP dính đáy để khỏi che video.
 export default function WatchLayout({ children }: { children: React.ReactNode }) {
-  return <div className="flex flex-1 flex-col">{children}</div>;
+  return (
+    <>
+      <SiteHeader />
+      <div className="flex flex-1 flex-col">{children}</div>
+      <SiteFooter />
+    </>
+  );
 }

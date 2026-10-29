@@ -15,6 +15,8 @@ type ViewerData = {
   progress: Map<number, SeriesProgressItem>; // theo episode_id
   favorited: boolean;
   setFavorited: (value: boolean) => void;
+  /** Ghi tiến độ vừa lưu vào bộ nhớ để quay lại tập đó phát tiếp đúng chỗ (không phải tải lại). */
+  recordProgress: (episodeId: number, number: number, sec: number) => void;
 };
 
 const Ctx = createContext<ViewerData | null>(null);
@@ -61,6 +63,20 @@ export function SeriesViewerProvider({
     setLoaded((prev) => (prev ? { ...prev, favorited: value } : prev));
   }, []);
 
+  const recordProgress = useCallback((episodeId: number, number: number, sec: number) => {
+    setLoaded((prev) => {
+      if (!prev) return prev;
+      const progress = new Map(prev.progress);
+      progress.set(episodeId, {
+        episode_id: episodeId,
+        number,
+        progress_sec: sec,
+        updated_at: new Date().toISOString(),
+      });
+      return { ...prev, progress };
+    });
+  }, []);
+
   const value = useMemo<ViewerData>(() => {
     const mine = loaded && loaded.userId === userId ? loaded : null;
     return {
@@ -68,8 +84,9 @@ export function SeriesViewerProvider({
       progress: mine?.progress ?? new Map(),
       favorited: mine?.favorited ?? false,
       setFavorited,
+      recordProgress,
     };
-  }, [loaded, userId, session.status, setFavorited]);
+  }, [loaded, userId, session.status, setFavorited, recordProgress]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

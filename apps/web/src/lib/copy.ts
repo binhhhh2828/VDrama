@@ -4,7 +4,9 @@
 export const copy = {
   nav: {
     home: "Home",
-    browse: "Browse",
+    browse: "Series",
+    download: "Download",
+    news: "News",
     myList: "My List",
     vip: "VIP",
     account: "Account",

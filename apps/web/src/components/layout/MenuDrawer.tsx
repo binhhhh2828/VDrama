@@ -6,14 +6,13 @@ import { Suspense, useCallback, useEffect, useRef, type ComponentType } from "re
 import { Logo } from "@/components/brand/Logo";
 import { useSession } from "@/components/session/SessionProvider";
 import {
-  BookmarkIcon,
   CloseIcon,
-  CrownIcon,
+  DownloadBoxIcon,
   GridIcon,
-  HomeIcon,
   MenuIcon,
+  NewsIcon,
   PlaySquareIcon,
-  UserIcon,
+  ReelIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
@@ -21,12 +20,13 @@ import { activeHref } from "./nav";
 
 type Item = { href: string; label: string; Icon: ComponentType<{ size?: number }> };
 
+// Bốn mục như ngăn kéo NetShort (ảnh 05): Home, Series (Phim bộ), Download (Tải xuống), News (Thông tin).
+// My List, VIP và tài khoản nằm ở avatar và trang tài khoản.
 const BASE_ITEMS: Item[] = [
-  { href: "/", label: copy.nav.home, Icon: HomeIcon },
+  { href: "/", label: copy.nav.home, Icon: ReelIcon },
   { href: "/browse", label: copy.nav.browse, Icon: PlaySquareIcon },
-  { href: "/account/list", label: copy.nav.myList, Icon: BookmarkIcon },
-  { href: "/vip", label: copy.nav.vip, Icon: CrownIcon },
-  { href: "/account", label: copy.nav.account, Icon: UserIcon },
+  { href: "/download", label: copy.nav.download, Icon: DownloadBoxIcon },
+  { href: "/news", label: copy.nav.news, Icon: NewsIcon },
 ];
 const ADMIN_ITEM: Item = { href: "/admin", label: copy.nav.admin, Icon: GridIcon };
 

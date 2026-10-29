@@ -64,7 +64,8 @@ export function SeriesActions({
   );
 }
 
-export function MyListButton({ seriesId }: { seriesId: number }) {
+/** Bật/tắt My List của một phim. Khách bấm thì chuyển sang đăng nhập rồi quay lại trang này. */
+export function useMyList(seriesId: number) {
   const session = useSession();
   const viewer = useSeriesViewer();
   const router = useRouter();
@@ -92,12 +93,24 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
     }
   }
 
+  return {
+    on,
+    busy,
+    error,
+    toggle,
+    disabled: busy || (session.status === "user" && !viewer.ready),
+  };
+}
+
+export function MyListButton({ seriesId }: { seriesId: number }) {
+  const { on, error, toggle, disabled } = useMyList(seriesId);
+
   return (
     <>
       <button
         type="button"
         aria-pressed={on}
-        disabled={busy || (session.status === "user" && !viewer.ready)}
+        disabled={disabled}
         onClick={toggle}
         className={cn(
           "inline-flex min-h-12 items-center gap-2.5 rounded-full border px-[22px] text-base font-semibold transition disabled:opacity-70",

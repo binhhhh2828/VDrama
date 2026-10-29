@@ -224,3 +224,140 @@ export const PlaySquareIcon = (p: IconProps) => (
     <path d="M3 8h18M10 11.5v5l4.5-2.5z" />
   </Stroke>
 );
+
+export const ChevronUpIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="m6 15 6-6 6 6" />
+  </Stroke>
+);
+
+/** Hai lớp chồng nhau (dải "All episodes"). */
+export const LayersIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 13 9 5 9-5M3 17.5l9 5 9-5" />
+  </Stroke>
+);
+
+export const LinkIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+  </Stroke>
+);
+
+/** Hình trong hình (nút PiP của player). */
+export const PipIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M21 10V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5" />
+    <rect x="13" y="13" width="8" height="6" rx="1.5" fill="currentColor" />
+  </Stroke>
+);
+
+/** Trái tim đặc (lượt thích). */
+export function HeartIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <path d="M12 21s-8-5.2-8-11.3A4.7 4.7 0 0 1 8.7 5c1.3 0 2.5.6 3.3 1.7A4.2 4.2 0 0 1 15.3 5 4.7 4.7 0 0 1 20 9.7C20 15.8 12 21 12 21Z" />
+    </svg>
+  );
+}
+
+/** Dấu trang đặc (lượt lưu). */
+export function BookmarkFillIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z" />
+    </svg>
+  );
+}
+
+/** Ba thanh nhạc (tập đang phát). */
+export function BarsIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <rect x="4" y="6" width="4" height="14" rx="1.5" />
+      <rect x="10" y="3" width="4" height="17" rx="1.5" />
+      <rect x="16" y="9" width="4" height="11" rx="1.5" />
+    </svg>
+  );
+}
+
+export function FacebookIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <path d="M13.5 22v-8h2.7l.5-3.2h-3.2V8.7c0-.9.4-1.7 1.8-1.7h1.5V4.2S15.6 4 14.4 4C11.9 4 10.2 5.5 10.2 8.2v2.6H7.5V14h2.7v8h3.3Z" />
+    </svg>
+  );
+}
+
+export function XIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <path d="M18.9 2H22l-7.2 8.2L23 22h-6.6l-5.2-6.7L5.2 22H2l7.7-8.8L1.5 2h6.8l4.7 6.1L18.9 2Zm-1.2 18h1.8L7.3 3.9H5.4L17.7 20Z" />
+    </svg>
+  );
+}
+
+/** Cuộn phim có đuôi (mục Home trong ngăn kéo, ảnh 05). */
+export const ReelIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <circle cx="11.5" cy="11.5" r="8.5" />
+    <circle cx="11.5" cy="11.5" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="11.5" cy="7" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="7.4" cy="10.4" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="15.6" cy="10.4" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="11.5" cy="16" r="1.1" fill="currentColor" stroke="none" />
+    <path d="m17.5 17.5 3 3" />
+  </Stroke>
+);
+
+/** Điện thoại có mũi tên tải xuống (mục Download). */
+export const DownloadBoxIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="5" y="3" width="14" height="18" rx="2.5" />
+    <path d="M12 7.5v6M9.4 11.2l2.6 2.6 2.6-2.6M8.5 17.5h7" />
+  </Stroke>
+);
+
+/** Tờ báo (mục News). */
+export const NewsIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M6 3h8l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+    <path d="M8 11h7M8 15h4" />
+  </Stroke>
+);

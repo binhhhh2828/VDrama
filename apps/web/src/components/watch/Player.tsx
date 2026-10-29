@@ -3,11 +3,13 @@
 import type Hls from "hls.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import {
+  CloseIcon,
   FullscreenIcon,
   MuteIcon,
-  NextIcon,
   PauseIcon,
+  PipIcon,
   PlayIcon,
   VolumeIcon,
 } from "@/components/ui/icons";
@@ -21,6 +23,9 @@ type Props = {
   /** Tua tới giây này khi video sẵn sàng (tiến độ cũ). */
   startAt: number;
   label: string;
+  /** Nút X góc trái trên: thoát về trang phim. */
+  closeHref: string;
+  prevHref: string | null;
   nextHref: string | null;
   /** Lưu tiến độ; `final`: lúc đóng trang (gửi bằng keepalive). */
   onProgress: (sec: number, final: boolean) => void;
@@ -44,6 +49,8 @@ export function Player({
   source,
   startAt,
   label,
+  closeHref,
+  prevHref,
   nextHref,
   onProgress,
   onEnded,
@@ -57,6 +64,9 @@ export function Player({
   const startRef = useRef(startAt);
   const refreshingRef = useRef(false);
   const onProgressRef = useRef(onProgress);
+  // Vị trí xem gần nhất. Lúc rời tập, effect dọn dẹp chạy sau khi phần tử video đã bị gỡ khỏi trang
+  // (videoRef = null) và hls.js đã reset video, nên không đọc currentTime ở đó được.
+  const lastTimeRef = useRef(0);
   const renewRef = useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
     onProgressRef.current = onProgress;
@@ -173,8 +183,8 @@ export function Player({
 
   useEffect(() => {
     const flush = () => {
-      const v = videoRef.current;
-      if (v && v.currentTime > 0) onProgressRef.current(v.currentTime, true);
+      const t = lastTimeRef.current;
+      if (t > 0) onProgressRef.current(t, true);
     };
     const onHidden = () => document.visibilityState === "hidden" && flush();
     window.addEventListener("pagehide", flush);
@@ -221,6 +231,19 @@ export function Player({
     else video?.webkitEnterFullscreen?.(); // iPhone chỉ cho video toàn màn hình
   }, []);
 
+  const [canPip, setCanPip] = useState(false);
+  useEffect(() => {
+    // Chỉ biết trình duyệt có hỗ trợ hình-trong-hình sau khi gắn vào trang.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCanPip(typeof document !== "undefined" && document.pictureInPictureEnabled === true);
+  }, []);
+  const togglePip = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (document.pictureInPictureElement) void document.exitPictureInPicture();
+    else void v.requestPictureInPicture?.().catch(() => {});
+  }, []);
+
   // Hiện thanh điều khiển khi rê chuột / chạm, ẩn sau 3 giây khi đang phát.
   const hideTimer = useRef<number | undefined>(undefined);
   const poke = useCallback(() => {
@@ -243,6 +266,7 @@ export function Player({
       m: toggleMute,
       f: toggleFullscreen,
       n: () => nextHref && (window.location.href = nextHref),
+      p: () => prevHref && (window.location.href = prevHref),
     };
     const fn = map[e.key] ?? map[e.key.toLowerCase()];
     if (fn) {
@@ -254,6 +278,7 @@ export function Player({
 
   const progress = duration ? time / duration : 0;
   const showControls = controlsVisible || !playing;
+  const circle = "flex size-11 items-center justify-center rounded-full text-fg transition-opacity";
 
   return (
     <div
@@ -265,7 +290,7 @@ export function Player({
       onMouseMove={poke}
       onTouchStart={poke}
       className={cn(
-        "group relative aspect-video w-full overflow-hidden bg-black outline-none sm:rounded-[18px] sm:border sm:border-line",
+        "group relative aspect-[9/16] w-full overflow-hidden bg-black outline-none",
         "focus-visible:ring-2 focus-visible:ring-link",
         !showControls && "cursor-none",
       )}
@@ -274,7 +299,7 @@ export function Player({
         ref={videoRef}
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full bg-black"
+        className="absolute inset-0 h-full w-full bg-black object-contain"
         onClick={toggle}
         onDoubleClick={toggleFullscreen}
         onPlay={() => {
@@ -291,10 +316,16 @@ export function Player({
           setPlaying(false);
           setEnded(true);
           const v = videoRef.current;
-          if (v) onProgressRef.current(v.duration, false);
+          if (v) {
+            lastTimeRef.current = v.duration;
+            onProgressRef.current(v.duration, false);
+          }
           onEnded();
         }}
-        onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => {
+          lastTimeRef.current = e.currentTarget.currentTime;
+          setTime(e.currentTarget.currentTime);
+        }}
         onDurationChange={(e) => setDuration(e.currentTarget.duration || 0)}
         onProgress={(e) => {
           const b = e.currentTarget.buffered;
@@ -310,10 +341,19 @@ export function Player({
         onError={() => setFailed(true)}
       />
 
-      <span className="pointer-events-none absolute top-3 left-3 rounded-full border border-fg/20 bg-canvas/60 px-2.5 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase sm:top-4 sm:left-4 sm:text-xs">
-        {label}
-        {source.sample ? " · sample video" : ""}
-      </span>
+      {/* Nút X (thoát về trang phim), góc trái trên như ảnh 10. */}
+      <Link
+        href={closeHref}
+        aria-label="Close player"
+        className={cn(circle, "absolute top-1.5 left-1.5 bg-black/45 hover:text-fg")}
+      >
+        <CloseIcon size={20} />
+      </Link>
+      {source.sample ? (
+        <span className="pointer-events-none absolute top-3 right-3 rounded-full bg-black/45 px-2 py-1 text-[10px] font-semibold tracking-[0.06em] uppercase">
+          Sample video
+        </span>
+      ) : null}
 
       {failed ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-canvas/85 p-6 text-center">
@@ -335,7 +375,7 @@ export function Player({
           {waiting && playing ? (
             <span
               aria-hidden="true"
-              className="absolute top-1/2 left-1/2 size-14 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
+              className="absolute top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
             />
           ) : null}
           {!playing ? (
@@ -343,21 +383,25 @@ export function Player({
               type="button"
               aria-label="Play"
               onClick={toggle}
-              className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-on-accent shadow-lg sm:size-[84px]"
+              className="absolute top-1/2 left-1/2 flex size-[58px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-fg"
             >
-              <PlayIcon size={28} />
+              <PlayIcon size={26} />
             </button>
           ) : null}
         </>
       )}
 
-      {/* Thanh điều khiển */}
+      {/* Hàng điều khiển: phát, thời gian, thanh tua, PiP, âm lượng, toàn màn hình (ảnh 10). */}
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 flex flex-col gap-1.5 bg-linear-to-b from-canvas/0 to-canvas/90 px-3 pt-10 pb-2 transition-opacity sm:gap-3 sm:px-5 sm:pb-4",
+          "absolute inset-x-0 bottom-0 flex items-center gap-1 bg-linear-to-b from-black/0 to-black/75 px-1 pt-8 pb-1 transition-opacity",
           showControls ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       >
+        <CtrlButton label={playing ? "Pause" : "Play"} onClick={toggle}>
+          {playing ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+        </CtrlButton>
+        <span className="text-[11px] text-fg tabular-nums">{formatClock(time)}</span>
         <SeekBar
           time={time}
           duration={duration}
@@ -368,42 +412,18 @@ export function Player({
             if (v) v.currentTime = t;
           }}
         />
-        <div className="flex items-center gap-0.5 sm:gap-1.5">
-          <CtrlButton label={playing ? "Pause" : "Play"} onClick={toggle}>
-            {playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
+        <span className="text-[11px] text-fg tabular-nums">{formatClock(duration)}</span>
+        {canPip ? (
+          <CtrlButton label="Picture in picture" onClick={togglePip}>
+            <PipIcon size={18} />
           </CtrlButton>
-          <CtrlButton label="Back 10 seconds" onClick={() => seekBy(-SEEK_STEP)}>
-            <span className="text-xs font-bold">−10</span>
-          </CtrlButton>
-          <CtrlButton label="Forward 10 seconds" onClick={() => seekBy(SEEK_STEP)}>
-            <span className="text-xs font-bold">+10</span>
-          </CtrlButton>
-          {nextHref ? (
-            <CtrlButton label="Next episode" onClick={() => (window.location.href = nextHref)}>
-              <NextIcon size={20} />
-            </CtrlButton>
-          ) : null}
-          <span className="ml-1.5 text-xs text-fg-soft tabular-nums sm:text-sm">
-            {formatClock(time)} / {formatClock(duration)}
-          </span>
-          <span className="flex-1" />
-          <CtrlButton label={muted ? "Unmute" : "Mute"} onClick={toggleMute}>
-            {muted || volume === 0 ? <MuteIcon size={20} /> : <VolumeIcon size={20} />}
-          </CtrlButton>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={muted ? 0 : volume}
-            onChange={(e) => setVol(Number(e.target.value))}
-            aria-label="Volume"
-            className="hidden w-20 accent-accent sm:block"
-          />
-          <CtrlButton label="Full screen" onClick={toggleFullscreen}>
-            <FullscreenIcon size={20} />
-          </CtrlButton>
-        </div>
+        ) : null}
+        <CtrlButton label={muted || volume === 0 ? "Unmute" : "Mute"} onClick={toggleMute}>
+          {muted || volume === 0 ? <MuteIcon size={18} /> : <VolumeIcon size={18} />}
+        </CtrlButton>
+        <CtrlButton label="Full screen" onClick={toggleFullscreen}>
+          <FullscreenIcon size={18} />
+        </CtrlButton>
       </div>
     </div>
   );
@@ -424,14 +444,14 @@ function CtrlButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="flex size-11 items-center justify-center rounded-[10px] text-fg hover:bg-fg/10"
+      className="flex size-9 shrink-0 items-center justify-center rounded-full text-fg hover:bg-fg/10"
     >
       {children}
     </button>
   );
 }
 
-/** Thanh tua: input range (bàn phím, trình đọc màn hình dùng được) phủ lên thanh vẽ. */
+/** Thanh tua mảnh: input range (bàn phím, trình đọc màn hình dùng được) phủ lên thanh vẽ. */
 function SeekBar({
   time,
   duration,
@@ -447,15 +467,15 @@ function SeekBar({
 }) {
   const pct = `${progress * 100}%`;
   return (
-    <div className="relative flex h-5 items-center">
-      <div className="relative h-1.5 w-full rounded-full bg-fg/20">
+    <div className="relative flex h-9 min-w-0 flex-1 items-center">
+      <div className="relative h-[3px] w-full rounded-full bg-fg/25">
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-fg/25"
           style={{ width: `${duration ? (buffered / duration) * 100 : 0}%` }}
         />
-        <div className="absolute inset-y-0 left-0 rounded-full bg-brand-x" style={{ width: pct }} />
+        <div className="absolute inset-y-0 left-0 rounded-full bg-accent" style={{ width: pct }} />
         <span
-          className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+          className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
           style={{ left: pct }}
         />
       </div>
@@ -468,7 +488,7 @@ function SeekBar({
         onChange={(e) => onSeek(Number(e.target.value))}
         aria-label="Seek"
         aria-valuetext={`${formatClock(time)} of ${formatClock(duration)}`}
-        className="absolute inset-0 w-full cursor-pointer opacity-0"
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       />
     </div>
   );

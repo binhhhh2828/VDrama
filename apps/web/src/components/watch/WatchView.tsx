@@ -4,17 +4,33 @@ import { IS_DEMO } from "@/lib/demo/config";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useSession } from "@/components/session/SessionProvider";
-import { MyListButton, ShareButton } from "@/components/series/SeriesActions";
+import { useMyList } from "@/components/series/SeriesActions";
 import { useSeriesViewer } from "@/components/series/SeriesViewer";
 import { ButtonLink } from "@/components/ui/Button";
-import { CheckIcon, LockIcon, PlayIcon } from "@/components/ui/icons";
+import { GenreTag } from "@/components/ui/Chip";
+import {
+  BookmarkFillIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  FacebookIcon,
+  HeartIcon,
+  LayersIcon,
+  LinkIcon,
+  LockIcon,
+  PlayIcon,
+  XIcon,
+} from "@/components/ui/icons";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { Episode } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
-import { formatDuration, isFinished } from "@/lib/format";
+import { copy } from "@/lib/copy";
+import { compactNumber, isFinished } from "@/lib/format";
+import { EpisodeSheet } from "./EpisodeSheet";
 import { Player } from "./Player";
 import type { PlayerSource } from "./Player";
 
@@ -56,23 +72,46 @@ function gateFor(err: unknown): Gate {
   }
 }
 
+export type WatchSeries = {
+  id: number;
+  slug: string;
+  title: string;
+  genres: string[];
+  description: string | null;
+  favoriteCount: number;
+};
+
+/**
+ * Trang xem theo NetShort mobile (ảnh 10, 11, 23): player dọc 9:16 giữa nền đen, dải "All episodes"
+ * mở bảng danh sách tập, panel bo trên với tên + lượt thích/lưu, thể loại, tóm tắt, nút chia sẻ.
+ * `children` (hàng đề xuất, đánh giá...) do server dựng, hiện dưới panel. Desktop: player bên trái,
+ * panel bên phải.
+ */
 export function WatchView({
   series,
   episodes,
   episode,
+  likes,
+  children,
 }: {
-  series: { id: number; slug: string; title: string };
+  series: WatchSeries;
   episodes: Episode[];
   episode: Episode;
+  /** Số lượt thích mẫu (chỉ bản demo; API thật chưa có "thích"). */
+  likes: number | null;
+  children?: ReactNode;
 }) {
   const session = useSession();
   const viewer = useSeriesViewer();
+  const { recordProgress } = viewer;
   const router = useRouter();
   const userId = session.status === "user" ? session.user.id : null;
   const isVip = session.status === "user" && session.user.is_vip;
 
   const [result, setResult] = useState<{ key: string; gate: Gate } | null>(null);
-  const key = `${userId}:${episode.id}`;
+  // Có `isVip` trong khóa: mua VIP xong quay lại đúng tập này thì hỏi lại `play`, không dùng kết quả
+  // "cần VIP" cũ.
+  const key = `${userId}:${isVip}:${episode.id}`;
 
   // Khách không gọi `play` (chắc chắn 401): hiện mời đăng nhập ngay.
   useEffect(() => {
@@ -96,27 +135,38 @@ export function WatchView({
           ? result.gate
           : { kind: "loading" };
 
-  const next = episodes.find((e) => e.number > episode.number) ?? null;
+  const idx = episodes.findIndex((e) => e.id === episode.id);
+  const prev = idx > 0 ? episodes[idx - 1] : null;
+  const next = idx >= 0 && idx < episodes.length - 1 ? episodes[idx + 1] : null;
   const nextLocked = next ? next.access === "vip" && !isVip : false;
-  const nextHref = next && !nextLocked ? `/series/${series.slug}/episode/${next.number}` : null;
+  // Chevron "tập sau" luôn đi tới trang tập đó (tập VIP thì trang đó hiện màn hình mời mua);
+  // chỉ tự chuyển tập khi tập sau xem được.
+  const prevHref = prev ? `/series/${series.slug}/episode/${prev.number}` : null;
+  const nextHref = next ? `/series/${series.slug}/episode/${next.number}` : null;
+
+  const swipe = useVerticalSwipe({
+    onUp: () => nextHref && router.push(nextHref),
+    onDown: () => prevHref && router.push(prevHref),
+  });
 
   // Tiến độ cũ của tập này (đã xem xong thì phát lại từ đầu).
   const saved = viewer.progress.get(episode.id);
   const startAt =
     saved && !isFinished(saved.progress_sec, episode.duration_sec) ? saved.progress_sec : 0;
 
-  const lastSaved = useRef(-1);
+  const lastSaved = useRef({ id: -1, sec: -1 });
   const onProgress = useCallback(
     (sec: number, final: boolean) => {
       if (userId === null || !Number.isFinite(sec) || sec <= 0) return;
       const rounded = Math.floor(sec);
-      if (rounded === lastSaved.current) return;
-      lastSaved.current = rounded;
+      if (lastSaved.current.id === episode.id && lastSaved.current.sec === rounded) return;
+      lastSaved.current = { id: episode.id, sec: rounded };
+      recordProgress(episode.id, episode.number, rounded);
       void api.saveProgress(episode.id, rounded, { keepalive: final }).catch(() => {
-        lastSaved.current = -1; // lần sau thử lại
+        lastSaved.current = { id: -1, sec: -1 }; // lần sau thử lại
       });
     },
-    [userId, episode.id],
+    [userId, episode.id, episode.number, recordProgress],
   );
 
   const refreshSource = useCallback(async () => {
@@ -130,94 +180,259 @@ export function WatchView({
 
   const [autoNext, setAutoNext] = useState<number | null>(null);
   useEffect(() => {
-    if (autoNext === null || !nextHref) return;
+    if (autoNext === null || !nextHref || nextLocked) return;
     if (autoNext <= 0) {
       router.push(nextHref);
       return;
     }
     const t = window.setTimeout(() => setAutoNext((n) => (n === null ? null : n - 1)), 1000);
     return () => window.clearTimeout(t);
-  }, [autoNext, nextHref, router]);
+  }, [autoNext, nextHref, nextLocked, router]);
 
-  const label = `EP ${episode.number}${episode.title && episode.title !== `Episode ${episode.number}` ? ` · ${episode.title}` : ""}`;
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
+
+  const customTitle = episode.title && episode.title !== `Episode ${episode.number}`;
+  const label = `EP ${episode.number}${customTitle ? ` · ${episode.title}` : ""}`;
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-7">
-      <div className="flex min-w-0 flex-1 flex-col gap-5">
-        {/* Chờ có tiến độ cũ rồi mới gắn player, để tua đúng chỗ đang xem dở. */}
-        {gate.kind === "ready" && viewer.ready ? (
-          <Player
-            key={episode.id}
-            source={gate.source}
-            startAt={startAt}
-            label={label}
-            nextHref={nextHref}
-            onProgress={onProgress}
-            onEnded={() => nextHref && setAutoNext(5)}
-            refreshSource={refreshSource}
-            endOverlay={
-              nextHref && next ? (
-                <EndCard
-                  next={next}
-                  seconds={autoNext}
-                  href={nextHref}
-                  onCancel={() => setAutoNext(null)}
-                />
-              ) : undefined
-            }
-          />
-        ) : (
-          <GateScreen
-            gate={gate.kind === "ready" ? { kind: "loading" } : gate}
-            episode={episode}
-            thumbnail={episode.thumbnail_url}
-          />
-        )}
-
-        <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-0">
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <h1 className="text-[22px] font-extrabold sm:text-[28px]">
-              Episode {episode.number}
-              {episode.title !== `Episode ${episode.number}` ? ` · ${episode.title}` : ""}
-            </h1>
-            <p className="text-[15px] text-muted">
-              <Link
-                href={`/series/${series.slug}`}
-                className="font-extrabold tracking-[-0.02em] text-fg no-underline hover:text-fg"
-              >
-                {series.title}
-              </Link>
-              {episode.duration_sec ? ` · ${formatDuration(episode.duration_sec)}` : ""}
-              {` · ${episode.access === "free" ? "Free" : "VIP"}`}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            <MyListButton seriesId={series.id} />
-            <ShareButton title={`${series.title} · Episode ${episode.number}`} />
+    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:px-6">
+      <div className="flex min-w-0 flex-col bg-canvas-black lg:w-[420px] lg:shrink-0 lg:rounded-hero lg:pb-2">
+        <div className="flex justify-center pt-0.5">
+          <div
+            onTouchStart={swipe.onTouchStart}
+            onTouchEnd={swipe.onTouchEnd}
+            // Vuốt dọc trên player là chuyển tập nên chặn trình duyệt cuộn trang ở vùng này.
+            className="relative w-[min(73.3vw,340px)] touch-none lg:w-[min(380px,calc((100dvh-190px)*9/16))]"
+          >
+            {/* Chờ có tiến độ cũ rồi mới gắn player, để tua đúng chỗ đang xem dở. */}
+            {gate.kind === "ready" && viewer.ready ? (
+              <Player
+                key={episode.id}
+                source={gate.source}
+                startAt={startAt}
+                label={label}
+                closeHref={`/series/${series.slug}`}
+                prevHref={prevHref}
+                nextHref={nextHref}
+                onProgress={onProgress}
+                onEnded={() => nextHref && !nextLocked && setAutoNext(5)}
+                refreshSource={refreshSource}
+                endOverlay={
+                  next && nextHref ? (
+                    <EndCard
+                      next={next}
+                      locked={nextLocked}
+                      seconds={autoNext}
+                      href={nextHref}
+                      onCancel={() => setAutoNext(null)}
+                    />
+                  ) : undefined
+                }
+              />
+            ) : (
+              <GateScreen
+                gate={gate.kind === "ready" ? { kind: "loading" } : gate}
+                episode={episode}
+                thumbnail={episode.thumbnail_url}
+              />
+            )}
+            {/* Chevron tập trước/sau nằm ở khoảng đen bên phải player, như ảnh 10. */}
+            <nav
+              aria-label="Episode navigation"
+              className="absolute top-1/2 left-full ml-1.5 flex -translate-y-1/2 flex-col gap-3"
+            >
+              {prevHref ? (
+                <EpisodeStep href={prevHref} label="Previous episode">
+                  <ChevronUpIcon size={18} />
+                </EpisodeStep>
+              ) : null}
+              {nextHref ? (
+                <EpisodeStep href={nextHref} label="Next episode">
+                  <ChevronDownIcon size={18} />
+                </EpisodeStep>
+              ) : null}
+            </nav>
           </div>
         </div>
 
-        {next ? (
-          <UpNext next={next} slug={series.slug} locked={nextLocked} />
-        ) : (
-          <p className="mx-4 rounded-card border border-line bg-surface p-4 text-sm text-muted sm:mx-0">
-            You&apos;re on the latest episode. New episodes land weekly.
-          </p>
-        )}
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-haspopup="dialog"
+          className="flex min-h-12 items-center gap-2 px-3 py-2 text-left text-[15px] text-fg"
+        >
+          <LayersIcon size={20} className="shrink-0" />
+          <span className="min-w-0 flex-1 truncate">
+            {copy.series.allEpisodes} • {series.title}
+          </span>
+          <ChevronRightIcon size={16} className="shrink-0 text-muted" />
+        </button>
       </div>
 
-      <EpisodeSidebar
+      <EpisodeSheet
+        open={sheetOpen}
+        onClose={closeSheet}
         slug={series.slug}
         episodes={episodes}
-        currentId={episode.id}
+        currentNumber={episode.number}
         isVip={isVip}
-        signedIn={userId !== null}
       />
+
+      <div className="flex min-w-0 flex-1 flex-col gap-8 lg:max-w-[600px]">
+        <InfoPanel series={series} episode={episode} likes={likes} />
+        {children}
+      </div>
     </div>
   );
 }
 
-/** Màn hình thay cho player khi chưa xem được (khách, cần VIP, video đang xử lý...). */
+/** Panel bo trên: tên + tập, lượt thích/lưu, thể loại, tóm tắt, chia sẻ (ảnh 11). */
+function InfoPanel({
+  series,
+  episode,
+  likes,
+}: {
+  series: WatchSeries;
+  episode: Episode;
+  likes: number | null;
+}) {
+  const myList = useMyList(series.id);
+  const viewer = useSeriesViewer();
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // Số lưu của server đã gồm lựa chọn của người xem lúc tải trang; bấm lưu/bỏ lưu thì cộng/trừ 1 so
+  // với trạng thái đã tải (lấy ngay lúc đã biết được trạng thái đó).
+  const [baseFavorited, setBaseFavorited] = useState<boolean | null>(null);
+  if (viewer.ready && baseFavorited === null) setBaseFavorited(viewer.favorited);
+  const delta = baseFavorited === null ? 0 : Number(myList.on) - Number(baseFavorited);
+  const saves = Math.max(0, series.favoriteCount + delta);
+
+  const customTitle = episode.title && episode.title !== `Episode ${episode.number}`;
+
+  function open(url: string) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+  const pageUrl = () => encodeURIComponent(window.location.href);
+  const shareTitle = encodeURIComponent(`${series.title} · Episode ${episode.number} · VDrama`);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // trình duyệt chặn clipboard: bỏ qua
+    }
+  }
+
+  const share =
+    "flex size-11 items-center justify-center rounded-full text-white transition hover:brightness-110";
+
+  return (
+    <section
+      aria-label="Episode details"
+      className="rounded-t-[24px] bg-surface px-[13px] pt-5 pb-6 lg:rounded-[24px]"
+    >
+      <h1 className="px-0.5 text-base leading-snug">
+        {series.title} Episode {episode.number}
+        {customTitle ? ` · ${episode.title}` : ""}
+      </h1>
+
+      <div className="mt-3 flex items-center gap-5 px-0.5 text-[15px] text-fg-soft">
+        {likes !== null ? (
+          <span className="flex items-center gap-1.5">
+            <HeartIcon size={18} className="text-fg-soft" />
+            <span aria-label={`${likes} likes`}>{compactNumber(likes)}</span>
+          </span>
+        ) : null}
+        <button
+          type="button"
+          aria-pressed={myList.on}
+          aria-label={myList.on ? "Remove from My List" : "Add to My List"}
+          disabled={myList.disabled}
+          onClick={myList.toggle}
+          className={cn(
+            "hit-44 relative flex items-center gap-1.5 disabled:opacity-70",
+            myList.on ? "text-accent" : "text-fg-soft",
+          )}
+        >
+          <BookmarkFillIcon size={18} />
+          <span>{compactNumber(saves)}</span>
+        </button>
+      </div>
+      {myList.error ? (
+        <p role="alert" className="mt-2 text-sm text-error-soft">
+          {myList.error}
+        </p>
+      ) : null}
+
+      {series.genres.length > 0 ? (
+        <div className="mt-3.5 flex flex-wrap gap-2.5">
+          {series.genres.map((g) => (
+            <GenreTag key={g} className="px-4 py-1.5 text-[15px]">
+              {g}
+            </GenreTag>
+          ))}
+        </div>
+      ) : null}
+
+      {series.description ? (
+        <div className="mt-4 px-0.5">
+          <p className="text-[15px]">{copy.series.summary}</p>
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-2 flex w-full items-start gap-1 text-left text-[15px] leading-6 text-muted"
+          >
+            <span className={cn("min-w-0 flex-1", !expanded && "line-clamp-2")}>
+              {series.description}
+            </span>
+            <ChevronDownIcon
+              size={18}
+              className={cn("mt-1 shrink-0", expanded && "rotate-180")}
+              aria-hidden
+            />
+          </button>
+        </div>
+      ) : null}
+
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Share on Facebook"
+          onClick={() => open(`https://www.facebook.com/sharer/sharer.php?u=${pageUrl()}`)}
+          className={cn(share, "bg-[#1877f2]")}
+        >
+          <FacebookIcon size={22} />
+        </button>
+        <button
+          type="button"
+          aria-label="Share on X"
+          onClick={() =>
+            open(`https://twitter.com/intent/tweet?url=${pageUrl()}&text=${shareTitle}`)
+          }
+          className={cn(share, "bg-black ring-1 ring-fg/20")}
+        >
+          <XIcon size={18} />
+        </button>
+        <button
+          type="button"
+          aria-label={copied ? "Link copied" : "Copy link"}
+          onClick={copyLink}
+          className={cn(share, "bg-accent")}
+        >
+          <LinkIcon size={20} />
+        </button>
+        {copied ? <span className="text-sm text-muted">Copied</span> : null}
+      </div>
+    </section>
+  );
+}
+
+/** Màn hình thay cho player khi chưa xem được (khách, cần VIP, video đang xử lý...), cùng khung 9:16. */
 function GateScreen({
   gate,
   episode,
@@ -237,7 +452,7 @@ function GateScreen({
           <span
             aria-label="Loading video"
             role="status"
-            className="size-14 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
+            className="size-12 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
           />
         );
       case "signin":
@@ -250,8 +465,10 @@ function GateScreen({
                 : "Sign in first. This episode is for VIP members."
             }
           >
-            <ButtonLink href={`/signin?next=${next}`}>Sign in</ButtonLink>
-            <ButtonLink href={`/signup?next=${next}`} variant="secondary">
+            <ButtonLink href={`/signin?next=${next}`} size="sm">
+              Sign in
+            </ButtonLink>
+            <ButtonLink href={`/signup?next=${next}`} variant="secondary" size="sm">
               Create account
             </ButtonLink>
           </GateBox>
@@ -263,8 +480,8 @@ function GateScreen({
             title="Unlock this episode with VIP"
             text="VIP gives you every episode, ad-free, in Full HD."
           >
-            <ButtonLink href="/vip" variant="vip">
-              <LockIcon size={18} /> See VIP plans
+            <ButtonLink href="/vip" variant="vip" size="sm">
+              <LockIcon size={16} /> See VIP plans
             </ButtonLink>
           </GateBox>
         );
@@ -290,13 +507,13 @@ function GateScreen({
   })();
 
   return (
-    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-art sm:rounded-[18px] sm:border sm:border-line">
+    <div className="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden bg-art">
       {thumbnail ? (
         <Image
           src={thumbnail}
           alt=""
           fill
-          sizes="(min-width: 1024px) 1000px, 100vw"
+          sizes="(min-width: 1024px) 380px, 340px"
           className="object-cover opacity-35 blur-[2px]"
         />
       ) : null}
@@ -315,15 +532,15 @@ function GateBox({
   eyebrow?: string;
   title: string;
   text: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
-    <div role="status" className="flex max-w-md flex-col items-center gap-2 text-center sm:gap-3">
+    <div role="status" className="flex max-w-xs flex-col items-center gap-2 text-center">
       {eyebrow ? (
-        <span className="text-xs font-extrabold tracking-[0.12em] text-vip">{eyebrow}</span>
+        <span className="text-xs font-bold tracking-[0.12em] text-vip">{eyebrow}</span>
       ) : null}
-      <p className="text-lg font-extrabold sm:text-2xl">{title}</p>
-      <p className="text-sm text-fg-soft sm:text-base">{text}</p>
+      <p className="text-lg font-bold">{title}</p>
+      <p className="text-sm text-fg-soft">{text}</p>
       {children ? (
         <div className="mt-1 flex flex-wrap justify-center gap-2.5">{children}</div>
       ) : null}
@@ -333,168 +550,98 @@ function GateBox({
 
 function EndCard({
   next,
+  locked,
   seconds,
   href,
   onCancel,
 }: {
   next: Episode;
+  locked: boolean;
   seconds: number | null;
   href: string;
   onCancel: () => void;
 }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <span className="text-xs font-extrabold tracking-[0.12em] text-link">UP NEXT</span>
-      <p className="text-lg font-extrabold sm:text-2xl">Episode {next.number}</p>
+      <span
+        className={cn("text-xs font-bold tracking-[0.12em]", locked ? "text-vip" : "text-link")}
+      >
+        UP NEXT{locked ? " · VIP" : ""}
+      </span>
+      <p className="text-lg font-bold">Episode {next.number}</p>
       <div className="flex gap-2.5">
-        <ButtonLink href={href} size="sm">
-          <PlayIcon /> {seconds !== null ? `Playing in ${seconds}` : "Play now"}
-        </ButtonLink>
-        {seconds !== null ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="min-h-11 rounded-full border border-fg/25 px-4 text-sm font-semibold hover:bg-fg/10"
-          >
-            Cancel
-          </button>
-        ) : null}
+        {locked ? (
+          <ButtonLink href="/vip" variant="vip" size="sm">
+            <LockIcon size={16} /> Unlock with VIP
+          </ButtonLink>
+        ) : (
+          <>
+            <ButtonLink href={href} size="sm">
+              <PlayIcon /> {seconds !== null ? `Playing in ${seconds}` : "Play now"}
+            </ButtonLink>
+            {seconds !== null ? (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="min-h-11 rounded-full border border-fg/25 px-4 text-sm font-semibold hover:bg-fg/10"
+              >
+                Cancel
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-function UpNext({ next, slug, locked }: { next: Episode; slug: string; locked: boolean }) {
+/** Nút chevron tròn nhỏ (nhìn 36px, vùng bấm 44px). */
+function EpisodeStep({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+}) {
   return (
-    <section
-      aria-label="Up next"
-      className={cn(
-        "mx-4 flex flex-wrap items-center gap-4 rounded-2xl border p-4 sm:mx-0 sm:gap-5 sm:p-[18px]",
-        locked ? "border-vip-line bg-vip-panel" : "border-line bg-surface",
-      )}
+    <Link
+      href={href}
+      aria-label={label}
+      title={label}
+      className="hit-44 relative flex size-9 items-center justify-center rounded-full bg-fg/12 text-fg no-underline hover:bg-fg/20 hover:text-fg"
     >
-      <div className="relative flex aspect-video w-[34%] max-w-40 min-w-24 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-art sm:w-40">
-        {next.thumbnail_url ? (
-          <Image
-            src={next.thumbnail_url}
-            alt=""
-            fill
-            sizes="160px"
-            className={cn("object-cover", locked && "opacity-40")}
-          />
-        ) : null}
-        {locked ? <LockIcon size={26} className="relative text-vip" /> : null}
-      </div>
-      <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1">
-        <span
-          className={cn(
-            "text-[13px] font-extrabold tracking-[0.08em]",
-            locked ? "text-vip" : "text-link",
-          )}
-        >
-          UP NEXT{locked ? " · VIP" : ""}
-        </span>
-        <span className="text-lg font-bold">Episode {next.number}</span>
-        <span className="text-sm text-muted">
-          {locked ? "VIP members can keep watching." : formatDuration(next.duration_sec)}
-        </span>
-      </div>
-      {locked ? (
-        <ButtonLink href="/vip" variant="vip" size="sm">
-          Unlock with VIP
-        </ButtonLink>
-      ) : (
-        <ButtonLink href={`/series/${slug}/episode/${next.number}`} variant="secondary" size="sm">
-          <PlayIcon /> Play
-        </ButtonLink>
-      )}
-    </section>
+      {children}
+    </Link>
   );
 }
 
-function EpisodeSidebar({
-  slug,
-  episodes,
-  currentId,
-  isVip,
-  signedIn,
-}: {
-  slug: string;
-  episodes: Episode[];
-  currentId: number;
-  isVip: boolean;
-  signedIn: boolean;
-}) {
-  const viewer = useSeriesViewer();
-  const watched = useMemo(
-    () =>
-      episodes.filter((e) => {
-        const p = viewer.progress.get(e.id);
-        return p ? isFinished(p.progress_sec, e.duration_sec) : false;
-      }).length,
-    [episodes, viewer.progress],
-  );
-  return (
-    <aside
-      aria-labelledby="list-h"
-      className="mx-4 flex flex-col gap-3 rounded-[18px] border border-line bg-surface p-4 sm:mx-0 sm:p-[18px] lg:sticky lg:top-6 lg:w-[360px] lg:shrink-0"
-    >
-      <div className="flex items-baseline justify-between">
-        <h2 id="list-h" className="text-lg font-extrabold">
-          Episodes
-        </h2>
-        {signedIn ? (
-          <span className="text-[13px] text-muted">
-            {watched} / {episodes.length} watched
-          </span>
-        ) : null}
-      </div>
-      <ol className="flex max-h-[60vh] flex-col gap-1.5 overflow-y-auto">
-        {episodes.map((e) => {
-          const current = e.id === currentId;
-          const p = viewer.progress.get(e.id);
-          const done = p ? isFinished(p.progress_sec, e.duration_sec) : false;
-          const locked = signedIn && e.access === "vip" && !isVip;
-          return (
-            <li key={e.id}>
-              <Link
-                href={`/series/${slug}/episode/${e.number}`}
-                aria-current={current ? "page" : undefined}
-                className={cn(
-                  "flex min-h-11 items-center gap-3 rounded-[10px] px-3 py-2.5 text-fg no-underline hover:bg-fg/6 hover:text-fg",
-                  current && "bg-accent/14",
-                )}
-              >
-                <span
-                  className={cn("w-7 text-[15px] font-bold", current ? "text-link" : "text-muted")}
-                >
-                  {e.number}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{e.title}</span>
-                {locked ? (
-                  <LockIcon
-                    size={16}
-                    className="text-vip"
-                    aria-label="VIP"
-                    role="img"
-                    aria-hidden={undefined}
-                  />
-                ) : done ? (
-                  <CheckIcon
-                    size={16}
-                    className="text-success"
-                    aria-label="Watched"
-                    role="img"
-                    aria-hidden={undefined}
-                  />
-                ) : e.access === "vip" && !signedIn ? (
-                  <span className="text-[11px] font-extrabold text-vip">VIP</span>
-                ) : null}
-              </Link>
-            </li>
-          );
-        })}
-      </ol>
-    </aside>
-  );
+/** Vuốt dọc quá chừng này (px) và dọc nhiều hơn ngang thì tính là một cú vuốt chuyển tập. */
+const SWIPE_STEP = 70;
+
+/**
+ * Cử chỉ kiểu video ngắn: vuốt lên (ngón tay đi lên) sang tập sau, vuốt xuống về tập trước. Bỏ qua cú
+ * vuốt bắt đầu trên thanh tua để kéo thanh tua không bị tính nhầm.
+ */
+function useVerticalSwipe({ onUp, onDown }: { onUp: () => void; onDown: () => void }) {
+  const start = useRef<{ x: number; y: number } | null>(null);
+  return {
+    onTouchStart: (e: React.TouchEvent) => {
+      const t = e.touches[0];
+      const onSeekBar = e.target instanceof HTMLInputElement;
+      start.current = t && !onSeekBar ? { x: t.clientX, y: t.clientY } : null;
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      const from = start.current;
+      const t = e.changedTouches[0];
+      start.current = null;
+      if (!from || !t) return;
+      const dx = t.clientX - from.x;
+      const dy = t.clientY - from.y;
+      if (Math.abs(dy) < SWIPE_STEP || Math.abs(dy) < Math.abs(dx) * 1.5) return;
+      if (dy < 0) onUp();
+      else onDown();
+    },
+  };
 }
