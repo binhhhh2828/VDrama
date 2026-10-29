@@ -64,7 +64,9 @@ Nền chuyển sắc (`@utility` trong `globals.css`):
 | `Badge` | `hot` (đỏ gạch, nghiêng, ngọn lửa), `original` (nhãn nhỏ `accent` ở poster), `top`, `vip`, `free`, `new`, `preview` |
 | `Chip`, `GenreTag` | Chip lọc chữ nhật bo 10, nền `surface-2`, đang chọn nền `accent`; nhãn thể loại chỉ đọc bo 16 nền `surface-3` |
 | `PosterArt` | Ảnh 3:4 hoặc 4:5 có tên phim in đè (cho ảnh giữ chỗ không có chữ); `withTitle={false}` khi poster đã có chữ |
-| `PosterCard` | Thẻ phim (làm lại 3:4 ở bước R3) |
+| `PosterCard` | Thẻ phim 3:4 bo 10, tên phim in đè ảnh (`PosterArt`), dưới là tên 15px tối đa 2 dòng (`variant="row"` 600, `"grid"` 400) và thể loại xám ngăn " • "; nhãn TOP/NEW trái, VIP phải, ORIGINAL ở đáy |
+| `PosterRow` (`components/series`) | Hàng cuộn ngang: thẻ rộng `(100vw-76px)/3` (≈118 ở 430), gap 10, lề trái 22, thò thẻ thứ 4, tràn hai mép trang |
+| `PosterGrid` (`components/series`) | Lưới 3 cột gap 10 trên điện thoại, từ `sm` tự chia cột 170px+ |
 | `EpisodeThumb` | 16:9, nút play giữa (ổ khóa nếu chưa có quyền), tiến độ ở chân, nhãn FREE/VIP |
 | `ProgressBar` | 0–1; có `label` thì là `progressbar` cho trình đọc màn hình |
 | `Skeleton`, `PosterGridSkeleton` | Giữ chỗ khi chờ dữ liệu |

@@ -191,29 +191,23 @@ export default async function DevUiPage() {
       </Section>
 
       <Section title="Cards">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-5">
+        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-5">
           <PosterCard
             href="/dev/ui"
             title="Virtual City"
-            meta="12 episodes · Romance"
-            posterUrl="https://picsum.photos/seed/poster-virtual-city/400/600"
+            genres={["Romance", "Drama"]}
+            posterUrl="https://picsum.photos/seed/virtual-city/600/800"
             rank={1}
           />
+          <PosterCard href="/dev/ui" title="Sky of Memories" genres={["Romance"]} rank={2} vip />
           <PosterCard
             href="/dev/ui"
-            title="Sky of Memories"
-            meta="24 episodes · Romance"
-            rank={2}
-            vip
-          />
-          <PosterCard href="/dev/ui" title="Girl From Another World" meta="12 episodes" isNew />
-          <PosterCard
-            href="/dev/ui"
-            title="Twin Destinies"
-            meta="24 episodes · Romance"
+            title="Girl From Another World"
+            genres={["Fantasy", "Comedy"]}
             isNew
-            vip
+            original
           />
+          <PosterCard href="/dev/ui" title="Twin Destinies" genres={["Romance"]} isNew vip />
         </div>
         <div className="grid gap-5 sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
           <EpisodeThumb

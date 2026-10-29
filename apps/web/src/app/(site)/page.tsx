@@ -4,10 +4,10 @@ import { ContinueWatching } from "@/components/home/ContinueWatching";
 import { HeroCarousel, HeroFallback, HeroSkeleton } from "@/components/home/HeroCarousel";
 import type { HeroSlide } from "@/components/home/HeroCarousel";
 import { SectionHeader } from "@/components/home/SectionHeader";
-import { PosterGrid } from "@/components/series/PosterGrid";
+import { PosterRow } from "@/components/series/PosterRow";
 import { ButtonLink } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
+import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { listGenres, listSeries } from "@/lib/api/catalog";
 import { IS_DEMO } from "@/lib/demo/config";
 
@@ -28,7 +28,7 @@ export default function HomePage() {
 
         <section aria-labelledby="trending-h" className="flex flex-col gap-3 md:gap-4">
           <SectionHeader id="trending-h" title="Trending now" href="/browse?sort=hot" />
-          <Suspense fallback={<PosterGridSkeleton count={6} />}>
+          <Suspense fallback={<PosterRowSkeleton />}>
             <Trending />
           </Suspense>
         </section>
@@ -44,7 +44,7 @@ export default function HomePage() {
 
         <section aria-labelledby="new-h" className="flex flex-col gap-3 md:gap-4">
           <SectionHeader id="new-h" title="New releases" href="/browse?sort=new" />
-          <Suspense fallback={<PosterGridSkeleton count={6} />}>
+          <Suspense fallback={<PosterRowSkeleton />}>
             <NewReleases />
           </Suspense>
         </section>
@@ -71,12 +71,12 @@ async function Hero() {
 
 async function Trending() {
   const { items } = await listSeries({ sort: "hot", limit: 6 });
-  return <PosterGrid series={items} ranked preloadFirst={3} />;
+  return <PosterRow series={items} ranked preloadFirst={4} />;
 }
 
 async function NewReleases() {
   const { items } = await listSeries({ sort: "new", limit: 6 });
-  return <PosterGrid series={items} markNew />;
+  return <PosterRow series={items} markNew />;
 }
 
 async function Genres() {

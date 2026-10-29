@@ -8,7 +8,6 @@ import { PosterGridSkeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { SeriesCard } from "@/lib/api/types";
-import { seriesMeta } from "@/lib/format";
 
 const PAGE = 18;
 
@@ -90,14 +89,15 @@ export function MyList() {
           {error}
         </p>
       ) : null}
-      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-5">
+      <ul className="grid grid-cols-3 gap-x-2.5 gap-y-5 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-x-5 sm:gap-y-6">
         {items.map((s) => (
           <li key={s.id} className="relative">
             <PosterCard
               href={`/series/${s.slug}`}
               title={s.title}
               posterUrl={s.poster_url}
-              meta={seriesMeta(s)}
+              genres={s.genres.map((g) => g.name)}
+              variant="grid"
             />
             <button
               type="button"

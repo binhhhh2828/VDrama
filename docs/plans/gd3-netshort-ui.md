@@ -126,7 +126,7 @@ Mỗi bước dùng cùng quy tắc kiểm tra: lint, type-check, format, test, 
   - Làm sớm phần hero của R4 theo yêu cầu (2026-10-29): `HeroCarousel` tràn hai mép, 4:5, kéo lên nằm dưới header trong suốt (`-mt-[58px]`), vuốt bằng `scroll-snap` (mỗi lần một phim), tự chuyển 6 giây, tên phim + HOT (demo), nút "Play now" 240×30, chấm báo trang thanh trắng; desktop là các thẻ 4:5 rộng 400px xếp ngang. Phần còn lại của R4 (các hàng phim) vẫn chưa làm.
   - Việc: header 58 px không nền (nội dung cuộn dưới, chỉ ô tìm kiếm có nền; thêm lớp tối nhẹ khi cuộn để chữ đọc được); ngăn kéo 82% (Home, Browse, My List, VIP, Account (không có chọn ngôn ngữ); đóng bằng X, vuốt, phím Esc, chạm nền; khóa cuộn; `aria`); thanh mời Get VIP dính đáy (có X); nút lên đầu trang; chân trang accordion; bỏ `BottomNav`.
   - Hoàn thành khi: khớp số đo ảnh 05 (rộng ≈82%, mục cao ≈81, bỏ mục ngôn ngữ); ngăn kéo thao tác được bằng bàn phím và cảm ứng; chân trang đúng ảnh 04.
-- [ ] **R3: Thẻ phim, hàng cuộn ngang, lưới 3 cột** — ảnh 02, 03, 18
+- [x] **R3: Thẻ phim, hàng cuộn ngang, lưới 3 cột** — ảnh 02, 03, 18 — xong 2026-10-29: `PosterCard` 3:4 (đổi prop `meta` thành `genres`, thêm `original`, `variant`), `PosterRow` mới, `PosterGrid` 3 cột, `PosterRowSkeleton`; trang chủ tạm dùng `PosterRow` cho "Trending now" và "New releases" (R4 làm tiếp tiêu đề và các hàng còn lại), MyList và `/dev/ui` đổi theo. Đo ở 430px: thẻ 118×157, gap 10, lề 22, thò 24px thẻ thứ 4.
   - Việc: `PosterCard` mới (3:4, bo 10, tên 2 dòng, thể loại ngăn " • "), `PosterRow` cuộn ngang `scroll-snap`, lề trái 22, thò thẻ thứ 4; `PosterGrid` 3 cột; nhãn góc.
   - Hoàn thành khi: ở 430 px thấy đúng 3 thẻ + phần thẻ thứ 4 thò ra; chữ cắt 2 dòng; vuốt mượt.
 - [ ] **R4: Trang chủ** — ảnh 01–04
