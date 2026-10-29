@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Lịch sử xem, yêu thích, test phân quyền tổng thể
 
-> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–2. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
+> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–3. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
 > Liên quan: `plan.md` Giai đoạn 2, task "Watch history, favorites" và "Test tự động cho auth, play, phân quyền"; mục 5 (User: `/me/favorites`, `/me/history`). Bảng dùng: `watch_history`, `favorites`, `series_stats` (migration `0003`, `0006`). Frontend cần cho: trang xem phim (nhớ tiến độ), trang chi tiết (tiếp tục tập N, nút yêu thích), trang tài khoản (lịch sử, yêu thích) ở Giai đoạn 3.
 
 ## Mục tiêu và phạm vi
@@ -92,7 +92,7 @@ Auth, play, catalog đã có test riêng từng phần. Phần còn thiếu là 
 - [x] **Bước 2: Xóa mềm cho lịch sử xem và yêu thích (migration `0011`)** (xong 2026-10-29: `DeletedAtMixin` ở `app/models/mixins.py`, `SoftDeleteMixin` kế thừa nó nên bộ lọc cũ không đổi hành vi; hai bảng thêm vào danh sách test chặn xóa thật sẵn có; `alembic check` sạch, hạ/nâng `0011` thử trên database tạm)
   - Việc: `DeletedAtMixin` (tách từ `SoftDeleteMixin`, bộ lọc ORM áp cho lớp nền); `WatchHistory`, `Favorite` dùng mixin này; migration `0011`: cột `deleted_at` hai bảng, trigger chặn xóa thật; upsert tiến độ đặt lại `deleted_at = NULL`.
   - Hoàn thành khi: test dòng có `deleted_at` bị ẩn khỏi truy vấn ORM của hai bảng, `include_deleted` vẫn thấy; `DELETE`/`TRUNCATE` thật bị chặn, cờ bảo trì vẫn cho qua (cascade khi bảo trì xóa user/tập vẫn chạy); báo tiến độ lên dòng đã xóa thì dòng hiện lại; vẫn là HOT update (kể cả lúc xóa mềm); không có index trên `deleted_at`; `alembic upgrade`/`downgrade` hai chiều và `alembic check` sạch; mọi test xóa mềm cũ của bảng admin vẫn xanh.
-- [ ] **Bước 3: Xem tiếp và xóa lịch sử**
+- [x] **Bước 3: Xem tiếp và xóa lịch sử** (xong 2026-10-29: tập xem gần nhất bị gỡ thì "Xem tiếp" lùi về tập còn xem được gần nhất của phim đó; tiến độ theo phim cùng độ hiển thị với danh sách tập ở catalog (admin xem trước được); xóa giữ nguyên `updated_at` (lần xem cuối) cho phân tích; xóa tập chưa từng xem hoặc không tồn tại vẫn 204; `GET /me/history` và `/series/{slug}` trả `{"items": [...]}`)
   - Việc: `GET /me/history`, `GET /me/history/series/{slug}`, hai `DELETE`.
   - Hoàn thành khi: test mỗi phim một dòng là tập mới nhất, sắp theo lần xem gần nhất; tập/phim gỡ xuất bản hoặc xóa mềm bị ẩn, xuất bản lại thì hiện lại; user này không thấy lịch sử user khác; tiến độ theo phim đúng từng tập; xóa một tập / xóa hết chỉ ảnh hưởng chính mình, dòng vẫn còn trong DB với `deleted_at`, gọi lại vẫn 204; truy vấn xem tiếp đi theo khóa chính (`EXPLAIN`).
 - [ ] **Bước 4: Yêu thích**
