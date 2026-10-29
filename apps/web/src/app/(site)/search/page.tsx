@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { PosterGrid } from "@/components/series/PosterGrid";
-import { SearchIcon } from "@/components/ui/icons";
-import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
-import { listGenres, searchSeries } from "@/lib/api/catalog";
+import { SearchResultList, SearchResultSkeleton } from "@/components/series/SearchResultList";
+import { Chip } from "@/components/ui/Chip";
+import { getSeries, listGenres, searchSeries } from "@/lib/api/catalog";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -12,14 +11,15 @@ export const metadata: Metadata = {
 };
 
 const MIN_LENGTH = 2;
+const MAX_RESULTS = 20;
 
-// /search?q=. Tìm khi người dùng gửi form (Enter hoặc nút), không tìm theo từng phím gõ.
-// Từ khóa dưới 2 ký tự thì không gọi API.
+// /search?q= theo ảnh 22. Ô tìm kiếm nằm ở header (giữ từ khóa đang tìm); tìm khi gửi form (Enter),
+// không tìm theo từng phím gõ. Từ khóa dưới 2 ký tự thì không gọi API.
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   return (
-    <main className="mx-auto flex w-full max-w-[1360px] flex-col gap-6 px-4 pt-6 pb-16 sm:px-6 md:gap-8 md:pt-10">
-      <h1 className="text-[28px] font-extrabold tracking-[-0.01em] md:text-[36px]">Search</h1>
-      <Suspense fallback={<Skeleton className="h-14 w-full max-w-2xl rounded-full" />}>
+    <main className="mx-auto flex w-full max-w-[1360px] flex-col gap-6 px-4 pt-6 pb-16 sm:px-6">
+      <h1 className="sr-only">Search results</h1>
+      <Suspense fallback={<SearchResultSkeleton />}>
         <SearchContent searchParams={searchParams} />
       </Suspense>
     </main>
@@ -34,54 +34,30 @@ async function SearchContent({
   const sp = await searchParams;
   const q = (typeof sp.q === "string" ? sp.q : "").trim().slice(0, 100);
 
+  if (q.length >= MIN_LENGTH) {
+    return (
+      <Suspense key={q} fallback={<SearchResultSkeleton />}>
+        <Results q={q} />
+      </Suspense>
+    );
+  }
   return (
     <>
-      <form role="search" action="/search" className="flex w-full max-w-2xl gap-2.5">
-        <label htmlFor="search-q" className="sr-only">
-          Search series
-        </label>
-        <div className="flex h-14 min-w-0 flex-1 items-center gap-3 rounded-full border border-line bg-surface px-5 focus-within:border-link">
-          <SearchIcon size={20} className="shrink-0 text-muted" />
-          <input
-            id="search-q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            // Mở trang tìm kiếm (nút kính lúp trên điện thoại) thì gõ được ngay.
-            autoFocus={!q}
-            minLength={MIN_LENGTH}
-            maxLength={100}
-            required
-            placeholder="Search by series title…"
-            className="min-w-0 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-faint"
-          />
-        </div>
-        <button
-          type="submit"
-          className="h-14 shrink-0 rounded-full bg-brand px-5 font-bold sm:px-6 text-on-accent hover:brightness-110"
-        >
-          Search
-        </button>
-      </form>
-
-      {q.length >= MIN_LENGTH ? (
-        <Suspense key={q} fallback={<PosterGridSkeleton count={6} />}>
-          <Results q={q} />
-        </Suspense>
-      ) : q.length > 0 ? (
-        <p className="text-muted">Type at least {MIN_LENGTH} characters to search.</p>
-      ) : (
-        <Suspense fallback={null}>
-          <GenreSuggestions />
-        </Suspense>
-      )}
+      <p className="text-muted" aria-live="polite">
+        {q.length > 0
+          ? `Type at least ${MIN_LENGTH} characters to search.`
+          : "Search by series title using the box above."}
+      </p>
+      <Suspense fallback={null}>
+        <GenreSuggestions />
+      </Suspense>
     </>
   );
 }
 
 async function Results({ q }: { q: string }) {
-  const items = await searchSeries(q, 30);
-  if (items.length === 0) {
+  const found = await searchSeries(q, MAX_RESULTS);
+  if (found.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-panel border border-line bg-surface px-6 py-16 text-center">
         <p className="text-lg font-bold">No series match &ldquo;{q}&rdquo;</p>
@@ -92,12 +68,14 @@ async function Results({ q }: { q: string }) {
       </div>
     );
   }
+  // Kết quả tìm kiếm của API không có mô tả; lấy từ trang chi tiết (đã cache vài phút).
+  const details = await Promise.all(found.map((s) => getSeries(s.slug)));
+  const descriptions = Object.fromEntries(
+    found.map((s, i) => [s.slug, details[i]?.description ?? null]),
+  );
   return (
-    <section aria-labelledby="results-h" className="flex flex-col gap-4">
-      <h2 id="results-h" className="text-sm text-muted" aria-live="polite">
-        {items.length} {items.length === 1 ? "result" : "results"} for &ldquo;{q}&rdquo;
-      </h2>
-      <PosterGrid series={items} preloadFirst={6} />
+    <section aria-label={`${found.length} results for ${q}`}>
+      <SearchResultList items={found} descriptions={descriptions} q={q} />
     </section>
   );
 }
@@ -107,18 +85,14 @@ async function GenreSuggestions() {
   if (genres.length === 0) return null;
   return (
     <section aria-labelledby="explore-h" className="flex flex-col gap-3">
-      <h2 id="explore-h" className="text-lg font-bold">
+      <h2 id="explore-h" className="text-lg font-semibold">
         Or explore a genre
       </h2>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2.5">
         {genres.map((g) => (
-          <Link
-            key={g.slug}
-            href={`/browse?genre=${g.slug}`}
-            className="inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-5 text-[15px] font-semibold text-fg no-underline hover:border-fg/30 hover:text-fg"
-          >
+          <Chip key={g.slug} href={`/browse?genre=${g.slug}`}>
             {g.name}
-          </Link>
+          </Chip>
         ))}
       </div>
     </section>

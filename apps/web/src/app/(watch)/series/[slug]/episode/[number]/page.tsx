@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SectionHeader } from "@/components/home/SectionHeader";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { SeriesViewerProvider } from "@/components/series/SeriesViewer";
 import { PosterRow } from "@/components/series/PosterRow";
 import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
@@ -59,25 +59,15 @@ async function WatchContent({ params }: { params: Props["params"] }) {
   const extras = IS_DEMO ? (await import("@/lib/demo/extras")).demoExtras(series.slug) : null;
   return (
     <>
-      <nav aria-label="Breadcrumb" className="px-[13px] pt-3 pb-3.5 text-[15px] text-muted">
-        <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-          <li>
-            <Link href="/" className="text-muted no-underline hover:text-fg">
-              Home
-            </Link>
-          </li>
-          <li aria-hidden>&gt;</li>
-          <li>
-            <Link href="/browse" className="text-muted no-underline hover:text-fg">
-              {copy.nav.browse}
-            </Link>
-          </li>
-          <li aria-hidden>&gt;</li>
-          <li aria-current="page" className="basis-full text-fg">
-            {series.title.toLowerCase()}
-          </li>
-        </ol>
-      </nav>
+      <div className="px-[13px]">
+        <Breadcrumb
+          items={[
+            { label: copy.nav.home, href: "/" },
+            { label: copy.nav.browse, href: "/browse" },
+            { label: series.title.toLowerCase() },
+          ]}
+        />
+      </div>
       <SeriesViewerProvider slug={series.slug} seriesId={series.id}>
         <WatchView
           series={{

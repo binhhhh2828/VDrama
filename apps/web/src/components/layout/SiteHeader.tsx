@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Logo } from "@/components/brand/Logo";
-import { SearchIcon } from "@/components/ui/icons";
-import { copy } from "@/lib/copy";
 import { AccountArea } from "./AccountArea";
 import { HeaderBar } from "./HeaderBar";
+import { HeaderSearch, SearchForm } from "./HeaderSearch";
 import { MenuDrawer } from "./MenuDrawer";
 import { NavLinks } from "./NavLinks";
 
@@ -26,26 +26,9 @@ export function SiteHeader() {
           <Logo height={24} preload className="h-6 w-auto md:h-8" />
         </Link>
         <NavLinks />
-        <form
-          role="search"
-          action="/search"
-          className="ml-auto flex h-9 max-w-[183px] min-w-0 flex-1 items-center gap-2 rounded-full bg-surface-2 px-3 focus-within:ring-2 focus-within:ring-link md:max-w-[360px]"
-        >
-          <SearchIcon size={18} className="shrink-0 text-muted" />
-          {/* Ô nhập cao 44px (tràn khỏi viên thuốc 36px) để vùng bấm đủ lớn. */}
-          <label htmlFor="site-search" className="sr-only">
-            {copy.nav.searchLabel}
-          </label>
-          <input
-            id="site-search"
-            name="q"
-            type="search"
-            minLength={2}
-            maxLength={100}
-            placeholder={copy.nav.search}
-            className="-my-1 h-11 min-w-0 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-muted"
-          />
-        </form>
+        <Suspense fallback={<SearchForm />}>
+          <HeaderSearch />
+        </Suspense>
         <AccountArea />
       </div>
     </HeaderBar>

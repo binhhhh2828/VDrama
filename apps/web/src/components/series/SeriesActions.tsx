@@ -10,6 +10,7 @@ import { ApiError } from "@/lib/api/errors";
 import type { Episode } from "@/lib/api/types";
 import { isFinished } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 import { useSeriesViewer } from "./SeriesViewer";
 
 /** Tập nên phát tiếp: tập xem gần nhất (xem xong thì tập sau nó), không có thì tập đầu. */
@@ -32,35 +33,28 @@ export function resumeTarget(
   return { episode: latest.ep, resume: true };
 }
 
-export function SeriesActions({
-  slug,
-  seriesId,
-  title,
-  episodes,
-}: {
-  slug: string;
-  seriesId: number;
-  title: string;
-  episodes: Episode[];
-}) {
+/** Nút "Watch now" (ảnh 15): phát tiếp tập đang xem dở, chưa xem thì phát tập đầu. */
+export function WatchNowButton({ slug, episodes }: { slug: string; episodes: Episode[] }) {
   const viewer = useSeriesViewer();
   const target = resumeTarget(episodes, viewer.progress);
+  const shape = "h-[46px] w-[182px] max-w-full rounded-[14px]! text-base";
 
+  if (!target) {
+    return (
+      <Button variant="cta" disabled className={shape}>
+        Coming soon
+      </Button>
+    );
+  }
   return (
-    <div className="flex flex-wrap gap-3">
-      {target ? (
-        <ButtonLink href={`/series/${slug}/episode/${target.episode.number}`}>
-          <PlayIcon />
-          {target.resume
-            ? `Continue Episode ${target.episode.number}`
-            : `Play Episode ${target.episode.number}`}
-        </ButtonLink>
-      ) : (
-        <Button disabled>Episodes coming soon</Button>
-      )}
-      <MyListButton seriesId={seriesId} />
-      <ShareButton title={title} />
-    </div>
+    <ButtonLink
+      href={`/series/${slug}/episode/${target.episode.number}`}
+      variant="cta"
+      className={shape}
+    >
+      <PlayIcon size={18} />
+      {target.resume ? `Continue EP ${target.episode.number}` : copy.series.watchNow}
+    </ButtonLink>
   );
 }
 

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { GenreChips } from "@/components/series/GenreChips";
 import { SeriesList } from "@/components/series/SeriesList";
-import { Chip } from "@/components/ui/Chip";
 import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { listGenres, listSeries } from "@/lib/api/catalog";
 import type { SeriesSort } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
+import { copy } from "@/lib/copy";
 
 export const metadata: Metadata = {
   title: "Browse series",
@@ -31,11 +33,12 @@ function href(f: Filters): string {
   return s ? `/browse?${s}` : "/browse";
 }
 
-// /browse?genre=&sort=new|hot. Bộ lọc nằm trong URL nên chia sẻ được và nút Back hoạt động.
+// /browse?genre=&sort=new|hot theo ảnh 18. Bộ lọc nằm trong URL nên chia sẻ được và nút Back hoạt động.
 export default function BrowsePage({ searchParams }: PageProps<"/browse">) {
   return (
-    <main className="mx-auto flex w-full max-w-[1360px] flex-col gap-6 px-4 pt-6 pb-16 sm:px-6 md:gap-8 md:pt-10">
-      <h1 className="text-[28px] font-extrabold tracking-[-0.01em] md:text-[36px]">Browse</h1>
+    <main className="mx-auto flex w-full max-w-[1360px] flex-col px-4 pb-16 sm:px-6">
+      <Breadcrumb items={[{ label: copy.nav.home, href: "/" }, { label: copy.nav.browse }]} />
+      <h1 className="mt-5 text-[28px] leading-9 font-bold">Explore genres &amp; short dramas</h1>
       <Suspense fallback={<FiltersSkeleton />}>
         <BrowseContent searchParams={searchParams} />
       </Suspense>
@@ -54,29 +57,18 @@ async function BrowseContent({
 
   return (
     <>
-      <div className="flex flex-col gap-4">
-        <nav
-          aria-label="Genres"
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 md:gap-2.5"
-        >
-          <Chip
-            href={href({ ...filters, genre: null })}
-            active={!filters.genre}
-            className="shrink-0"
-          >
-            All
-          </Chip>
-          {genres.map((g) => (
-            <Chip
-              key={g.slug}
-              href={href({ ...filters, genre: g.slug })}
-              active={filters.genre === g.slug}
-              className="shrink-0"
-            >
-              {g.name}
-            </Chip>
-          ))}
-        </nav>
+      <h2 className="mt-8 text-2xl leading-8 font-semibold">All series</h2>
+      <div className="mt-5 flex flex-col gap-5">
+        <GenreChips
+          items={[
+            { label: "All", href: href({ ...filters, genre: null }), active: !filters.genre },
+            ...genres.map((g) => ({
+              label: g.name,
+              href: href({ ...filters, genre: g.slug }),
+              active: filters.genre === g.slug,
+            })),
+          ]}
+        />
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm text-muted" aria-live="polite">
             {current ? current.name : "All genres"} ·{" "}
@@ -86,9 +78,11 @@ async function BrowseContent({
         </div>
       </div>
 
-      <Suspense key={href(filters)} fallback={<PosterGridSkeleton count={12} />}>
-        <Results filters={filters} unknownGenre={filters.genre !== null && !current} />
-      </Suspense>
+      <div className="mt-6">
+        <Suspense key={href(filters)} fallback={<PosterGridSkeleton count={12} />}>
+          <Results filters={filters} unknownGenre={filters.genre !== null && !current} />
+        </Suspense>
+      </div>
     </>
   );
 }
@@ -146,8 +140,9 @@ async function Results({ filters, unknownGenre }: { filters: Filters; unknownGen
 
 function FiltersSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
-      <Skeleton className="h-11 w-full max-w-2xl rounded-full" />
+    <div className="mt-8 flex flex-col gap-6">
+      <Skeleton className="h-8 w-48 rounded-md" />
+      <Skeleton className="h-[119px] w-full max-w-2xl" />
       <PosterGridSkeleton count={12} />
     </div>
   );

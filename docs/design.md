@@ -66,6 +66,8 @@ Nền chuyển sắc (`@utility` trong `globals.css`):
 | `PosterArt` | Ảnh 3:4 hoặc 4:5 có tên phim in đè (cho ảnh giữ chỗ không có chữ); `withTitle={false}` khi poster đã có chữ |
 | `PosterCard` | Thẻ phim 3:4 bo 10, tên phim in đè ảnh (`PosterArt`), dưới là tên 15px tối đa 2 dòng (`variant="row"` 600, `"grid"` 400) và thể loại xám ngăn " • "; nhãn TOP/NEW trái, VIP phải, ORIGINAL ở đáy |
 | `PosterRow` (`components/series`) | Hàng cuộn ngang: thẻ rộng `(100vw-76px)/3` (≈118 ở 430), gap 10, lề trái 22, thò thẻ thứ 4, tràn hai mép trang |
+| `Breadcrumb` (`components/layout`) | "Home > Series > tên phim" chữ xám 15px, mục cuối sáng và xuống dòng; caller tự bọc lề |
+| `GenreChips`, `SearchResultList` (`components/series`) | Chip thể loại nhiều dòng có nút mở rộng (Series); kết quả tìm kiếm dạng danh sách có tô từ khớp (Search) |
 | `PosterGrid` (`components/series`) | Lưới 3 cột gap 10 trên điện thoại, từ `sm` tự chia cột 170px+ |
 | `EpisodeThumb` | 16:9, nút play giữa (ổ khóa nếu chưa có quyền), tiến độ ở chân, nhãn FREE/VIP |
 | `ProgressBar` | 0–1; có `label` thì là `progressbar` cho trình đọc màn hình |
