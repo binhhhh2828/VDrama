@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AuthHeading } from "@/components/auth/AuthTabs";
+import { AuthHeading, AuthPage } from "@/components/auth/AuthTabs";
 import { PreviewNotice } from "@/components/preview/PreviewNotice";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Forgot password", robots: { index: f
 // PREVIEW: chưa có API gửi email đặt lại mật khẩu (plan.md, Giai đoạn 2). Form không gửi đi đâu.
 export default function ForgotPasswordPage() {
   return (
-    <>
+    <AuthPage>
       <AuthHeading
         title="Forgot your password?"
         text="Enter the email you signed up with and we'll send you a link to set a new one."
@@ -35,6 +35,6 @@ export default function ForgotPasswordPage() {
       <p className="text-center text-sm text-muted">
         Remembered it? <Link href="/signin">Back to sign in</Link>
       </p>
-    </>
+    </AuthPage>
   );
 }

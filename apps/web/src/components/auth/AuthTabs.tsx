@@ -1,44 +1,31 @@
 import Link from "next/link";
-import { cn } from "@/lib/cn";
+import type { ReactNode } from "react";
 
-/** Chuyển giữa Sign in / Create account, giữ nguyên `?next=`. */
-export function AuthTabs({ active, next }: { active: "signin" | "signup"; next: string }) {
-  const qs = next !== "/" ? `?next=${encodeURIComponent(next)}` : "";
-  const tab = (key: "signin" | "signup", label: string) => (
-    <Link
-      href={`/${key}${qs}`}
-      aria-current={active === key ? "page" : undefined}
-      className={cn(
-        "flex h-11 flex-1 items-center justify-center rounded-full text-[15px] no-underline",
-        active === key
-          ? "bg-brand font-bold text-on-accent hover:text-on-accent"
-          : "font-semibold text-muted hover:text-fg",
-      )}
-    >
-      {label}
-    </Link>
-  );
+/** Khung nội dung cho các trang phụ của nhóm (auth) (quên mật khẩu, đặt lại, xác thực email). */
+export function AuthPage({ children }: { children: ReactNode }) {
   return (
-    <nav
-      aria-label="Account"
-      className="flex gap-1.5 rounded-full border border-line bg-surface p-[5px]"
-    >
-      {tab("signin", "Sign in")}
-      {tab("signup", "Create account")}
-    </nav>
+    <div className="flex flex-col gap-6 px-5 pt-4 pb-10 md:p-0">
+      <Link
+        href="/"
+        className="text-sm font-medium text-muted no-underline hover:text-fg md:hidden"
+      >
+        ← VDrama
+      </Link>
+      {children}
+    </div>
   );
 }
 
 export function AuthHeading({ title, text }: { title: string; text: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <h1 className="text-[26px] font-extrabold md:text-[30px]">{title}</h1>
+      <h1 className="text-[24px] leading-snug font-semibold md:text-[28px]">{title}</h1>
       <p className="text-[15px] text-muted">{text}</p>
     </div>
   );
 }
 
-export function FormAlert({ children }: { children: React.ReactNode }) {
+export function FormAlert({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"

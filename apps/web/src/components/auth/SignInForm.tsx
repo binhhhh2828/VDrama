@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
@@ -9,6 +8,7 @@ import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { FormAlert } from "./AuthTabs";
+import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
 
 export function SignInForm({ next }: { next: string }) {
@@ -16,10 +16,12 @@ export function SignInForm({ next }: { next: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const terms = useTerms();
   useRedirectIfSignedIn(next);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!terms.check()) return;
     const form = new FormData(e.currentTarget);
     setBusy(true);
     setError(null);
@@ -57,9 +59,6 @@ export function SignInForm({ next }: { next: string }) {
         autoComplete="current-password"
         required
       />
-      <div className="-mt-1 text-right text-sm">
-        <Link href="/forgot-password">Forgot password?</Link>
-      </div>
       <Button type="submit" disabled={busy} aria-busy={busy} className="h-[52px]">
         {busy ? "Signing in…" : "Sign in"}
       </Button>

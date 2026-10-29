@@ -1,23 +1,52 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { Badge } from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
+import { NEWS_ARTICLES, newsCoverUrl } from "@/lib/news-data";
 
 export const metadata: Metadata = { title: copy.nav.news };
 
-// Trang tin tức: giữ chỗ (nhãn Preview) để mục News trong menu không dẫn tới 404. Bản tĩnh theo ảnh 16
-// làm ở bước R8 của docs/plans/gd3-netshort-ui.md.
+// Trang tin tức tĩnh theo ảnh 16: thẻ bài viết có ảnh bìa, nhãn, ngày • tác giả, tiêu đề, trích đoạn.
+// PREVIEW: bài viết mẫu (lib/news-data.ts), chưa có API hay trang chi tiết bài.
 export default function NewsPage() {
   return (
-    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-5 px-4 pt-8 pb-16 sm:px-6">
-      <Badge kind="preview" className="self-start" />
-      <h1 className="text-[28px] leading-tight font-bold">{copy.nav.news}</h1>
-      <p className="text-[15px] leading-7 text-fg-soft">
-        News and behind-the-scenes stories from VDrama will appear here soon.
-      </p>
-      <ButtonLink href="/browse" size="sm" className="self-start">
-        Browse series
-      </ButtonLink>
+    <main className="mx-auto flex w-full max-w-[1360px] flex-col px-4 pb-16 sm:px-6">
+      <Breadcrumb items={[{ label: copy.nav.home, href: "/" }, { label: copy.nav.news }]} />
+      <div className="mt-4 flex items-center gap-3">
+        <h1 className="text-[28px] leading-9 font-bold">{copy.nav.news}</h1>
+        <Badge kind="preview" />
+      </div>
+      <p className="mt-1 text-sm text-muted">Sample articles. The newsroom isn&apos;t live yet.</p>
+
+      <ul className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {NEWS_ARTICLES.map((a, i) => (
+          <li key={a.slug}>
+            <article className="overflow-hidden rounded-[18px] bg-surface">
+              <div className="relative aspect-video bg-art">
+                <Image
+                  src={newsCoverUrl(a.slug)}
+                  alt=""
+                  fill
+                  preload={i === 0}
+                  sizes="(min-width: 1024px) 420px, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
+                />
+                <span className="absolute top-3.5 left-3.5 max-w-[70%] truncate rounded-full bg-[#d61fe0] px-3 py-1 text-[13px] font-medium text-white">
+                  {a.tag}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2 p-4">
+                <p className="text-sm text-muted">
+                  <time dateTime={a.date}>{a.date}</time> • By {a.author}
+                </p>
+                <h2 className="text-lg leading-snug font-semibold">{a.title}</h2>
+                <p className="line-clamp-3 text-[15px] leading-6 text-muted">{a.excerpt}</p>
+              </div>
+            </article>
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

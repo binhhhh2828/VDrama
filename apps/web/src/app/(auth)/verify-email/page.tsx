@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AuthHeading } from "@/components/auth/AuthTabs";
+import { AuthHeading, AuthPage } from "@/components/auth/AuthTabs";
 import { PreviewNotice } from "@/components/preview/PreviewNotice";
 import { Button, ButtonLink } from "@/components/ui/Button";
 
@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Verify your email", robots: { index:
 // PREVIEW: màn hình "kiểm tra hộp thư" sau khi đăng ký. Chưa có API gửi email xác thực.
 export default function VerifyEmailPage() {
   return (
-    <>
+    <AuthPage>
       <div
         aria-hidden="true"
         className="flex size-16 items-center justify-center rounded-2xl bg-brand text-on-accent"
@@ -40,6 +40,6 @@ export default function VerifyEmailPage() {
           Continue to VDrama
         </ButtonLink>
       </div>
-    </>
+    </AuthPage>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
@@ -9,14 +8,15 @@ import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { FormAlert } from "./AuthTabs";
+import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
 
-type Errors = Partial<Record<"display_name" | "email" | "password" | "accept_terms", string>>;
+type Errors = Partial<Record<"display_name" | "email" | "password", string>>;
 
 const PASSWORD_MIN = 8;
 
 /** Kiểm tra nhanh trên trình duyệt (API vẫn kiểm tra lại đầy đủ). */
-function validate(v: { name: string; email: string; password: string; terms: boolean }): Errors {
+function validate(v: { name: string; email: string; password: string }): Errors {
   const errors: Errors = {};
   if (!v.name.trim()) errors.display_name = "Tell us what to call you.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()))
@@ -25,7 +25,6 @@ function validate(v: { name: string; email: string; password: string; terms: boo
     errors.password = `Use at least ${PASSWORD_MIN} characters.`;
   else if (v.password.trim().toLowerCase() === v.email.trim().toLowerCase())
     errors.password = "Your password can't be the same as your email.";
-  if (!v.terms) errors.accept_terms = "Please agree to the Terms of Use and Privacy Policy.";
   return errors;
 }
 
@@ -35,16 +34,17 @@ export function SignUpForm({ next }: { next: string }) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const terms = useTerms();
   useRedirectIfSignedIn(next);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!terms.check()) return;
     const form = new FormData(e.currentTarget);
     const values = {
       name: String(form.get("display_name") ?? ""),
       email: String(form.get("email") ?? ""),
       password: String(form.get("password") ?? ""),
-      terms: form.get("accept_terms") === "on",
     };
     const local = validate(values);
     setErrors(local);
@@ -62,7 +62,7 @@ export function SignUpForm({ next }: { next: string }) {
         display_name: values.name.trim(),
         email: values.email.trim(),
         password: values.password,
-        accept_terms: values.terms,
+        accept_terms: true,
       });
       session.setUser(user);
       router.replace(next);
@@ -79,7 +79,7 @@ export function SignUpForm({ next }: { next: string }) {
         const fieldErrors: Errors = {};
         for (const f of err.fields) {
           const key = f.field as keyof Errors;
-          if (key in { display_name: 1, email: 1, password: 1, accept_terms: 1 })
+          if (key in { display_name: 1, email: 1, password: 1 })
             fieldErrors[key] = err.fieldError(f.field);
         }
         if (Object.keys(fieldErrors).length) setErrors(fieldErrors);
@@ -121,26 +121,6 @@ export function SignUpForm({ next }: { next: string }) {
         hint={`At least ${PASSWORD_MIN} characters.`}
         error={errors.password}
       />
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-start gap-2.5 text-sm leading-normal text-fg-soft">
-          <input
-            type="checkbox"
-            name="accept_terms"
-            aria-invalid={errors.accept_terms ? true : undefined}
-            aria-describedby={errors.accept_terms ? "signup-terms-error" : undefined}
-            className="mt-0.5 size-5 shrink-0 accent-accent"
-          />
-          <span>
-            I agree to the <Link href="/terms">Terms of Use</Link> and{" "}
-            <Link href="/privacy">Privacy Policy</Link>.
-          </span>
-        </label>
-        {errors.accept_terms ? (
-          <span id="signup-terms-error" className="text-[13px] text-error-soft">
-            {errors.accept_terms}
-          </span>
-        ) : null}
-      </div>
       <Button type="submit" disabled={busy} aria-busy={busy} className="h-[52px]">
         {busy ? "Creating account…" : "Create account"}
       </Button>

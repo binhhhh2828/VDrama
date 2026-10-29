@@ -4,7 +4,7 @@ Website xem phim bộ có tài khoản và gói VIP. Kế hoạch đầy đủ: 
 
 ## Mở bản demo
 
-Bản demo gồm cả phía người xem và phía admin, giao diện tiếng Anh. Màn hình nào chưa có API thì là giao diện tĩnh có nhãn **PREVIEW** màu vàng: bấm thử được, nhưng nút lưu bị tắt và không gửi gì đi. Plan frontend: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md), hệ thống thiết kế: [docs/design.md](docs/design.md).
+Bản demo gồm cả phía người xem và phía admin, giao diện tiếng Anh. Màn hình nào chưa có API thì là giao diện tĩnh có nhãn **PREVIEW** màu vàng: bấm thử được, nhưng nút lưu bị tắt và không gửi gì đi. Plan frontend: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md), hệ thống thiết kế: [docs/design.md](docs/design.md). Giao diện người xem làm theo phong cách NetShort mobile web (ưu tiên điện thoại): [docs/plans/gd3-netshort-ui.md](docs/plans/gd3-netshort-ui.md).
 
 Cần Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm. Mở 3 terminal:
 
@@ -33,11 +33,11 @@ Tài khoản demo (cùng mật khẩu `DEMO_PASSWORD`):
 |---|---|
 | `viewer@example.com` | Người xem thường: tập free xem được, tập VIP mời mua VIP |
 | `vip@example.com` | Người xem có VIP 30 ngày: xem được mọi tập |
-| `admin@example.com` | Khu admin ở `/admin` (nút "Admin" trong menu tài khoản) |
+| `admin@example.com` | Khu admin ở `/admin` (mục "Admin" trong menu bên trái và trang Account) |
 
 Luồng gợi ý:
 
-- **Người xem:** trang chủ → mở một phim → Create account (hoặc đăng nhập `viewer@`) → xem tập 1 (free) → bấm tập VIP: thấy mời mua VIP → Get VIP → chọn gói → trang chuyển khoản (Preview) → thêm phim vào My List → Account → History (tiếp tục xem đúng chỗ đã dừng).
+- **Người xem:** trang chủ → mở một phim → Create account (hoặc đăng nhập `viewer@`) → xem tập 1 (free) → bấm tập VIP: thấy mời mua VIP → Get VIP (bảng VIP trượt từ đáy) → chọn gói → trang chuyển khoản (Preview) → thêm phim vào My List → Account → History (tiếp tục xem đúng chỗ đã dừng).
 - **Admin:** đăng nhập `admin@` → `/admin` tổng quan → Series & episodes → mở một phim (thấy cả tập nháp) → bấm "Video" của một tập (upload, Sync status) → Users → Payments → VIP plans → Audit log.
 
 ### Bản demo trực tuyến (Netlify, không cần API)
@@ -62,6 +62,7 @@ Phần nào thật, phần nào Preview:
 | Admin: danh sách phim, chi tiết phim, bảng tập kể cả tập nháp | Thật (chỉ đọc) |
 | Admin: upload video lên Cloudflare Stream, Sync status | Thật (cần cấu hình Stream, nếu chưa có thì báo rõ lý do) |
 | Quên mật khẩu, xác thực email, đổi mật khẩu | Preview (chưa có API) |
+| Đăng nhập bằng Google/Apple, xóa tài khoản, trang Download, trang News, bài đánh giá tập | Preview (chưa có API, bài viết và đánh giá là dữ liệu mẫu) |
 | Trang VIP chọn gói, chuyển khoản VietQR | Preview (thanh toán SePay ở Giai đoạn 5) |
 | Admin: tổng quan, sửa/tạo/xóa phim và tập | Preview (API admin ở Giai đoạn 4) |
 | Admin: người dùng, thanh toán, gói VIP, nhật ký | Preview (dữ liệu mẫu, thao tác cần lý do và đang tắt) |
