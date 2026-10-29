@@ -1,12 +1,44 @@
+import base64
+import binascii
+import re
 import secrets
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr, field_validator, model_validator
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from pydantic import PrivateAttr, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # HS256 cần khóa tối thiểu 256 bit; ngắn hơn thì đoán được bằng vét cạn.
 MIN_JWT_SECRET_BYTES = 32
+MIN_STREAM_KEY_BITS = 2048
+# Cloudflare không nhận token có `exp` quá 24 giờ kể từ lúc ký.
+MAX_STREAM_TOKEN_TTL_MINUTES = 24 * 60
+_CUSTOMER_CODE = re.compile(r"^[a-z0-9]+$")
+
+
+def load_stream_signing_key(value: str) -> RSAPrivateKey:
+    """Đọc khóa ký của Cloudflare Stream.
+
+    Cloudflare trả trường `pem` đã mã base64; dán nguyên giá trị đó vào .env. Chấp nhận cả PEM
+    thô (bắt đầu bằng -----BEGIN) cho tiện khi tự sinh khóa.
+    """
+    raw = value.strip()
+    if raw.startswith("-----BEGIN"):
+        pem = raw.encode()
+    else:
+        try:
+            pem = base64.b64decode(raw, validate=True)
+        except (binascii.Error, ValueError):
+            raise ValueError("CF_STREAM_SIGNING_KEY_PEM không phải base64 hợp lệ") from None
+    try:
+        key = load_pem_private_key(pem, password=None)
+    except (ValueError, TypeError):
+        raise ValueError("CF_STREAM_SIGNING_KEY_PEM không phải khóa PEM hợp lệ") from None
+    if not isinstance(key, RSAPrivateKey) or key.key_size < MIN_STREAM_KEY_BITS:
+        raise ValueError(f"CF_STREAM_SIGNING_KEY_PEM phải là khóa RSA >= {MIN_STREAM_KEY_BITS} bit")
+    return key
 
 
 def to_psycopg_url(url: str) -> str:
@@ -44,6 +76,21 @@ class Settings(BaseSettings):
     # Chỉ bật khi API nằm sau Cloudflare và firewall chỉ mở cho dải IP Cloudflare.
     trust_cloudflare_ip: bool = False
 
+    # --- Cloudflare Stream ---
+    # Gọi API Cloudflare: chỉ cho upload, đồng bộ trạng thái, lệnh cài đặt (không dùng khi xem).
+    cf_account_id: str = ""
+    cf_stream_api_token: SecretStr = SecretStr("")
+    # Phần <code> trong domain phát customer-<code>.cloudflarestream.com
+    cf_stream_customer_code: str = ""
+    # Khóa ký token xem phim (tạo một lần bằng lệnh CLI). Ký ngay trong backend, không gọi API.
+    cf_stream_signing_key_id: str = ""
+    cf_stream_signing_key_pem: SecretStr = SecretStr("")
+    cf_stream_webhook_secret: SecretStr = SecretStr("")
+    # Hạn token xem phim; tự kéo dài nếu tập dài hơn (tối đa 24 giờ).
+    stream_token_ttl_minutes: int = 180
+
+    _stream_signing_key: RSAPrivateKey | None = PrivateAttr(default=None)
+
     @field_validator("public_origin")
     @classmethod
     def _strip_trailing_slash(cls, v: str) -> str:
@@ -73,7 +120,45 @@ class Settings(BaseSettings):
             self.jwt_secret = SecretStr(secrets.token_urlsafe(48))
         if self.access_token_ttl_minutes <= 0 or self.refresh_token_ttl_days <= 0:
             raise ValueError("Thời hạn token phải lớn hơn 0")
+        self._check_stream()
         return self
+
+    def _check_stream(self) -> None:
+        if not 0 < self.stream_token_ttl_minutes <= MAX_STREAM_TOKEN_TTL_MINUTES:
+            raise ValueError(
+                f"STREAM_TOKEN_TTL_MINUTES phải trong khoảng 1–{MAX_STREAM_TOKEN_TTL_MINUTES}"
+            )
+        code = self.cf_stream_customer_code
+        if code and not _CUSTOMER_CODE.match(code):
+            raise ValueError("CF_STREAM_CUSTOMER_CODE chỉ gồm chữ thường và số")
+        pem = self.cf_stream_signing_key_pem.get_secret_value()
+        if bool(pem) != bool(self.cf_stream_signing_key_id):
+            raise ValueError(
+                "CF_STREAM_SIGNING_KEY_ID và CF_STREAM_SIGNING_KEY_PEM phải đặt cùng nhau"
+            )
+        # Đọc khóa ngay lúc khởi động: khóa hỏng thì báo luôn, không đợi lượt xem đầu tiên.
+        self._stream_signing_key = load_stream_signing_key(pem) if pem else None
+        if self.env == "prod":
+            missing = [
+                name
+                for name, value in (
+                    ("CF_STREAM_CUSTOMER_CODE", code),
+                    ("CF_STREAM_SIGNING_KEY_ID", self.cf_stream_signing_key_id),
+                    ("CF_STREAM_WEBHOOK_SECRET", self.cf_stream_webhook_secret.get_secret_value()),
+                )
+                if not value
+            ]
+            if missing:
+                raise ValueError("ENV=prod bắt buộc đặt " + ", ".join(missing))
+
+    @property
+    def stream_signing_key(self) -> RSAPrivateKey | None:
+        return self._stream_signing_key
+
+    @property
+    def stream_playback_configured(self) -> bool:
+        """Đủ cấu hình để cấp URL phát (dev có thể thiếu: `play` trả 503)."""
+        return bool(self._stream_signing_key and self.cf_stream_customer_code)
 
     @property
     def app_db_url(self) -> str:

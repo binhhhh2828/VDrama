@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.core.config import Settings, to_psycopg_url
+from app.tests import stream_keys
 
 SECRET = "x" * 32
 
@@ -30,6 +31,7 @@ PROD = {
     "jwt_secret": SECRET,
     "public_origin": "https://vdrama.vn",
     "trust_cloudflare_ip": True,
+    **stream_keys.stream_settings(),
 }
 
 
@@ -79,3 +81,78 @@ def test_secret_not_in_repr():
 
 def test_public_origin_trailing_slash_removed():
     assert make(public_origin="http://localhost:3000/").public_origin == "http://localhost:3000"
+
+
+# --- Cloudflare Stream ---
+
+
+def test_dev_starts_without_stream_config():
+    s = make(env="dev")
+    assert s.stream_signing_key is None
+    assert not s.stream_playback_configured
+
+
+@pytest.mark.parametrize(
+    ("field", "env_name"),
+    [
+        ("cf_stream_customer_code", "CF_STREAM_CUSTOMER_CODE"),
+        ("cf_stream_webhook_secret", "CF_STREAM_WEBHOOK_SECRET"),
+    ],
+)
+def test_prod_requires_stream_config(field, env_name):
+    with pytest.raises(ValidationError, match=env_name):
+        make(**{**PROD, field: ""})
+
+
+def test_prod_requires_signing_key():
+    with pytest.raises(ValidationError, match="CF_STREAM_SIGNING_KEY_ID"):
+        make(**{**PROD, "cf_stream_signing_key_id": "", "cf_stream_signing_key_pem": ""})
+
+
+def test_signing_key_id_and_pem_go_together():
+    for missing in ("cf_stream_signing_key_id", "cf_stream_signing_key_pem"):
+        with pytest.raises(ValidationError, match="phải đặt cùng nhau"):
+            make(**{**stream_keys.stream_settings(), missing: ""})
+
+
+def test_signing_key_loaded_at_startup():
+    s = make(**stream_keys.stream_settings())
+    assert s.stream_signing_key is not None
+    assert s.stream_playback_configured
+
+
+def test_signing_key_accepts_raw_pem():
+    raw = stream_keys.pem().decode()
+    s = make(**{**stream_keys.stream_settings(), "cf_stream_signing_key_pem": raw})
+    assert s.stream_signing_key is not None
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ("không phải base64!", "base64"),
+        ("aGVsbG8=", "PEM"),  # base64 hợp lệ nhưng không phải PEM
+        (stream_keys.pem_b64(bits=1024), "2048"),
+    ],
+)
+def test_bad_signing_key_rejected_at_startup(value, message):
+    with pytest.raises(ValidationError, match=message):
+        make(**{**stream_keys.stream_settings(), "cf_stream_signing_key_pem": value})
+
+
+def test_signing_key_not_in_repr():
+    s = make(**stream_keys.stream_settings())
+    assert stream_keys.pem_b64() not in repr(s)
+    assert "PRIVATE KEY" not in repr(s)
+
+
+@pytest.mark.parametrize("ttl", [0, -1, 24 * 60 + 1])
+def test_stream_token_ttl_bounds(ttl):
+    with pytest.raises(ValidationError, match="STREAM_TOKEN_TTL_MINUTES"):
+        make(stream_token_ttl_minutes=ttl)
+    make(stream_token_ttl_minutes=24 * 60)
+
+
+def test_customer_code_format():
+    with pytest.raises(ValidationError, match="CF_STREAM_CUSTOMER_CODE"):
+        make(cf_stream_customer_code="customer-abc.cloudflarestream.com")

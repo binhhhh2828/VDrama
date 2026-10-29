@@ -11,6 +11,7 @@ from app.models import AuditLog, Episode, Genre, Series
 from app.models.soft_delete import INCLUDE_DELETED
 from app.services import demo_seed
 from app.services.demo_seed import SERIES, DemoSeedRefusedError, seed_demo
+from app.tests import stream_keys
 
 PUBLIC = [s for s in SERIES if s.published and not s.deleted]
 
@@ -40,6 +41,7 @@ async def test_refused_in_prod(adb: AsyncSession, monkeypatch):
         "JWT_SECRET": "x" * 32,
         "PUBLIC_ORIGIN": "https://vdrama.vn",
         "TRUST_CLOUDFLARE_IP": "true",
+        **stream_keys.stream_env(),
     }.items():
         monkeypatch.setenv(key, value)
     get_settings.cache_clear()

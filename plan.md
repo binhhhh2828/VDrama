@@ -202,8 +202,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [ ] Xác thực email, quên/đặt lại mật khẩu (gửi email qua Resend/Brevo, cấu hình SPF/DKIM/DMARC cho domain)
 - [x] (plan chi tiết: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md), xong 2026-10-28 trên branch `feat/catalog`; có lệnh `seed-demo` tạo dữ liệu mẫu cho frontend) Catalog: series, episodes, thể loại, phân trang
 - [x] (cùng plan catalog, Bước 4, xong 2026-10-28: `GET /api/v1/search`) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
-- [ ] Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
-- [ ] Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn). Đây là **chỗ duy nhất** kiểm tra quyền xem: catalog chỉ trả `access: free | vip` giống nhau cho mọi người (để cache được), frontend tự hiện ổ khóa theo `/me.is_vip` (chốt 2026-10-28)
+- [ ] (plan chi tiết: [docs/plans/gd2-b4-stream-play.md](docs/plans/gd2-b4-stream-play.md), duyệt 2026-10-29, đang làm trên branch `feat/stream`, xong Bước 1/5; làm trước xác thực email vì `play` chặn frontend/admin và test được khi chưa có tài khoản Cloudflare) Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
+- [ ] (cùng plan Stream ở trên, Bước 2) Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn). Đây là **chỗ duy nhất** kiểm tra quyền xem: catalog chỉ trả `access: free | vip` giống nhau cho mọi người (để cache được), frontend tự hiện ổ khóa theo `/me.is_vip` (chốt 2026-10-28)
 - [ ] Watch history, favorites
 - [ ] Test tự động cho auth, play, phân quyền
 
