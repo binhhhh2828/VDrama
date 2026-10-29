@@ -52,6 +52,7 @@ class SeriesDetail(SeriesCard):
     episode_count: int
     latest_episode_number: int | None
     view_count: int
+    favorite_count: int
     # Luôn true với người thường; admin xem trước phim nháp thì thấy false.
     is_published: bool
 

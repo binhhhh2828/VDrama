@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Lịch sử xem, yêu thích, test phân quyền tổng thể
 
-> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–3. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
+> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–4. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
 > Liên quan: `plan.md` Giai đoạn 2, task "Watch history, favorites" và "Test tự động cho auth, play, phân quyền"; mục 5 (User: `/me/favorites`, `/me/history`). Bảng dùng: `watch_history`, `favorites`, `series_stats` (migration `0003`, `0006`). Frontend cần cho: trang xem phim (nhớ tiến độ), trang chi tiết (tiếp tục tập N, nút yêu thích), trang tài khoản (lịch sử, yêu thích) ở Giai đoạn 3.
 
 ## Mục tiêu và phạm vi
@@ -95,7 +95,7 @@ Auth, play, catalog đã có test riêng từng phần. Phần còn thiếu là 
 - [x] **Bước 3: Xem tiếp và xóa lịch sử** (xong 2026-10-29: tập xem gần nhất bị gỡ thì "Xem tiếp" lùi về tập còn xem được gần nhất của phim đó; tiến độ theo phim cùng độ hiển thị với danh sách tập ở catalog (admin xem trước được); xóa giữ nguyên `updated_at` (lần xem cuối) cho phân tích; xóa tập chưa từng xem hoặc không tồn tại vẫn 204; `GET /me/history` và `/series/{slug}` trả `{"items": [...]}`)
   - Việc: `GET /me/history`, `GET /me/history/series/{slug}`, hai `DELETE`.
   - Hoàn thành khi: test mỗi phim một dòng là tập mới nhất, sắp theo lần xem gần nhất; tập/phim gỡ xuất bản hoặc xóa mềm bị ẩn, xuất bản lại thì hiện lại; user này không thấy lịch sử user khác; tiến độ theo phim đúng từng tập; xóa một tập / xóa hết chỉ ảnh hưởng chính mình, dòng vẫn còn trong DB với `deleted_at`, gọi lại vẫn 204; truy vấn xem tiếp đi theo khóa chính (`EXPLAIN`).
-- [ ] **Bước 4: Yêu thích**
+- [x] **Bước 4: Yêu thích** (xong 2026-10-29: thêm dùng `INSERT … ON CONFLICT DO UPDATE … WHERE deleted_at IS NOT NULL RETURNING` nên chỉ cộng khi thật sự thêm mới/thêm lại, có test 5 request song song; `favorite_count` không xuống dưới 0; bỏ yêu thích phim không tồn tại vẫn 204; thêm và bỏ dùng chung bộ đếm rate limit, đọc không giới hạn; danh sách trả `SeriesPage` như `/series`, con trỏ loại `favorites`)
   - Việc: bốn endpoint `/me/favorites`, `favorite_count` (service + trang chi tiết phim), rate limit.
   - Hoàn thành khi: test thêm hai lần chỉ một dòng và `favorite_count` +1; bỏ hai lần chỉ -1, không âm, dòng vẫn còn với `deleted_at`; thêm lại sau khi bỏ dùng lại dòng cũ, +1, lên đầu danh sách; thêm song song từ hai request vẫn đúng; phim nháp/xóa/không có → 404; phim bị gỡ sau đó ẩn khỏi danh sách; phân trang con trỏ không trùng/sót; `GET /me/favorites/{id}` đúng cả hai trạng thái; trang chi tiết có `favorite_count`.
 - [ ] **Bước 5: Test phân quyền tổng thể**

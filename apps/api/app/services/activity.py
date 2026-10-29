@@ -7,13 +7,14 @@ Tiến độ xem: upsert một dòng cho mỗi (user, tập), cập nhật tại
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, tuple_, update
 from sqlalchemy.dialects.postgresql import Insert, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models import Episode, Series, User, WatchHistory
+from app.models import Episode, Favorite, Series, SeriesStats, User, WatchHistory
 from app.models.enums import UserRole
+from app.services.catalog import InvalidCursorError, SeriesCursor
 from app.services.play import find_watchable_episode
 
 # Một ngày: không tập nào dài hơn (Cloudflare nhận video tối đa 4 giờ).
@@ -138,3 +139,118 @@ async def delete_history(db: AsyncSession, user_id: int, episode_id: int | None 
         stmt = stmt.where(WatchHistory.episode_id == episode_id)
     result = await db.execute(stmt)
     return result.rowcount
+
+
+# --- Yêu thích (bỏ yêu thích: người dùng thấy đã bỏ, hệ thống xóa mềm) ---
+
+FAVORITES_SORT = "favorites"  # loại con trỏ: con trỏ của danh sách khác không dùng được ở đây
+
+
+class SeriesNotFoundError(Exception):
+    pass
+
+
+async def _bump_favorite_count(db: AsyncSession, series_id: int, delta: int) -> None:
+    stmt = insert(SeriesStats).values(series_id=series_id, favorite_count=max(delta, 0))
+    stmt = stmt.on_conflict_do_update(
+        index_elements=[SeriesStats.series_id],
+        set_={
+            # Không xuống dưới 0 (CHECK non_negative) dù số đếm từng bị lệch.
+            "favorite_count": func.greatest(SeriesStats.favorite_count + delta, 0),
+            "updated_at": func.now(),
+        },
+    )
+    await db.execute(stmt)
+
+
+async def add_favorite(db: AsyncSession, user_id: int, series_id: int) -> bool:
+    """Yêu thích một phim đang xuất bản. Trả True nếu trạng thái đổi (thêm mới hoặc thêm lại).
+
+    Thêm lại sau khi bỏ: dùng lại đúng dòng cũ, đặt lại `created_at` để lên đầu danh sách.
+    Đã đang yêu thích thì không đổi gì (bấm nhiều lần, hai tab cùng lúc vẫn chỉ đếm một).
+    """
+    visible = await db.scalar(select(Series.id).where(Series.id == series_id, Series.is_published))
+    if visible is None:
+        raise SeriesNotFoundError
+    stmt = (
+        insert(Favorite)
+        .values(user_id=user_id, series_id=series_id)
+        .on_conflict_do_update(
+            index_elements=[Favorite.user_id, Favorite.series_id],
+            set_={"deleted_at": None, "created_at": func.now()},
+            where=Favorite.deleted_at.is_not(None),
+        )
+        .returning(Favorite.series_id)
+    )
+    changed = (await db.execute(stmt)).first() is not None
+    if changed:
+        await _bump_favorite_count(db, series_id, +1)
+    return changed
+
+
+async def remove_favorite(db: AsyncSession, user_id: int, series_id: int) -> bool:
+    """Bỏ yêu thích (xóa mềm). Trả True nếu trạng thái đổi; chưa yêu thích thì không làm gì."""
+    stmt = (
+        update(Favorite)
+        .where(
+            Favorite.user_id == user_id,
+            Favorite.series_id == series_id,
+            Favorite.deleted_at.is_(None),
+        )
+        .values(deleted_at=func.now())
+        .returning(Favorite.series_id)
+        .execution_options(synchronize_session=False)
+    )
+    changed = (await db.execute(stmt)).first() is not None
+    if changed:
+        await _bump_favorite_count(db, series_id, -1)
+    return changed
+
+
+async def is_favorite(db: AsyncSession, user_id: int, series_id: int) -> bool:
+    """Đang yêu thích một phim còn xem được (phim bị gỡ thì coi như không)."""
+    found = await db.scalar(
+        select(Favorite.series_id)
+        .join(Series, Series.id == Favorite.series_id)
+        .where(Favorite.user_id == user_id, Favorite.series_id == series_id, Series.is_published)
+    )
+    return found is not None
+
+
+def favorites_stmt(user_id: int, *, limit: int, cursor: SeriesCursor | None = None):
+    stmt = (
+        select(Series, Favorite.created_at)
+        .join(Favorite, Favorite.series_id == Series.id)
+        .where(Favorite.user_id == user_id, Series.is_published)
+        .order_by(Favorite.created_at.desc(), Series.id.desc())
+        .limit(limit + 1)
+        .options(selectinload(Series.genres))
+    )
+    if cursor is not None:
+        after = datetime.fromisoformat(cursor.value)
+        stmt = stmt.where(tuple_(Favorite.created_at, Series.id) < tuple_(after, cursor.id))
+    return stmt
+
+
+async def list_favorites(
+    db: AsyncSession, user_id: int, *, limit: int, cursor: str | None = None
+) -> tuple[list[Series], str | None]:
+    """Phim đã yêu thích, mới yêu thích trước; phân trang keyset (created_at, series_id).
+
+    Phim bị gỡ/xóa sau khi yêu thích thì ẩn (dòng yêu thích vẫn giữ).
+    """
+    after = SeriesCursor.decode(cursor, sort=FAVORITES_SORT) if cursor else None
+    if after is not None:
+        try:
+            datetime.fromisoformat(after.value)
+        except ValueError:
+            raise InvalidCursorError("Con trỏ không hợp lệ") from None
+    rows = (await db.execute(favorites_stmt(user_id, limit=limit, cursor=after))).all()
+    page = rows[:limit]
+    next_cursor = None
+    if len(rows) > limit:
+        last_series, last_at = page[-1]
+        next_cursor = SeriesCursor(
+            sort=FAVORITES_SORT, value=last_at.isoformat(), id=last_series.id
+        ).encode()
+    return [series for series, _ in page], next_cursor

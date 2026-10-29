@@ -35,3 +35,7 @@ class EpisodeProgressOut(BaseModel):
 
 class SeriesProgressOut(BaseModel):
     items: list[EpisodeProgressOut]
+
+
+class FavoriteStatusOut(BaseModel):
+    favorited: bool
