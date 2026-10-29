@@ -58,7 +58,7 @@ async function SearchContent({
         </div>
         <button
           type="submit"
-          className="h-14 shrink-0 rounded-full bg-brand px-5 font-bold sm:px-6 text-ink hover:brightness-110"
+          className="h-14 shrink-0 rounded-full bg-brand px-5 font-bold sm:px-6 text-on-accent hover:brightness-110"
         >
           Search
         </button>

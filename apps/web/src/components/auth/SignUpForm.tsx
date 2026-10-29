@@ -128,7 +128,7 @@ export function SignUpForm({ next }: { next: string }) {
             name="accept_terms"
             aria-invalid={errors.accept_terms ? true : undefined}
             aria-describedby={errors.accept_terms ? "signup-terms-error" : undefined}
-            className="mt-0.5 size-5 shrink-0 accent-pink"
+            className="mt-0.5 size-5 shrink-0 accent-accent"
           />
           <span>
             I agree to the <Link href="/terms">Terms of Use</Link> and{" "}

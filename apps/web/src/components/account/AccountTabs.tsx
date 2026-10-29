@@ -27,7 +27,7 @@ export function AccountTabs() {
             className={cn(
               "-mb-px shrink-0 border-b-2 px-3.5 py-3 text-[15px] font-semibold whitespace-nowrap no-underline",
               active
-                ? "border-pink text-fg hover:text-fg"
+                ? "border-accent text-fg hover:text-fg"
                 : "border-transparent text-muted hover:text-fg",
             )}
           >

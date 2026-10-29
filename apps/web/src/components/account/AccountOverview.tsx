@@ -30,7 +30,7 @@ export function AccountOverview() {
           Profile
         </h2>
         <div className="flex items-center gap-4">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-extrabold text-ink">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand text-lg font-extrabold text-on-accent">
             {user.display_name.slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">

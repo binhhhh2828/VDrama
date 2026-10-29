@@ -11,7 +11,7 @@ export default function VerifyEmailPage() {
     <>
       <div
         aria-hidden="true"
-        className="flex size-16 items-center justify-center rounded-2xl bg-brand text-ink"
+        className="flex size-16 items-center justify-center rounded-2xl bg-brand text-on-accent"
       >
         <svg
           width="30"

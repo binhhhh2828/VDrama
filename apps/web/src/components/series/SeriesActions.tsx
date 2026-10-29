@@ -101,10 +101,12 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
         onClick={toggle}
         className={cn(
           "inline-flex min-h-12 items-center gap-2.5 rounded-full border px-[22px] text-base font-semibold transition disabled:opacity-70",
-          on ? "border-pink/55 bg-pink/12 text-fg" : "border-fg/22 bg-fg/8 text-fg hover:bg-fg/14",
+          on
+            ? "border-accent/55 bg-accent/12 text-fg"
+            : "border-fg/22 bg-fg/8 text-fg hover:bg-fg/14",
         )}
       >
-        {on ? <CheckIcon size={18} className="text-pink" /> : <PlusIcon size={18} />}
+        {on ? <CheckIcon size={18} className="text-accent" /> : <PlusIcon size={18} />}
         {on ? "In My List" : "My List"}
       </button>
       {error ? (

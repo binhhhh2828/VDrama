@@ -43,7 +43,7 @@ export function EpisodeList({ slug, episodes }: { slug: string; episodes: Episod
               className={cn(
                 "flex items-center gap-4 rounded-card border p-3 text-fg no-underline transition hover:text-fg md:p-3.5",
                 isCurrent
-                  ? "border-pink/55 bg-pink/8"
+                  ? "border-accent/55 bg-accent/8"
                   : "border-line bg-surface hover:border-fg/25",
               )}
             >

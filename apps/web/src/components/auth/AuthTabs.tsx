@@ -11,7 +11,7 @@ export function AuthTabs({ active, next }: { active: "signin" | "signup"; next: 
       className={cn(
         "flex h-11 flex-1 items-center justify-center rounded-full text-[15px] no-underline",
         active === key
-          ? "bg-brand font-bold text-ink hover:text-ink"
+          ? "bg-brand font-bold text-on-accent hover:text-on-accent"
           : "font-semibold text-muted hover:text-fg",
       )}
     >

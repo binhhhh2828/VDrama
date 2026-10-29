@@ -105,7 +105,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               <span
                 className={cn(
                   "block h-1.5 rounded-full transition-all",
-                  i === index ? "w-7 bg-pink" : "w-1.5 bg-fg/35",
+                  i === index ? "w-7 bg-accent" : "w-1.5 bg-fg/35",
                 )}
               />
             </button>

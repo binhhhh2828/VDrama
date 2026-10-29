@@ -41,7 +41,7 @@ export function EpisodeThumb({
       <div
         className={cn(
           "relative aspect-video overflow-hidden rounded-card border bg-art",
-          current ? "border-pink" : "border-line",
+          current ? "border-accent" : "border-line",
         )}
       >
         {thumbnailUrl ? (

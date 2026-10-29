@@ -21,7 +21,7 @@ function Links({ pathname }: { pathname: string | null }) {
             className={cn(
               base,
               active
-                ? "border-pink text-fg hover:text-fg"
+                ? "border-accent text-fg hover:text-fg"
                 : "border-transparent text-muted hover:text-fg",
             )}
           >

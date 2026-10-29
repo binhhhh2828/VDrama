@@ -1,8 +1,8 @@
 # Hệ thiết kế VDrama
 
-Nguồn: canvas [VDrama Web Design](https://claude.ai/artifact/Kto2QDvHNF4qtuLEAXUja2) (7 bảng: trang chủ, chi tiết phim, xem phim, VIP, đăng nhập, mobile, style guide). Code nằm ở `apps/web/src/app/globals.css` (token) và `apps/web/src/components/ui/` (thành phần). Xem trực tiếp mọi thành phần ở `http://localhost:3000/dev/ui` khi chạy `pnpm dev`.
+Nguồn: bố cục **NetShort mobile web** (23 ảnh chụp iPhone, số đo ở `docs/plans/gd3-netshort-ui.md`; chốt 2026-10-29, thay canvas [VDrama Web Design](https://claude.ai/artifact/Kto2QDvHNF4qtuLEAXUja2) cũ). Chỉ lấy bố cục, nhịp điệu, màu; thương hiệu, nội dung và chữ là của VDrama. Code nằm ở `apps/web/src/app/globals.css` (token) và `apps/web/src/components/ui/` (thành phần). Xem trực tiếp mọi thành phần ở `http://localhost:3000/dev/ui` khi chạy `pnpm dev`.
 
-Giao diện **chỉ có nền tối**, **tiếng Anh**, mobile-first.
+Giao diện **chỉ có nền tối**, **tiếng Anh** (chuỗi mới gom ở `src/lib/copy.ts`), **mobile-first** (viết cho 360–430 px trước).
 
 ## Màu
 
@@ -10,49 +10,66 @@ Dùng qua class Tailwind (`bg-surface`, `text-muted`, `border-line`...), không 
 
 | Token | Mã | Dùng cho |
 |---|---|---|
-| `canvas` | `#0B0709` | Nền trang |
-| `surface` | `#150E12` | Ô nhập, chip, thẻ |
-| `surface-2` | `#1F1419` | Bề mặt lớp 2, skeleton, nút tắt |
-| `line` | `#36252D` | Viền 1px |
-| `fg` | `#F7EFF2` | Chữ chính |
-| `fg-soft` | `#E7D6DC` | Đoạn văn dài |
-| `muted` | `#B5A2AA` | Chữ phụ, meta |
-| `faint` | `#8A7880` | Placeholder, chữ nút tắt |
-| `link` | `#FF6FA3` | Link, viền focus (hover `#FFB3CF`) |
-| `pink` / `orange` | `#FF3D7F` / `#FF8A3D` | Điểm nhấn (gạch dưới menu đang chọn, viền tập đang xem) |
-| `bg-brand` | `#FF2E7E → #FF7A3D` (135°) | Nút chính, nhãn TOP, thanh tiến độ (`bg-brand-x`, 90°) |
-| `ink` | `#16060D` | **Chữ trên nền gradient** (tương phản ~5.7:1; không dùng chữ trắng) |
-| `vip` / `vip-ink` | `#FFC247` / `#2B1D00` | **Chỉ cho VIP**: nút, nhãn, menu VIP. Khung VIP: `bg-vip-panel` + viền `vip-line` |
+| `canvas` | `#141414` | Nền trang chính |
+| `canvas-black` | `#000000` | Nền trang xem, bảng danh sách tập |
+| `surface` | `#252525` | Ngăn kéo, thẻ đánh giá, panel |
+| `surface-2` | `#2A2A2A` | Chip, ô tìm kiếm, ô số tập |
+| `surface-3` | `#333333` | Nhãn thể loại chỉ đọc (`GenreTag`), hover của chip |
+| `line` | `#383838` | Đường kẻ (divider), viền 1px |
+| `fg` | `#F3F3F3` | Chữ chính, tiêu đề |
+| `fg-soft` | `#D6D6D6` | Đoạn văn dài, chữ chip |
+| `muted` | `#828282` | Dòng thể loại, breadcrumb, meta. Ảnh đo được `#7D7D7D`; nâng nhẹ để đạt tương phản 4.5:1 trên `canvas` |
+| `faint` | `#5F5F5F` | Placeholder, chữ nút tắt |
+| `accent` | `#F4305E` | Nút chính, chip/mục đang chọn, nút lên đầu trang, tập đang xem |
+| `on-accent` | `#FFFFFF` | Chữ trên `accent` và các nền chuyển sắc. Tương phản ~3.9:1: chỉ dùng chữ đậm (≥ 600) |
+| `link` / `link-hover` | `#F4305E` / `#FF7A96` | Link, viền focus |
+| `ink` | `#141414` | Chữ tối trên nền sáng (nút trắng, thanh mời app bản sáng) |
+| `vip` / `vip-ink` | `#F6C781` / `#4B3625` | **Chỉ cho VIP**: chữ vàng trên nền tối; chữ nâu trên thẻ vàng. Viền `vip-line` `#6B5536` |
+| `wallet` | `#2B262C` | Thẻ thứ hai ở trang tài khoản (thay thẻ Ví) |
+| `plum` / `plum-2` / `plum-3` | `#2F111D` / `#4C1623` / `#381624` | Nền tím mận: đỉnh trang tài khoản / đỉnh bảng VIP / khung giới thiệu phim |
+| `cta-orange` | `#FF8225` | Điểm cuối của nút "Watch now" |
 | `success` | `#4FD6A0` | Nhãn FREE, thông báo thành công |
 | `error` / `error-soft` | `#FF6B6B` / `#FF8F8F` | Viền ô lỗi / chữ lỗi |
 
+Nền chuyển sắc (`@utility` trong `globals.css`):
+
+| Class | Giá trị | Dùng cho |
+|---|---|---|
+| `bg-brand` (`bg-brand-x`) | `#F4305E → #FE4F32` (90°) | Nút "Play now" ở kết quả tìm kiếm, nhãn TOP, thanh tiến độ |
+| `bg-cta` | `#CE6A9E → #FF8225` | Nút "Watch now" ở trang giới thiệu phim |
+| `bg-vip-gold` | `#FCDEA0 → #F6C781` | Thẻ VIP ở trang tài khoản |
+| `bg-plum-fade` | `#2F111D → canvas` (dọc) | Nền đỉnh trang tài khoản |
+| `bg-hot` | `#FF5A36 → #D8261F` | Nhãn HOT |
+| `bg-art` | nền tối có quầng accent | Thay ảnh khi phim chưa có poster |
+
 ## Chữ
 
-- **Inter** (100% sans-serif, chốt 2026-10-29), nạp bằng `next/font/google` (tự host, không gọi Google lúc chạy). Có bộ `vietnamese` vì tên phim hiện là tiếng Việt.
-- Tên phim lớn: 900, `tracking-[-0.02em]`, 56–72px (desktop), 40–48px (mobile).
-- Tiêu đề trang 800 · 28px; tiêu đề mục 800 · 22–24px.
-- Thân 400 · 16px / 1.6; meta 400 · 13px `muted`; menu 500 · 15px.
+- **Poppins** (OFL), nạp bằng `next/font/google` (tự host), độ đậm 400–900. Không có bộ ký tự tiếng Việt; giao diện là tiếng Anh.
+- Tiêu đề trang ≈ 28px · 700; tiêu đề hàng trang chủ ≈ 24px · 600; tiêu đề hàng ở trang xem ≈ 16px · 700.
+- Tên phim trong thẻ ≈ 15px/17px · 600, tối đa 2 dòng; dòng thể loại ≈ 12px `muted`, ngăn bằng " • ".
+- Thân 15px / 1.6 `fg-soft`.
 
 ## Hình khối và khoảng cách
 
-- Bo góc: hero 24px (`rounded-hero`) · panel 18–20px (`rounded-panel`) · thẻ 14px (`rounded-card`) · ô nhập, thumbnail nhỏ 10–12px (`rounded-input`) · nhãn 6px (`rounded-tag`) · nút, chip, ô tìm kiếm tròn hẳn (`rounded-full`).
-- Lưới 4px. Giữa các mục trang chủ 48px, giữa các thẻ 20px (mobile 16px). Lề hai bên 16px trên điện thoại, 24px từ `sm`. Khung nội dung tối đa 1360px.
-- Poster **2:3**; thumbnail tập và player **16:9**.
-- Vùng bấm tối thiểu **44px** (`Button size="sm"` = 44px, `md` = 48px).
+- Bo góc: thẻ poster, chip 10px (`rounded-card`, `rounded-chip`) · panel, bottom sheet 24px (`rounded-panel`) · hero 24px (`rounded-hero`) · ô nhập 12px (`rounded-input`) · nhãn 4px (`rounded-tag`) · nhãn thể loại 16px (`rounded-2xl`) · nút, ô tìm kiếm tròn hẳn (`rounded-full`).
+- Poster **3:4**, hero trang chủ **4:5**, player **9:16** (dọc); thumbnail tập cũ 16:9.
+- Số đo từng màn hình (header 58px, thẻ hàng cuộn 117px, lề trái 22px...) nằm ở bảng của `docs/plans/gd3-netshort-ui.md`.
+- **Vùng bấm tối thiểu 44px**, kể cả khi hình nhìn nhỏ hơn: thêm class `hit-44` (phần tử phải `relative`). `Button size="xs"` nhìn 30px, `Chip` nhìn 33px, đều bấm được 44px.
 
 ## Thành phần (`src/components/ui/`)
 
 | Thành phần | Ghi chú |
 |---|---|
-| `Button`, `ButtonLink` | `primary` (gradient), `secondary` (viền mờ), `vip` (vàng), `ghost`, `danger`; cỡ `md`/`sm`. Điều hướng thì dùng `ButtonLink`, hành động thì `Button` |
-| `Badge` | `top`, `vip`, `free`, `new`, `original`, `preview` |
-| `Chip`, `GenreTag` | Chip lọc (link, có trạng thái đang chọn); nhãn thể loại chỉ đọc |
-| `PosterCard` | Poster 2:3, TOP/NEW trái, VIP phải, tên đè chân ảnh; không có ảnh thì nền `bg-art` |
+| `Button`, `ButtonLink` | `primary` (viên thuốc `accent`), `gradient` (`bg-brand`), `cta` (`bg-cta`), `secondary` (viền mờ), `vip` (vàng), `ghost`, `danger`; cỡ `md` (48px) / `sm` (44px) / `xs` (nhìn 30px, bấm 44px). Điều hướng dùng `ButtonLink`, hành động dùng `Button` |
+| `Badge` | `hot` (đỏ gạch, nghiêng, ngọn lửa), `original` (nhãn nhỏ `accent` ở poster), `top`, `vip`, `free`, `new`, `preview` |
+| `Chip`, `GenreTag` | Chip lọc chữ nhật bo 10, nền `surface-2`, đang chọn nền `accent`; nhãn thể loại chỉ đọc bo 16 nền `surface-3` |
+| `PosterArt` | Ảnh 3:4 hoặc 4:5 có tên phim in đè (cho ảnh giữ chỗ không có chữ); `withTitle={false}` khi poster đã có chữ |
+| `PosterCard` | Thẻ phim (làm lại 3:4 ở bước R3) |
 | `EpisodeThumb` | 16:9, nút play giữa (ổ khóa nếu chưa có quyền), tiến độ ở chân, nhãn FREE/VIP |
 | `ProgressBar` | 0–1; có `label` thì là `progressbar` cho trình đọc màn hình |
 | `Skeleton`, `PosterGridSkeleton` | Giữ chỗ khi chờ dữ liệu |
 | `Field` | Nhãn + ô nhập + lỗi (`aria-invalid`, `aria-describedby`) |
-| `icons.tsx` | Icon nét 24×24, `currentColor`, luôn `aria-hidden` |
+| `icons.tsx` | Icon nét 24×24, `currentColor`, luôn `aria-hidden` (`FlameIcon`, `PlayIcon` là icon đặc) |
 | `brand/Logo` | `full` hoặc `icon`, truyền `height` |
 
 ## Màn hình Preview (chưa có API)

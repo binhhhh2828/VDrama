@@ -335,7 +335,7 @@ export function Player({
           {waiting && playing ? (
             <span
               aria-hidden="true"
-              className="absolute top-1/2 left-1/2 size-14 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-fg/20 border-t-pink"
+              className="absolute top-1/2 left-1/2 size-14 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
             />
           ) : null}
           {!playing ? (
@@ -343,7 +343,7 @@ export function Player({
               type="button"
               aria-label="Play"
               onClick={toggle}
-              className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-ink shadow-lg sm:size-[84px]"
+              className="absolute top-1/2 left-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-on-accent shadow-lg sm:size-[84px]"
             >
               <PlayIcon size={28} />
             </button>
@@ -398,7 +398,7 @@ export function Player({
             value={muted ? 0 : volume}
             onChange={(e) => setVol(Number(e.target.value))}
             aria-label="Volume"
-            className="hidden w-20 accent-pink sm:block"
+            className="hidden w-20 accent-accent sm:block"
           />
           <CtrlButton label="Full screen" onClick={toggleFullscreen}>
             <FullscreenIcon size={20} />

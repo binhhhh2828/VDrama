@@ -159,7 +159,7 @@ function PlanForm({ plan }: { plan?: PreviewAdminPlan }) {
             <input
               type="checkbox"
               defaultChecked={plan?.active ?? true}
-              className="size-4 accent-pink"
+              className="size-4 accent-accent"
             />
             On sale (shown on the VIP page)
           </label>

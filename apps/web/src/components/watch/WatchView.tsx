@@ -237,7 +237,7 @@ function GateScreen({
           <span
             aria-label="Loading video"
             role="status"
-            className="size-14 animate-spin rounded-full border-4 border-fg/20 border-t-pink"
+            className="size-14 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
           />
         );
       case "signin":
@@ -462,7 +462,7 @@ function EpisodeSidebar({
                 aria-current={current ? "page" : undefined}
                 className={cn(
                   "flex min-h-11 items-center gap-3 rounded-[10px] px-3 py-2.5 text-fg no-underline hover:bg-fg/6 hover:text-fg",
-                  current && "bg-pink/14",
+                  current && "bg-accent/14",
                 )}
               >
                 <span

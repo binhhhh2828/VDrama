@@ -115,7 +115,7 @@ function UserMenu() {
         aria-controls={menuId}
         aria-label={`Account menu for ${user.display_name}`}
         onClick={() => setOpen((v) => !v)}
-        className="relative flex size-11 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-ink"
+        className="relative flex size-11 items-center justify-center rounded-full bg-brand text-sm font-extrabold text-on-accent"
       >
         {initials(user.display_name)}
         {user.is_vip ? (

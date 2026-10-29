@@ -182,3 +182,19 @@ export const LogOutIcon = (p: IconProps) => (
     <path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H4" />
   </Stroke>
 );
+
+/** Ngọn lửa đặc (nhãn HOT). */
+export function FlameIcon({ size = 12, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      {...rest}
+    >
+      <path d="M12 2c1.2 3.6-1.3 5.4-2.9 7.6C7.9 11.3 6.5 13 6.5 15.5a5.5 5.5 0 0 0 11 0c0-2.6-1.4-4.6-2.8-6.2-.2 1.7-.9 2.7-2 3.2.8-3.3.6-6.9-.7-10.5Z" />
+    </svg>
+  );
+}

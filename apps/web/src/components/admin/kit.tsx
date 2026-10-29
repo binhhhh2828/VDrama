@@ -58,7 +58,7 @@ export function FilterChips<T extends string>({
             className={cn(
               "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold transition",
               on
-                ? "border-pink/60 bg-pink/14 text-fg"
+                ? "border-accent/60 bg-accent/14 text-fg"
                 : "border-line text-fg-soft hover:bg-fg/8 hover:text-fg",
             )}
           >

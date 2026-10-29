@@ -26,19 +26,36 @@ export default async function DevUiPage() {
   ]);
   const demoSeries = demoData.series;
 
+  // Giữ khớp với globals.css và bảng Màu trong docs/design.md.
   const colors: Array<[string, string]> = [
-    ["canvas", "#0B0709"],
-    ["surface", "#150E12"],
-    ["surface-2", "#1F1419"],
-    ["line", "#36252D"],
-    ["fg", "#F7EFF2"],
-    ["muted", "#B5A2AA"],
-    ["pink", "#FF3D7F"],
-    ["orange", "#FF8A3D"],
-    ["link", "#FF6FA3"],
-    ["vip", "#FFC247"],
+    ["canvas", "#141414"],
+    ["canvas-black", "#000000"],
+    ["surface", "#252525"],
+    ["surface-2", "#2A2A2A"],
+    ["surface-3", "#333333"],
+    ["line", "#383838"],
+    ["fg", "#F3F3F3"],
+    ["fg-soft", "#D6D6D6"],
+    ["muted", "#828282"],
+    ["faint", "#5F5F5F"],
+    ["accent", "#F4305E"],
+    ["link-hover", "#FF7A96"],
+    ["vip", "#F6C781"],
+    ["vip-ink", "#4B3625"],
+    ["wallet", "#2B262C"],
+    ["plum", "#2F111D"],
+    ["plum-2", "#4C1623"],
+    ["plum-3", "#381624"],
+    ["cta-orange", "#FF8225"],
     ["success", "#4FD6A0"],
     ["error", "#FF6B6B"],
+  ];
+  const gradients: Array<[string, string]> = [
+    ["bg-brand", "#F4305E → #FE4F32"],
+    ["bg-cta", "#CE6A9E → #FF8225"],
+    ["bg-vip-gold", "#FCDEA0 → #F6C781"],
+    ["bg-plum-fade", "#2F111D → canvas"],
+    ["bg-hot", "#FF5A36 → #D8261F"],
   ];
 
   return (
@@ -49,7 +66,7 @@ export default async function DevUiPage() {
             VDRAMA · UI KIT
           </span>
           <h1 className="text-4xl font-black tracking-[-0.02em] sm:text-[52px]">
-            Dark, warm, cinematic
+            Mobile-first, NetShort layout
           </h1>
         </div>
         <div className="flex items-center gap-4">
@@ -67,25 +84,30 @@ export default async function DevUiPage() {
               <span className="font-mono text-xs text-muted">{hex}</span>
             </div>
           ))}
-          <div className="col-span-3 flex flex-col gap-2 sm:col-span-2">
-            <div className="h-16 rounded-card border border-line bg-brand" />
-            <span className="text-sm font-semibold">bg-brand</span>
-            <span className="font-mono text-xs text-muted">#FF2E7E → #FF7A3D</span>
-          </div>
+          {gradients.map(([name, value]) => (
+            <div key={name} className="flex flex-col gap-2">
+              <div className={`h-16 rounded-card border border-line ${name}`} />
+              <span className="text-sm font-semibold">{name}</span>
+              <span className="font-mono text-xs text-muted">{value}</span>
+            </div>
+          ))}
         </div>
       </Section>
 
-      <Section title="Type">
+      <Section title="Type (Poppins)">
         <div className="flex flex-col gap-4">
-          <span className="text-5xl leading-[1.05] font-black tracking-[-0.02em] sm:text-[56px]">
-            Virtual City
+          <span className="text-[28px] leading-tight font-bold">
+            Explore genres &amp; short dramas
           </span>
-          <span className="text-[28px] font-extrabold">Continue watching</span>
-          <span className="text-[22px] font-extrabold">Trending now</span>
-          <p className="max-w-prose text-base leading-relaxed text-fg-soft">
+          <span className="text-2xl font-semibold">Hot Shorts</span>
+          <span className="text-base font-bold">Recommended for You</span>
+          <span className="line-clamp-2 max-w-[117px] text-[15px] leading-[17px] font-semibold">
+            Memories of You
+          </span>
+          <span className="text-xs text-muted">Romance • Drama</span>
+          <p className="max-w-prose text-[15px] leading-relaxed text-fg-soft">
             Is love real, or just an algorithm? Short AI dramas you can binge in an evening.
           </p>
-          <span className="text-[13px] text-muted">12 episodes · Romance</span>
         </div>
       </Section>
 
@@ -104,6 +126,10 @@ export default async function DevUiPage() {
           <Button variant="danger">
             <Icons.TrashIcon size={16} /> Clear history
           </Button>
+          <Button variant="gradient">
+            <Icons.PlayIcon /> Play now
+          </Button>
+          <Button variant="cta">Watch now</Button>
           <Button disabled>Disabled</Button>
           <ButtonLink href="/dev/ui" size="sm">
             Small link
@@ -111,6 +137,15 @@ export default async function DevUiPage() {
           <ButtonLink href="/dev/ui" size="sm" variant="secondary">
             Sign in
           </ButtonLink>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <ButtonLink href="/dev/ui" size="xs" className="w-[56%] max-w-60">
+            Play now
+          </ButtonLink>
+          <ButtonLink href="/dev/ui" size="xs" variant="gradient" className="w-[180px]">
+            <Icons.PlayIcon size={12} /> Play now
+          </ButtonLink>
+          <span className="text-xs text-muted">size xs: nhìn 30px, bấm 44px</span>
         </div>
       </Section>
 
@@ -122,6 +157,7 @@ export default async function DevUiPage() {
           <Badge kind="new" />
           <Badge kind="preview" />
           <Badge kind="original" />
+          <Badge kind="hot" />
           <GenreTag>Romance</GenreTag>
         </div>
         <div className="flex flex-wrap gap-2.5">
@@ -131,6 +167,9 @@ export default async function DevUiPage() {
           <Chip href="/dev/ui">Romance</Chip>
           <Chip href="/dev/ui">Fantasy</Chip>
           <Chip href="/dev/ui">Action</Chip>
+          <Chip href="/dev/ui">Comedy</Chip>
+          <Chip href="/dev/ui">Family</Chip>
+          <Chip href="/dev/ui">Drama</Chip>
         </div>
       </Section>
 
@@ -202,12 +241,7 @@ export default async function DevUiPage() {
                   className="rounded-[10px]"
                 >
                   {extras.badge ? (
-                    <Badge
-                      kind={extras.badge === "hot" ? "top" : "new"}
-                      className="absolute top-1.5 left-1.5 scale-90"
-                    >
-                      {extras.badge === "hot" ? "HOT" : "ORIGINAL"}
-                    </Badge>
+                    <Badge kind={extras.badge} className="absolute top-1.5 left-1.5" />
                   ) : null}
                 </PosterArt>
                 <span className="text-xs text-muted">

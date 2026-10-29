@@ -114,7 +114,7 @@ export function SeriesForm({ series }: { series?: SeriesDetail }) {
                   <input
                     type="checkbox"
                     defaultChecked={selected.has(g.slug)}
-                    className="accent-pink"
+                    className="accent-accent"
                   />
                   {g.name}
                 </label>
@@ -142,7 +142,7 @@ export function SeriesForm({ series }: { series?: SeriesDetail }) {
             <input
               type="checkbox"
               defaultChecked={series?.is_published ?? false}
-              className="size-4 accent-pink"
+              className="size-4 accent-accent"
             />
             Published (needs a published-at date; episodes need a ready video)
           </label>

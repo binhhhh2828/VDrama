@@ -238,7 +238,7 @@ function PlaceholderQr() {
         ))}
       </svg>
       <span className="absolute inset-0 flex items-center justify-center">
-        <span className="rotate-[-18deg] rounded-md border-2 border-pink bg-white/90 px-2.5 py-1 text-sm font-black tracking-[0.2em] text-pink">
+        <span className="rotate-[-18deg] rounded-md border-2 border-accent bg-white/90 px-2.5 py-1 text-sm font-black tracking-[0.2em] text-accent">
           SAMPLE
         </span>
       </span>

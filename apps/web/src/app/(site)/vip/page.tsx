@@ -58,12 +58,12 @@ export default function VipPage() {
             className={cn(
               "relative flex flex-col gap-[18px] rounded-panel border p-7",
               plan.featured
-                ? "border-pink/60 bg-linear-to-b from-pink/12 to-surface to-55%"
+                ? "border-accent/60 bg-linear-to-b from-accent/12 to-surface to-55%"
                 : "border-line bg-surface",
             )}
           >
             {plan.featured ? (
-              <span className="absolute -top-3.5 left-7 rounded-full bg-brand px-3 py-1.5 text-xs font-extrabold tracking-[0.06em] text-ink">
+              <span className="absolute -top-3.5 left-7 rounded-full bg-brand px-3 py-1.5 text-xs font-extrabold tracking-[0.06em] text-on-accent">
                 MOST POPULAR
               </span>
             ) : null}
@@ -78,7 +78,7 @@ export default function VipPage() {
               className={cn(
                 "mt-auto flex min-h-[52px] items-center justify-center rounded-full text-base font-bold no-underline",
                 plan.featured
-                  ? "bg-brand text-ink hover:text-ink hover:brightness-110"
+                  ? "bg-brand text-on-accent hover:text-on-accent hover:brightness-110"
                   : "border border-line bg-fg/6 text-fg hover:bg-fg/12 hover:text-fg",
               )}
             >

@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import { SessionProvider } from "@/components/session/SessionProvider";
 import { IS_DEMO } from "@/lib/demo/config";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin", "latin-ext", "vietnamese"],
+// Poppins không phải font biến nên phải liệt kê độ đậm. Không có bộ tiếng Việt (giao diện là tiếng Anh).
+const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
@@ -26,13 +28,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0709",
+  themeColor: "#141414",
   colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${poppins.variable} h-full`}>
       <body className="flex min-h-full flex-col font-sans">
         <SessionProvider>
           <DemoBanner />

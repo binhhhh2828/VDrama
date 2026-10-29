@@ -1,55 +1,98 @@
 @import "tailwindcss";
 
-/* Hệ thiết kế VDrama: chi tiết và lý do ở docs/design.md. Chỉ có giao diện tối. */
+/* Hệ thiết kế VDrama theo bố cục NetShort mobile (docs/design.md, docs/plans/gd3-netshort-ui.md).
+   Chỉ có giao diện tối. */
 @theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-poppins), system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --color-canvas: #0b0709;
-  --color-surface: #150e12;
-  --color-surface-2: #1f1419;
-  --color-line: #36252d;
-  --color-fg: #f7eff2;
-  --color-fg-soft: #e7d6dc;
-  --color-muted: #b5a2aa;
-  --color-faint: #8a7880;
-  --color-pink: #ff3d7f;
-  --color-orange: #ff8a3d;
-  --color-link: #ff6fa3;
-  --color-link-hover: #ffb3cf;
-  --color-ink: #16060d;
-  --color-vip: #ffc247;
-  --color-vip-ink: #2b1d00;
-  --color-vip-line: #5a4210;
+  --color-canvas: #141414;
+  --color-canvas-black: #000000;
+  --color-surface: #252525;
+  --color-surface-2: #2a2a2a;
+  --color-surface-3: #333333;
+  --color-line: #383838;
+  --color-fg: #f3f3f3;
+  --color-fg-soft: #d6d6d6;
+  --color-muted: #828282;
+  --color-faint: #5f5f5f;
+  --color-accent: #f4305e;
+  --color-on-accent: #ffffff;
+  --color-link: #f4305e;
+  --color-link-hover: #ff7a96;
+  --color-ink: #141414;
+  --color-vip: #f6c781;
+  --color-vip-ink: #4b3625;
+  --color-vip-line: #6b5536;
+  --color-wallet: #2b262c;
+  --color-plum: #2f111d;
+  --color-plum-2: #4c1623;
+  --color-plum-3: #381624;
+  --color-cta-orange: #ff8225;
   --color-success: #4fd6a0;
   --color-error: #ff6b6b;
   --color-error-soft: #ff8f8f;
 
   --radius-hero: 24px;
-  --radius-panel: 20px;
-  --radius-card: 14px;
+  --radius-panel: 24px;
+  --radius-card: 10px;
+  --radius-chip: 10px;
   --radius-input: 12px;
-  --radius-tag: 6px;
+  --radius-tag: 4px;
 }
 
-/* Gradient thương hiệu: nút chính, nhãn TOP, thanh tiến độ. Chữ trên nền này luôn là màu ink. */
+/* Nút chuyển sắc (nút "Play now" ở kết quả tìm kiếm, nhãn TOP, thanh tiến độ). Chữ trắng (on-accent). */
 @utility bg-brand {
-  background-image: linear-gradient(135deg, #ff2e7e 0%, #ff7a3d 100%);
+  background-image: linear-gradient(90deg, #f4305e 0%, #fe4f32 100%);
 }
 
 @utility bg-brand-x {
-  background-image: linear-gradient(90deg, #ff2e7e, #ff7a3d);
+  background-image: linear-gradient(90deg, #f4305e, #fe4f32);
+}
+
+/* Nút "Watch now" ở trang giới thiệu phim: tím → cam. */
+@utility bg-cta {
+  background-image: linear-gradient(90deg, #ce6a9e 0%, #ff8225 100%);
+}
+
+/* Thẻ VIP vàng (trang tài khoản). Chữ trên nền này là vip-ink. */
+@utility bg-vip-gold {
+  background-image: linear-gradient(90deg, #fcdea0 0%, #f6c781 100%);
 }
 
 @utility bg-vip-panel {
-  background-image: linear-gradient(135deg, #1f1708 0%, #150e12 60%);
+  background-image: linear-gradient(135deg, #3a2e1c 0%, #252525 60%);
+}
+
+/* Nền tím mận ở đỉnh trang tài khoản, nhạt dần về canvas. */
+@utility bg-plum-fade {
+  background-image: linear-gradient(180deg, #2f111d 0%, #141414 100%);
+}
+
+/* Nhãn HOT cạnh tên phim ở hero: đỏ gạch. */
+@utility bg-hot {
+  background-image: linear-gradient(90deg, #ff5a36 0%, #d8261f 100%);
 }
 
 /* Nền thay ảnh khi phim chưa có poster/banner. */
 @utility bg-art {
   background-image:
-    radial-gradient(70% 55% at 62% 28%, rgba(255, 46, 126, 0.85), transparent 70%),
-    radial-gradient(60% 45% at 18% 92%, rgba(255, 138, 61, 0.55), transparent 70%),
-    linear-gradient(180deg, #21111a, #0b0709);
+    radial-gradient(70% 55% at 62% 28%, rgba(244, 48, 94, 0.55), transparent 70%),
+    radial-gradient(60% 45% at 18% 92%, rgba(255, 130, 37, 0.35), transparent 70%),
+    linear-gradient(180deg, #2a2a2a, #141414);
+}
+
+/* Vùng bấm ít nhất 44px cho thành phần nhìn nhỏ hơn (nút 30px, chip 33px). Cần phần tử có `relative`. */
+@utility hit-44 {
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: max(100%, 44px);
+    min-width: 44px;
+    transform: translateY(-50%);
+  }
 }
 
 /* Đặt trong layer base để class tiện ích (text-fg, text-ink...) luôn thắng. */
