@@ -29,6 +29,12 @@ Mọi lỗi có cùng dạng (`app/core/errors.py`):
 | `vip_required` | 403 | Cần gói VIP còn hạn (dùng ở endpoint xem tập) |
 | `not_found` | 404 | Không tìm thấy |
 | `email_taken` | 409 | Email đã được dùng (không phân biệt hoa/thường, kể cả tài khoản đã xóa) |
+| `video_not_ready` | 409 | Video của tập chưa chuyển mã xong (chỉ gặp khi admin xem trước) |
+| `conflict` | 409 | Thao tác không hợp với trạng thái hiện tại (ví dụ thay video của tập đang xuất bản) |
+| `payload_too_large` | 413 | Dữ liệu gửi lên quá lớn |
+| `invalid_signature` | 401 | Chữ ký webhook sai, thiếu, hoặc quá hạn |
+| `stream_provider_error` | 502 | Cloudflare Stream lỗi hoặc không trả lời (thử lại sau) |
+| `stream_unavailable` | 503 | Chưa cấu hình Cloudflare Stream (thường gặp ở dev) |
 | `rate_limited` | 429 | Thao tác quá nhiều lần; header `Retry-After` cho biết số giây cần chờ |
 | `internal_error` | 500 | Lỗi phía server (chi tiết chỉ có trong log) |
 
@@ -58,6 +64,7 @@ Request `POST/PUT/PATCH/DELETE` có header `Origin` (hoặc `Referer`) khác `PU
 | `POST /auth/login` | 10 lần/phút theo IP và 5 lần/phút theo IP + email |
 | `POST /auth/register` | 5 lần/giờ theo IP |
 | `POST /auth/refresh` | 30 lần/phút theo IP |
+| `GET /episodes/{id}/play` | 60 lần/phút theo user |
 
 IP thật lấy từ `CF-Connecting-IP` khi `TRUST_CLOUDFLARE_IP=true` (bắt buộc ở prod, vì API nằm sau Cloudflare và Caddy). Request không xác định được IP thì không bị đếm.
 
@@ -196,7 +203,7 @@ Mọi tập đã xuất bản, theo số tập tăng dần (không phân trang):
 ]
 ```
 
-- `access`: `free` (đăng nhập là xem được) hoặc `vip` (cần VIP còn hạn). Không có id video: đường phát chỉ lấy qua endpoint xem tập (chưa làm).
+- `access`: `free` (đăng nhập là xem được) hoặc `vip` (cần VIP còn hạn). Không có id video: đường phát chỉ lấy qua `GET /api/v1/episodes/{id}/play`.
 - **Hiện ổ khóa**: catalog không biết ai đang xem, frontend tự ghép với `GET /me`:
 
 | | Khách | User | `is_vip: true` |
@@ -221,6 +228,37 @@ Phản hồi: `{ "items": [SeriesCard, ...] }` (chỉ trang đầu, không có c
 
 `uv run python -m app.cli seed-demo` (hoặc `docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo`) thêm 12 phim mẫu đủ các trường hợp trên. Ảnh là ảnh giữ chỗ từ `picsum.photos` (cần cho phép domain này trong cấu hình ảnh của Next.js), id video giả nên chưa phát được. Không chạy ở `ENV=prod`; chạy lại không tạo trùng.
 
+## Xem tập
+
+### `GET /api/v1/episodes/{id}/play`
+
+**Chỗ duy nhất kiểm tra quyền xem.** Trả URL phát có token ngắn hạn (Cloudflare Stream signed URL):
+
+```json
+{
+  "episode_id": 10,
+  "hls_url": "https://customer-xxx.cloudflarestream.com/<token>/manifest/video.m3u8",
+  "dash_url": "https://customer-xxx.cloudflarestream.com/<token>/manifest/video.mpd",
+  "iframe_url": "https://customer-xxx.cloudflarestream.com/<token>/iframe",
+  "expires_at": "2026-10-29T15:00:00Z"
+}
+```
+
+- Dùng `iframe_url` cho Stream player có sẵn, hoặc `hls_url` với hls.js (Safari phát HLS trực tiếp).
+- `expires_at`: hạn của token, mặc định 3 giờ, tự dài hơn nếu tập dài (tối đa 24 giờ). Đủ xem hết tập; hết hạn (người xem để tab mở lâu) thì gọi lại `play` lấy URL mới. Không lưu URL lâu dài.
+- Phản hồi có `Cache-Control: no-store`.
+- Mỗi lượt `play` thành công tính một lượt xem cho phim (mỗi người mỗi tập tối đa một lượt trong 6 giờ; admin không tính).
+
+| Tình huống | Kết quả |
+|---|---|
+| Tập/phim không có, đã xóa, chưa xuất bản | 404 `not_found` (kể cả với khách: không dò được tập ẩn) |
+| Khách | 401 `not_authenticated` (kể cả tập miễn phí) |
+| Tập VIP, chưa có VIP hoặc VIP hết hạn | 403 `vip_required` → mời mua VIP |
+| Admin | xem mọi tập, xem trước tập/phim chưa xuất bản |
+| Admin xem trước tập chưa chuyển mã xong | 409 `video_not_ready` |
+| Chưa cấu hình Stream | 503 `stream_unavailable` |
+| Quá 60 lần/phút | 429 `rate_limited` |
+
 ## Phân quyền
 
 | Hành động | Khách | User | VIP còn hạn | Admin |
@@ -242,3 +280,28 @@ uv run python -m app.cli create-admin --email admin@vdrama.vn --reason "Admin đ
 ```
 
 Email chưa có tài khoản thì tạo mới; đã có thì nâng quyền (không đổi mật khẩu).
+
+### Video tập phim (Cloudflare Stream)
+
+File video đi thẳng từ trình duyệt lên Cloudflare (tus), không qua VPS. Luồng:
+
+1. Tập phải **chưa xuất bản**. Gọi `POST /api/v1/admin/episodes/{id}/upload` với `{ "size_bytes": 734003200 }` → 201 `{ "upload_url": "...", "video_id": "..." }`. Tập chuyển sang `stream_status: uploading`.
+2. Upload bằng tus-js-client với `uploadUrl: upload_url` (không đặt `endpoint`), `chunkSize` khoảng 50–150 MB.
+3. Cloudflare chuyển mã xong thì báo webhook → tập thành `ready` (có `duration_sec`, `thumbnail_url`) hoặc `error`. Chỉ tập `ready` mới xuất bản được.
+4. Không thấy cập nhật (webhook trượt, hoặc ở dev): `POST /api/v1/admin/episodes/{id}/stream-sync` hỏi Cloudflare rồi cập nhật như webhook, trả `{ episode_id, video_id, stream_status, duration_sec, thumbnail_url, result }` với `result`: `updated` | `unchanged` | `skipped_published`.
+
+| Tình huống | Kết quả |
+|---|---|
+| Tập đang xuất bản (upload) | 409 `conflict`: gỡ xuất bản trước khi thay video |
+| Tập chưa có video (stream-sync) | 409 `conflict` |
+| File quá `STREAM_MAX_UPLOAD_BYTES` (mặc định 10 GB), `size_bytes` < 1 | 422 |
+| Cloudflare lỗi / không trả lời | 502 `stream_provider_error`, dữ liệu không đổi |
+| Thiếu `CF_ACCOUNT_ID`/`CF_STREAM_API_TOKEN` | 503 `stream_unavailable` |
+
+Thay video: video cũ vẫn nằm trên Cloudflare (tính phí lưu trữ); id của nó ghi trong nhật ký `episodes.upload_start` để dọn sau. Video nào báo xong mà không bật chế độ chỉ phát bằng token sẽ bị đánh dấu `error`.
+
+## Webhook
+
+### `POST /api/v1/webhooks/stream`
+
+Cloudflare Stream gọi khi video chuyển mã xong hoặc lỗi. Frontend không dùng. Xác thực bằng header `Webhook-Signature: time=<unix>,sig1=<hex>` (HMAC-SHA256 của `"<time>.<thân thô>"` với `CF_STREAM_WEBHOOK_SECRET`); sai, thiếu, hoặc lệch giờ quá 5 phút → 401 `invalid_signature`. Thân tối đa 64 KB. Trả `{ "result": "updated" | "unchanged" | "unknown_video" | "skipped_published" }`; Cloudflare gửi lại cùng sự kiện không gây ghi thêm.

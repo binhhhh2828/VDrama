@@ -22,7 +22,12 @@ import httpx
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
-from app.core.config import MAX_STREAM_TOKEN_TTL_MINUTES, Settings, get_settings
+from app.core.config import (
+    MAX_STREAM_TOKEN_TTL_MINUTES,
+    Settings,
+    get_settings,
+    load_stream_signing_key,
+)
 from app.models.enums import StreamStatus
 
 MAX_TOKEN_LIFETIME = timedelta(minutes=MAX_STREAM_TOKEN_TTL_MINUTES)
@@ -48,6 +53,9 @@ transport: httpx.AsyncBaseTransport | None = None
 
 class StreamNotConfiguredError(Exception):
     """Thiếu cấu hình Stream cần cho việc đang làm (thường gặp ở dev)."""
+
+    def __str__(self) -> str:
+        return "Thiếu cấu hình Cloudflare Stream (CF_ACCOUNT_ID, CF_STREAM_API_TOKEN, ...)"
 
 
 class StreamProviderError(Exception):
@@ -237,6 +245,41 @@ async def set_allowed_origins_quietly(video_id: str) -> None:
         await set_allowed_origins(video_id)
     except (StreamProviderError, StreamNotConfiguredError):
         logger.warning("Không đặt được allowedOrigins cho video %s", video_id)
+
+
+# --- Cài đặt một lần (lệnh CLI) ---
+
+
+@dataclass(frozen=True)
+class SigningKey:
+    key_id: str
+    pem_b64: str  # đúng dạng dán vào CF_STREAM_SIGNING_KEY_PEM
+
+
+async def create_signing_key(*, settings: Settings | None = None) -> SigningKey:
+    """Tạo khóa ký token. Cloudflare chỉ trả khóa riêng một lần, không lấy lại được."""
+    result = await _call(settings or get_settings(), "POST", "/keys")
+    key_id, pem = result.get("id"), result.get("pem")
+    if not isinstance(key_id, str) or not key_id or not isinstance(pem, str):
+        raise StreamProviderError("Cloudflare không trả id/pem của khóa")
+    try:
+        load_stream_signing_key(pem)  # dùng được thật thì mới đưa cho người vận hành
+    except ValueError as exc:
+        raise StreamProviderError(f"Khóa Cloudflare trả về không dùng được: {exc}") from exc
+    return SigningKey(key_id=key_id, pem_b64=pem)
+
+
+async def set_webhook(notification_url: str, *, settings: Settings | None = None) -> str:
+    """Đăng ký URL webhook (mỗi tài khoản một URL: ghi đè URL cũ). Trả secret để xác thực."""
+    if not notification_url.startswith("https://"):
+        raise ValueError("URL webhook phải bắt đầu bằng https://")
+    result = await _call(
+        settings or get_settings(), "PUT", "/webhook", json={"notificationUrl": notification_url}
+    )
+    secret = result.get("secret")
+    if not isinstance(secret, str) or not secret:
+        raise StreamProviderError("Cloudflare không trả secret của webhook")
+    return secret
 
 
 # --- Webhook ---

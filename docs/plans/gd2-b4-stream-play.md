@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Cloudflare Stream và endpoint `play`
 
-> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–4. Bốn câu hỏi mở chốt theo đề xuất. Làm trên branch `feat/stream`, tách từ `feat/catalog` (catalog chưa merge vào `main`).
+> Trạng thái: **xong (2026-10-29) trên branch `feat/stream`, chưa push. Chưa thử với tài khoản Cloudflare thật** (Giai đoạn 0 chưa có tài khoản): khi có, làm phần "Thử thật" ở Bước 5. Bốn câu hỏi mở chốt theo đề xuất. Branch tách từ `feat/catalog` (catalog chưa merge vào `main`).
 > Liên quan: `plan.md` mục 1 (Luồng xem video có kiểm soát quyền), mục 5 (Play, Admin upload-url), Giai đoạn 2 task "Service Cloudflare Stream" và "Endpoint `play`"; ma trận phân quyền ở `docs/plans/gd2-b2-auth.md`. Bảng dùng: `episodes` (`stream_video_id`, `stream_status`, `duration_sec`, `thumbnail_url`), `series_stats`.
 
 ## Vì sao làm phần này trước xác thực email
@@ -137,7 +137,7 @@ Phản hồi 200 (header `Cache-Control: no-store`):
   - Việc: `POST /webhooks/stream`, `POST /admin/episodes/{id}/stream-sync`, hàm áp trạng thái dùng chung (đặt ở `app/services/episode_video.py`).
   - Thêm (phát hiện ở Bước 3): video báo `ready` mà `requireSignedURLs` là false thì **không** đánh dấu `ready` (đặt `error`, ghi log cảnh báo), vì xuất bản video công khai là lộ phim VIP. `allowedOrigins` không đặt được qua tus: khi `ready` gọi API sửa video đặt `allowedOrigins` = host của `PUBLIC_ORIGIN` (lỗi thì vẫn `ready`, ghi log).
   - Hoàn thành khi: test chữ ký đúng → tập `ready` có `duration_sec`, `thumbnail_url`; sai chữ ký, thiếu header, lệch giờ > 5 phút → 401 và DB không đổi; gửi lại cùng sự kiện không ghi thêm audit; id video lạ → 200 không đổi gì; `error` → `stream_status = error`; sau `ready` admin xuất bản được tập (CHECK DB cho qua); đồng bộ tay cho cùng kết quả với webhook.
-- [ ] **Bước 5: Lệnh cài đặt, tài liệu, khép plan**
+- [x] **Bước 5: Lệnh cài đặt, tài liệu, khép plan** (xong 2026-10-29 trừ phần thử thật: chưa có tài khoản Cloudflare. Lệnh `stream-create-signing-key` kiểm tra khóa nạp được rồi mới in; `stream-set-webhook` chỉ nhận https. Khi thử thật cần xác nhận: header `stream-media-id` có trả không; `requiresignedurls` không giá trị có được nhận không (video tạo ra phải có `requireSignedURLs: true`); tên trường lỗi trong webhook; URL không token và token hết hạn bị từ chối)
   - Việc: hai lệnh CLI, `docs/api.md`, README, `CLAUDE.md` (quy ước: quyền xem chỉ ở `play`, không gọi API Cloudflare khi xem), đánh dấu `plan.md`.
   - Hoàn thành khi: test lệnh CLI với API giả in đúng biến cần dán; ruff, format, pytest xanh. Nếu đã có tài khoản Cloudflare: thử thật upload một video ngắn, nhận webhook (qua tunnel), phát bằng URL từ `play`, và xác nhận URL không token / token hết hạn bị từ chối.
 

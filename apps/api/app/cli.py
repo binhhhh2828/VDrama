@@ -2,10 +2,16 @@
 
     uv run python -m app.cli create-admin --email admin@vdrama.vn --reason "Admin đầu tiên"
     uv run python -m app.cli seed-demo      # dữ liệu phim mẫu cho dev
+    uv run python -m app.cli stream-create-signing-key
+    uv run python -m app.cli stream-set-webhook https://vdrama.vn/api/v1/webhooks/stream
 
-Email chưa có tài khoản: tạo admin mới, hỏi mật khẩu (nhập hai lần, không hiện ra màn hình).
-Email đã có: nâng quyền lên admin, không đổi mật khẩu. Mật khẩu không nhận qua tham số dòng lệnh
-để không lọt vào lịch sử shell. Mọi lần chạy đều ghi nhật ký thao tác (bắt buộc lý do).
+Hai lệnh stream-* gọi API Cloudflare (cần CF_ACCOUNT_ID, CF_STREAM_API_TOKEN) và in giá trị cần
+dán vào .env; không tự ghi file, không lưu ở đâu khác.
+
+create-admin: email chưa có tài khoản thì tạo admin mới, hỏi mật khẩu (nhập hai lần, không hiện
+ra màn hình). Email đã có: nâng quyền lên admin, không đổi mật khẩu. Mật khẩu không nhận qua
+tham số dòng lệnh để không lọt vào lịch sử shell. Mọi lần chạy đều ghi nhật ký thao tác (bắt
+buộc lý do).
 """
 
 import argparse
@@ -19,7 +25,7 @@ from pydantic import EmailStr, TypeAdapter, ValidationError
 from app.core.db import dispose_engine, get_sessionmaker
 from app.core.loop import selector_loop_factory
 from app.schemas.auth import PASSWORD_MAX, PASSWORD_MIN
-from app.services import demo_seed
+from app.services import demo_seed, stream
 from app.services.admin_accounts import (
     AdminAccountError,
     create_or_promote_admin,
@@ -71,6 +77,29 @@ async def seed_demo() -> str:
     )
 
 
+async def stream_create_signing_key() -> str:
+    key = await stream.create_signing_key()
+    return "\n".join(
+        [
+            "Đã tạo khóa ký token. Dán hai dòng sau vào .env (Cloudflare chỉ hiện khóa riêng",
+            "một lần, không lấy lại được; mất thì tạo khóa mới):",
+            f"CF_STREAM_SIGNING_KEY_ID={key.key_id}",
+            f"CF_STREAM_SIGNING_KEY_PEM={key.pem_b64}",
+        ]
+    )
+
+
+async def stream_set_webhook(url: str) -> str:
+    secret = await stream.set_webhook(url)
+    return "\n".join(
+        [
+            f"Đã đăng ký webhook {url} (thay URL cũ nếu có: mỗi tài khoản một URL).",
+            "Dán dòng sau vào .env:",
+            f"CF_STREAM_WEBHOOK_SECRET={secret}",
+        ]
+    )
+
+
 def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.getpass) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -79,6 +108,9 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.g
     p.add_argument("--reason", required=True, help="Lý do (ghi vào nhật ký thao tác)")
     p.add_argument("--display-name", default=None)
     sub.add_parser("seed-demo", help="Thêm dữ liệu phim mẫu cho dev (không chạy ở ENV=prod)")
+    sub.add_parser("stream-create-signing-key", help="Tạo khóa ký token xem phim trên Cloudflare")
+    p = sub.add_parser("stream-set-webhook", help="Đăng ký URL webhook Stream, in secret")
+    p.add_argument("url", help="Ví dụ https://vdrama.vn/api/v1/webhooks/stream")
     args = parser.parse_args(argv)
 
     if args.command == "create-admin":
@@ -90,6 +122,14 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.g
 
         def job() -> Awaitable[str]:
             return create_admin(email, args.reason, args.display_name, prompt)
+    elif args.command == "stream-create-signing-key":
+
+        def job() -> Awaitable[str]:
+            return stream_create_signing_key()
+    elif args.command == "stream-set-webhook":
+
+        def job() -> Awaitable[str]:
+            return stream_set_webhook(args.url)
     else:
 
         def job() -> Awaitable[str]:
@@ -104,7 +144,13 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.g
     try:
         with asyncio.Runner(loop_factory=selector_loop_factory) as runner:
             print(runner.run(run()))
-    except (AdminAccountError, demo_seed.DemoSeedRefusedError, ValueError) as exc:
+    except (
+        AdminAccountError,
+        demo_seed.DemoSeedRefusedError,
+        stream.StreamNotConfiguredError,
+        stream.StreamProviderError,
+        ValueError,
+    ) as exc:
         print(f"Lỗi: {exc}", file=sys.stderr)
         return 1
     return 0
