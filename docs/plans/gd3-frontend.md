@@ -130,7 +130,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
   - Hoàn thành khi:
     - Vitest: 401 → refresh → gửi lại đúng một lần; 5 request cùng 401 chỉ refresh một lần; refresh thất bại thì báo đăng xuất; mọi mã lỗi trong `docs/api.md` có câu tiếng Anh.
     - `pnpm build` xanh khi API không chạy.
-- [ ] **Bước 4: Khung trang người xem**
+- [x] **Bước 4: Khung trang người xem** (xong 2026-10-29; đã xem ở 1440px và 375px với khách và admin trên DB demo riêng `vdrama_demo`; trạng thái đăng nhập dùng chung qua `SessionProvider`; trang người xem nằm trong nhóm route `(site)`)
   - Việc:
     - Header: logo, menu, ô tìm kiếm, khu vực tài khoản đọc `/me` trên trình duyệt (Sign in / Get VIP, hoặc avatar có menu; admin có thêm link "Admin").
     - Footer có link trang tĩnh. Thanh điều hướng dưới đáy trên điện thoại.
