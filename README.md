@@ -40,6 +40,17 @@ Luồng gợi ý:
 - **Người xem:** trang chủ → mở một phim → Create account (hoặc đăng nhập `viewer@`) → xem tập 1 (free) → bấm tập VIP: thấy mời mua VIP → Get VIP → chọn gói → trang chuyển khoản (Preview) → thêm phim vào My List → Account → History (tiếp tục xem đúng chỗ đã dừng).
 - **Admin:** đăng nhập `admin@` → `/admin` tổng quan → Series & episodes → mở một phim (thấy cả tập nháp) → bấm "Video" của một tập (upload, Sync status) → Users → Payments → VIP plans → Audit log.
 
+### Bản demo trực tuyến (Netlify, không cần API)
+
+Cho người không chạy được máy: bản này chỉ gồm giao diện, **API giả chạy ngay trong trình duyệt** (dữ liệu phim chụp từ DB demo, tài khoản và VIP lưu trong trình duyệt của từng người). Cấu hình ở [netlify.toml](netlify.toml); biến `NEXT_PUBLIC_DEMO=true` bật chế độ này, bỏ đi thì web lại cần API thật. Kế hoạch: [docs/plans/gd3-netlify-demo.md](docs/plans/gd3-netlify-demo.md).
+
+- Tài khoản demo (mật khẩu `Demo1234!`, giả và công khai): `viewer@example.com`, `vip@example.com`, `admin@example.com`. Trang đăng nhập có sẵn nút bấm một chạm.
+- Nút **I've paid (demo)** ở trang thanh toán cấp VIP giả. Nút **Reset demo** ở dải đầu trang xóa mọi thứ về ban đầu.
+- Mọi tập phát cùng một video mẫu công khai; trang tự chặn công cụ tìm kiếm (`noindex`).
+- Chạy thử local, không cần API: `cd apps/web && NEXT_PUBLIC_DEMO=true pnpm dev`.
+- Chụp lại dữ liệu phim khi seed đổi (cần API đang chạy): `cd apps/web && DEMO_PASSWORD='...' node scripts/capture-demo-data.mjs the-one-in-my-dream`, rồi commit `src/lib/demo/data.json`.
+- Deploy: `npm i -g netlify-cli`, `netlify login`, `netlify link` (chọn site `vdramademo`), rồi `netlify deploy --build` (bản nháp, có link riêng để kiểm tra) và `netlify deploy --build --prod` khi ổn.
+
 Phần nào thật, phần nào Preview:
 
 | Chức năng | Trạng thái |

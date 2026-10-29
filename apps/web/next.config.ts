@@ -3,8 +3,11 @@ import type { NextConfig } from "next";
 // Khi chạy local (không có Caddy), chuyển /api/* sang FastAPI để giữ cùng một origin.
 const apiProxyTarget = process.env.API_PROXY_TARGET;
 
+// Bản demo trên Netlify dùng runtime của Netlify nên không đóng gói `standalone` (chỉ Docker cần).
+const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: isDemo ? undefined : "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   images: {
