@@ -82,6 +82,7 @@ async def series_detail(slug: SeriesSlug, db: DbSession, user: OptionalUser) -> 
         episode_count=data.episode_count,
         latest_episode_number=data.latest_episode_number,
         view_count=data.view_count,
+        favorite_count=data.favorite_count,
         is_published=data.series.is_published,
     )
 

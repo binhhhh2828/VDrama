@@ -80,13 +80,13 @@ async def _count_view(db: AsyncSession, user: User, episode: Episode, series_id:
     await db.execute(stmt)
 
 
-async def play_episode(
+async def find_watchable_episode(
     db: AsyncSession, episode_id: int, user: User | None
-) -> tuple[Episode, stream.PlaybackUrls]:
-    """Kiểm tra quyền rồi cấp URL phát.
+) -> tuple[Episode, int]:
+    """Bước 1–3 của thứ tự kiểm tra ở đầu file: tập mà `user` được xem, kèm id series.
 
-    Ném `PlayDeniedError` (các lớp con) khi không được xem, `stream.StreamNotConfiguredError`
-    khi thiếu cấu hình Stream.
+    Dùng chung cho `play` và báo tiến độ xem, để quyền xem chỉ quyết ở một chỗ.
+    Ném `EpisodeNotFoundError`, `LoginRequiredError`, `VipRequiredError`.
     """
     found = await _find_episode(db, episode_id, include_unpublished=_is_admin(user))
     if found is None:
@@ -96,6 +96,18 @@ async def play_episode(
         raise LoginRequiredError
     if not episode.is_free and not _is_admin(user) and not is_vip(user):
         raise VipRequiredError
+    return episode, series_id
+
+
+async def play_episode(
+    db: AsyncSession, episode_id: int, user: User | None
+) -> tuple[Episode, stream.PlaybackUrls]:
+    """Kiểm tra quyền rồi cấp URL phát.
+
+    Ném `PlayDeniedError` (các lớp con) khi không được xem, `stream.StreamNotConfiguredError`
+    khi thiếu cấu hình Stream.
+    """
+    episode, series_id = await find_watchable_episode(db, episode_id, user)
     if episode.stream_status != StreamStatus.READY or not episode.stream_video_id:
         raise VideoNotReadyError
     urls = stream.playback_urls(episode.stream_video_id, duration_sec=episode.duration_sec)

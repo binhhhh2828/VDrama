@@ -70,6 +70,7 @@ API → Neon PostgreSQL
    - Thông báo/đăng ký website thương mại điện tử với Bộ Công Thương nếu thuộc diện bắt buộc.
    - Hóa đơn điện tử cho giao dịch bán VIP.
    - Xem dịch vụ phát video trả phí của bạn có thuộc diện cần giấy phép/đăng ký riêng hay không.
+   - **Giữ dữ liệu sau khi người dùng xóa** (chốt 2026-10-29): người dùng xóa lịch sử xem / bỏ yêu thích thì chỉ ẩn với họ, hệ thống vẫn giữ để phân tích. Cần nói rõ trong Chính sách bảo mật (giữ gì, để làm gì, bao lâu) và có cách xóa thật hoặc ẩn danh hóa khi người dùng yêu cầu xóa tài khoản; hỏi luật sư về quyền yêu cầu xóa dữ liệu theo quy định bảo vệ dữ liệu cá nhân.
 
 ---
 
@@ -129,6 +130,8 @@ vdrama/
 | `0007` | Trạng thái | `payments.paid_event_id`, `failure_code`, `failure_detail`; trigger chuyển trạng thái `payments_guard`, `subscriptions_guard` |
 | `0008` | Xóa mềm | `deleted_at`, `deleted_by_id` cho `users`, `series`, `episodes`, `genres`, `vip_plans`; trigger `block_hard_delete` |
 | `0009` | Nhật ký | `audit_logs` (chỉ thêm) |
+| `0010` | Auth | xoay vòng refresh token, đồng ý điều khoản, `users.vip_expires_at` |
+| `0011` | Hoạt động | `deleted_at` cho `watch_history`, `favorites` (người dùng xóa → xóa mềm); chặn xóa thật hai bảng |
 
 Quy tắc chính nằm ở tầng DB (có test):
 - Email duy nhất không phân biệt hoa/thường; tìm user theo `lower(email)`.
@@ -141,6 +144,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 - Gia hạn VIP: thêm dòng `subscriptions` mới với `starts_at` = max(bây giờ, hạn VIP hiện tại), `expires_at` = `starts_at` + `duration_days`; không sửa dòng cũ.
 - Trạng thái VIP (chốt 2026-10-27, thêm ở migration `0010` cùng auth): cột `users.vip_expires_at`, VIP khi `vip_expires_at > now()`; không dùng role `vip` hay cờ `is_vip`. Cột này là bản tóm tắt của `subscriptions`, chỉ được ghi bởi `services/vip.py` trong cùng transaction.
 - Mọi khóa ngoại đều có index; `watch_history` ghi bằng upsert và cập nhật tại chỗ (HOT).
+- Lịch sử xem, yêu thích: người dùng xóa thì chỉ ẩn với họ (`deleted_at`, migration `0011`), hệ thống vẫn giữ; DB chặn xóa thật.
 
 ---
 
@@ -151,7 +155,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 | Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /me` |
 | Catalog | `GET /series`, `GET /series/{slug}`, `GET /series/{slug}/episodes`, `GET /search?q=` |
 | Play | `GET /episodes/{id}/play` (kiểm tra quyền → signed token) |
-| User | `GET/POST /me/favorites`, `GET/PUT /me/history` |
+| User | `GET /me/favorites`, `PUT/DELETE/GET /me/favorites/{series_id}`, `GET/DELETE /me/history`, `PUT/DELETE /me/history/{episode_id}`, `GET /me/history/series/{slug}` |
 | VIP | `GET /plans`, `POST /payments/checkout`, `POST /payments/webhook` |
 | Webhook | `POST /webhooks/stream` (Cloudflare Stream báo chuyển mã xong/lỗi) |
 | Admin | CRUD series/episodes/plans, `POST /admin/episodes/{id}/upload` (direct upload tus lên Stream), `POST /admin/episodes/{id}/stream-sync`, danh sách user/payment |
@@ -205,8 +209,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (cùng plan catalog, Bước 4, xong 2026-10-28: `GET /api/v1/search`) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
 - [x] (plan chi tiết: [docs/plans/gd2-b4-stream-play.md](docs/plans/gd2-b4-stream-play.md), xong 2026-10-29 trên branch `feat/stream`; **chưa thử với tài khoản Cloudflare thật**, danh sách cần xác nhận ở Bước 5 của plan; lệnh cài đặt `stream-create-signing-key`, `stream-set-webhook`; làm trước xác thực email vì `play` chặn frontend/admin và test được khi chưa có tài khoản Cloudflare) Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
 - [x] (cùng plan Stream ở trên, Bước 2, xong 2026-10-29: `GET /api/v1/episodes/{id}/play`, có đếm lượt xem) Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn). Đây là **chỗ duy nhất** kiểm tra quyền xem: catalog chỉ trả `access: free | vip` giống nhau cho mọi người (để cache được), frontend tự hiện ổ khóa theo `/me.is_vip` (chốt 2026-10-28)
-- [ ] Watch history, favorites
-- [ ] Test tự động cho auth, play, phân quyền
+- [x] (plan chi tiết: [docs/plans/gd2-b5-activity.md](docs/plans/gd2-b5-activity.md), xong 2026-10-29 trên branch `feat/activity`; người dùng xóa → xóa mềm, migration `0011`) Watch history, favorites
+- [x] (cùng plan activity ở trên, Bước 5, xong 2026-10-29: `app/tests/test_permissions.py` kiểm kê route, ma trận quyền, tài liệu khớp mã lỗi, luồng đầu-cuối mức API) Test tự động cho auth, play, phân quyền
 
 ### Giai đoạn 3 — Frontend
 - [ ] Layout, header, footer, responsive mobile-first
@@ -285,6 +289,7 @@ Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sep
 - [ ] Thêm MoMo, VNPay (dùng lại bảng payments/payment_events, thêm provider mới)
 - [ ] Hỗ trợ phụ đề nhiều ngôn ngữ
 - [ ] Khi tải tăng: nâng VPS, hoặc tách frontend/backend sang dịch vụ managed
+- [ ] Bảng sự kiện chỉ-thêm cho phân tích hành vi (xem lúc nào, bao lâu, bỏ ở đâu, thêm/bỏ yêu thích khi nào). Xóa mềm hiện tại chỉ giữ trạng thái cuối mỗi dòng (ghi chú 2026-10-29, plan `docs/plans/gd2-b5-activity.md`)
 - [ ] Khi catalog lên hàng chục nghìn phim: tối ưu lại tìm kiếm (Full-text Search của Postgres hoặc Elasticsearch). Hiện dùng trigram + `unaccent`, cho phép từ khóa từ 2 ký tự (chốt 2026-10-28)
 
 ---

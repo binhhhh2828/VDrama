@@ -18,7 +18,8 @@ router = APIRouter(tags=["play"])
 EpisodeId = Annotated[int, Path(ge=1, le=2**63 - 1)]
 
 
-def _denied(exc: play_service.PlayDeniedError) -> ApiError:
+def play_denied(exc: play_service.PlayDeniedError) -> ApiError:
+    """Lỗi quyền xem → phản hồi API (dùng chung cho play và báo tiến độ)."""
     match exc:
         case play_service.LoginRequiredError():
             return not_authenticated()
@@ -41,7 +42,7 @@ async def play(
     try:
         episode, urls = await play_service.play_episode(db, episode_id, user)
     except play_service.PlayDeniedError as exc:
-        raise _denied(exc) from None
+        raise play_denied(exc) from None
     except StreamNotConfiguredError:
         raise ApiError(
             503, ErrorCode.STREAM_UNAVAILABLE, "Chức năng xem phim tạm thời chưa sẵn sàng."

@@ -165,6 +165,7 @@ class SeriesDetailData:
     episode_count: int  # chỉ tập đã xuất bản
     latest_episode_number: int | None
     view_count: int
+    favorite_count: int
 
 
 async def _find_series(db: AsyncSession, slug: str, *, include_unpublished: bool) -> Series | None:
@@ -189,11 +190,20 @@ async def get_series_detail(
             )
         )
     ).one()
-    views = await db.scalar(
-        select(SeriesStats.view_count).where(SeriesStats.series_id == series.id)
-    )
+    stats = (
+        await db.execute(
+            select(SeriesStats.view_count, SeriesStats.favorite_count).where(
+                SeriesStats.series_id == series.id
+            )
+        )
+    ).one_or_none()
+    views, favorites = stats if stats is not None else (0, 0)
     return SeriesDetailData(
-        series=series, episode_count=count, latest_episode_number=latest, view_count=views or 0
+        series=series,
+        episode_count=count,
+        latest_episode_number=latest,
+        view_count=views,
+        favorite_count=favorites,
     )
 
 
