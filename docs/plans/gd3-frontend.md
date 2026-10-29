@@ -113,10 +113,10 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - lint, typecheck, format, build xanh.
     - `/dev/ui` khớp style guide trên canvas (xem bằng trình duyệt ở 1440px và 390px).
     - Build production không có `/dev/ui`.
-- [ ] **Bước 2: Dữ liệu mẫu tiếng Anh và tài khoản demo** (backend)
+- [x] **Bước 2: Dữ liệu mẫu tiếng Anh và tài khoản demo** (backend; xong 2026-10-29, thêm 3 gói VIP mẫu để cấp VIP cho tài khoản demo; 640 test API xanh)
   - Việc:
     - `app/services/demo_seed.py`: tên phim, slug, thể loại, mô tả, tên tập ("Episode 1"), quốc gia, lý do trong nhật ký sang tiếng Anh. Giữ đủ các trường hợp cũ (banner, hot, tập nháp, phim nháp, phim đã xóa).
-    - Thêm 3 tài khoản demo `viewer@vdrama.test`, `vip@vdrama.test`, `admin@vdrama.test`. Mật khẩu đọc từ biến `DEMO_PASSWORD` (không ghi cứng trong code); VIP cấp qua `services/vip.grant_vip` (có lý do, có nhật ký); admin qua cùng service với lệnh `create-admin`. Vẫn từ chối chạy khi `ENV=prod`.
+    - Thêm 3 tài khoản demo `viewer@example.com`, `vip@example.com`, `admin@example.com` (domain dành riêng cho ví dụ, không nhận email thật; `.test` bị kiểm tra email của API từ chối). Mật khẩu đọc từ biến `DEMO_PASSWORD` (không ghi cứng trong code); VIP cấp qua `services/vip.grant_vip` (có lý do, có nhật ký); admin qua cùng service với lệnh `create-admin`. Vẫn từ chối chạy khi `ENV=prod`.
     - README: cách làm mới DB dev (seed chỉ thêm phần thiếu theo slug, nên DB đã có phim tiếng Việt cũ phải xóa volume rồi seed lại).
   - Hoàn thành khi:
     - `test_demo_seed.py` cập nhật và xanh; thêm test: 3 tài khoản đúng vai trò, tài khoản VIP có `is_vip`, chạy lại không trùng, thiếu `DEMO_PASSWORD` thì bỏ qua tài khoản và báo rõ.
@@ -234,7 +234,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
 - **Ảnh poster hiện là ảnh giữ chỗ** (`picsum.photos` trong `seed-demo`): `next/image` cần khai báo domain ảnh; khi chuyển sang R2 (Giai đoạn 4) thì đổi.
 - **Màn hình Preview bị hiểu nhầm là đã chạy thật**: luôn có nhãn Preview; QR mẫu không chứa số tài khoản thật.
 - **Admin phần lớn là Preview**: sếp có thể tưởng admin đã quản lý được phim, user, thanh toán. Nhãn Preview đặt ở đầu từng trang admin tĩnh, README ghi rõ phần nào thật, phần nào chờ Giai đoạn 4.
-- **Tài khoản demo**: chỉ tạo khi `ENV` khác `prod`, mật khẩu lấy từ biến môi trường, domain `.test` không nhận email thật.
+- **Tài khoản demo**: chỉ tạo khi `ENV` khác `prod`, mật khẩu lấy từ biến môi trường, domain `example.com` không nhận email thật.
 - **Logo tách từ JPG**: viền có thể hơi mềm ở cỡ rất lớn. Đủ dùng cho web; khi in ấn hoặc làm banner lớn thì cần bản vector.
 
 ## Quyết định đã chốt khi duyệt (2026-10-29)

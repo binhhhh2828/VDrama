@@ -6,6 +6,8 @@ Website xem phim bộ có tài khoản và gói VIP. Kế hoạch đầy đủ: 
 
 Cần: Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm, Docker (tùy chọn).
 
+Trong VS Code, cài extension Python của Microsoft. Workspace đã cấu hình để tự kích hoạt môi trường `apps\api\.venv` trong terminal mới. Lần đầu mở dự án, chạy `uv sync` trong thư mục `apps\api` để tạo môi trường; nếu terminal đã mở trước đó, hãy mở terminal mới.
+
 ```bash
 # API  → http://localhost:8000/api/health
 cd apps/api && uv sync && uv run uvicorn app.main:app --reload
@@ -62,14 +64,22 @@ Cổng trên máy trùng với dự án khác thì đổi khi chạy compose: `D
 
 ## Catalog
 
-Danh sách phim, chi tiết, danh sách tập, thể loại, tìm kiếm không dấu dưới `/api/v1` (tài liệu: [docs/api.md](docs/api.md#catalog), thiết kế: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md)). Dữ liệu phim mẫu cho dev (12 phim, không chạy ở prod, chạy lại không trùng):
+Danh sách phim, chi tiết, danh sách tập, thể loại, tìm kiếm không dấu dưới `/api/v1` (tài liệu: [docs/api.md](docs/api.md#catalog), thiết kế: [docs/plans/gd2-b3-catalog.md](docs/plans/gd2-b3-catalog.md)). Dữ liệu mẫu cho dev và demo (tiếng Anh: 12 phim, 3 gói VIP, 3 tài khoản demo; không chạy ở prod, chạy lại không trùng). Tài khoản demo dùng chung mật khẩu lấy từ biến `DEMO_PASSWORD` (8–128 ký tự, tự đặt); thiếu biến này thì chỉ bỏ qua phần tài khoản:
+
+| Email | Vai trò |
+|---|---|
+| `viewer@example.com` | Người xem thường (tập VIP bị khóa) |
+| `vip@example.com` | Người xem có VIP 30 ngày |
+| `admin@example.com` | Admin |
 
 ```bash
-docker compose -f docker-compose.dev.yml exec api python -m app.cli seed-demo
-# hoặc chạy trực tiếp: cd apps/api && uv run python -m app.cli seed-demo
+docker compose -f docker-compose.dev.yml exec -e DEMO_PASSWORD='mật-khẩu-demo' api python -m app.cli seed-demo
+# hoặc chạy trực tiếp: cd apps/api && DEMO_PASSWORD='mật-khẩu-demo' uv run python -m app.cli seed-demo
 curl "http://localhost:8000/api/v1/series?sort=hot&limit=5"
-curl "http://localhost:8000/api/v1/search?q=nang%20tho"
+curl "http://localhost:8000/api/v1/search?q=city"
 ```
+
+Seed chỉ thêm phần còn thiếu (theo slug phim, tên gói, email). DB dev đã có dữ liệu mẫu tiếng Việt cũ (trước 2026-10-29) thì xóa DB rồi seed lại: `docker compose -f docker-compose.dev.yml down -v` (xóa **toàn bộ** dữ liệu dev), rồi `up` và chạy lệnh trên.
 
 ## Video (Cloudflare Stream)
 
