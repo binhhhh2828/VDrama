@@ -168,7 +168,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - Phát được luồng HLS mẫu ở dev.
     - Tiến độ lưu và khôi phục đúng (xem trên `/account/history`).
     - Khách bị mời đăng nhập; tập VIP mời mua VIP; bàn phím điều khiển được (space, mũi tên).
-- [ ] **Bước 9: Đăng ký, đăng nhập, đăng xuất, quên mật khẩu**
+- [x] **Bước 9: Đăng ký, đăng nhập, đăng xuất, quên mật khẩu** (xong 2026-10-29; nhóm route `(auth)` có khung riêng theo canvas; `?next=` chỉ nhận đường dẫn trong site (`safeNext`, có test); đã thử: sai mật khẩu, đúng mật khẩu quay về tập đang xem, đăng ký báo lỗi từng trường và email trùng, đăng ký mới tự đăng nhập, đăng xuất qua menu, lần thứ 6 sai mật khẩu báo chờ 54 giây; trang Preview không có `<form>` nên không gửi gì. Phần "vào /account sau khi đăng xuất bị chuyển về đăng nhập" kiểm ở Bước 10 khi có trang /account)
   - Việc:
     - Đăng ký, đăng nhập theo API (display name, email, mật khẩu, đồng ý điều khoản); lỗi từng trường từ `fields`; quay về `?next=`; đăng xuất ở menu tài khoản.
     - Tĩnh (Preview): `/forgot-password`, `/reset-password`, `/verify-email` theo cùng thiết kế; nút gửi bị tắt, ghi "Email sign-in help is coming soon".
