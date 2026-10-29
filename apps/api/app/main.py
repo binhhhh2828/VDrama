@@ -9,7 +9,7 @@ from app.core.config import get_settings
 from app.core.db import DatabaseNotConfiguredError, dispose_engine
 from app.core.errors import register_error_handlers
 from app.core.request_context import request_context_middleware
-from app.routers import admin_stream, auth, catalog, health, me, play
+from app.routers import admin_stream, auth, catalog, health, me, play, webhooks
 
 settings = get_settings()
 
@@ -43,6 +43,7 @@ app.include_router(me.router, prefix="/api/v1")
 app.include_router(catalog.router, prefix="/api/v1")
 app.include_router(play.router, prefix="/api/v1")
 app.include_router(admin_stream.router, prefix="/api/v1")
+app.include_router(webhooks.router, prefix="/api/v1")
 
 # Lỗi trả về dạng {"error": {"code", "message"}} (xem app/core/errors.py).
 register_error_handlers(app)

@@ -39,6 +39,9 @@ class ErrorCode(StrEnum):
     VIDEO_NOT_READY = "video_not_ready"
     STREAM_UNAVAILABLE = "stream_unavailable"
     STREAM_PROVIDER_ERROR = "stream_provider_error"
+    # Webhook
+    INVALID_SIGNATURE = "invalid_signature"
+    PAYLOAD_TOO_LARGE = "payload_too_large"
 
 
 # Lỗi HTTP chung (route không tồn tại, sai method...) đổi về code + câu tiếng Việt.
