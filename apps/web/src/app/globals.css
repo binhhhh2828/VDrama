@@ -28,6 +28,7 @@
   --color-plum-2: #4c1623;
   --color-plum-3: #381624;
   --color-cta-orange: #ff8225;
+  --color-promo: #cecece;
   --color-success: #4fd6a0;
   --color-error: #ff6b6b;
   --color-error-soft: #ff8f8f;
@@ -105,6 +106,11 @@
   html,
   body {
     overflow-x: clip;
+  }
+
+  /* Khóa cuộn trang khi một hộp thoại modal (ngăn kéo menu, bottom sheet) đang mở. */
+  html:has(dialog[open]:modal) {
+    overflow: hidden;
   }
 
   body {

@@ -198,3 +198,29 @@ export function FlameIcon({ size = 12, ...rest }: IconProps) {
     </svg>
   );
 }
+
+export const MenuIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </Stroke>
+);
+
+export const ArrowUpIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 19V5M5 12l7-7 7 7" />
+  </Stroke>
+);
+
+export const ChevronDownIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </Stroke>
+);
+
+/** Ô vuông có nút phát (mục Browse trong ngăn kéo). */
+export const PlaySquareIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="3" />
+    <path d="M3 8h18M10 11.5v5l4.5-2.5z" />
+  </Stroke>
+);

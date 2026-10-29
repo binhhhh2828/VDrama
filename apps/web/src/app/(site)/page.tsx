@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ContinueWatching } from "@/components/home/ContinueWatching";
-import { HeroCarousel, HeroFallback } from "@/components/home/HeroCarousel";
+import { HeroCarousel, HeroFallback, HeroSkeleton } from "@/components/home/HeroCarousel";
 import type { HeroSlide } from "@/components/home/HeroCarousel";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { PosterGrid } from "@/components/series/PosterGrid";
 import { ButtonLink } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
-import { getSeries, listGenres, listSeries } from "@/lib/api/catalog";
+import { listGenres, listSeries } from "@/lib/api/catalog";
+import { IS_DEMO } from "@/lib/demo/config";
 
 // Trang chủ. Phần catalog lấy trên server (HTML có sẵn tên phim, cache vài phút); phần riêng của
 // người xem (Continue watching) lấy trên trình duyệt. Mỗi mục có Suspense riêng để mục nào xong
@@ -16,60 +17,55 @@ import { getSeries, listGenres, listSeries } from "@/lib/api/catalog";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1360px] flex-col gap-8 px-4 pt-4 pb-16 sm:px-6 md:gap-12 md:pt-6">
-      <Suspense
-        fallback={<Skeleton className="h-[460px] rounded-panel md:h-[520px] md:rounded-hero" />}
-      >
+    <main className="flex flex-col">
+      <h1 className="sr-only">VDrama: short AI dramas</h1>
+      {/* Hero tràn hai mép, nằm dưới header trong suốt; phần còn lại có lề như cũ. */}
+      <Suspense fallback={<HeroSkeleton />}>
         <Hero />
       </Suspense>
+      <div className="mx-auto flex w-full max-w-[1360px] flex-col gap-8 px-4 pt-6 pb-16 sm:px-6 md:gap-12">
+        <ContinueWatching />
 
-      <ContinueWatching />
+        <section aria-labelledby="trending-h" className="flex flex-col gap-3 md:gap-4">
+          <SectionHeader id="trending-h" title="Trending now" href="/browse?sort=hot" />
+          <Suspense fallback={<PosterGridSkeleton count={6} />}>
+            <Trending />
+          </Suspense>
+        </section>
 
-      <section aria-labelledby="trending-h" className="flex flex-col gap-3 md:gap-4">
-        <SectionHeader id="trending-h" title="Trending now" href="/browse?sort=hot" />
-        <Suspense fallback={<PosterGridSkeleton count={6} />}>
-          <Trending />
-        </Suspense>
-      </section>
+        <section aria-labelledby="genres-h" className="flex flex-col gap-3 md:gap-4">
+          <h2 id="genres-h" className="text-xl font-extrabold md:text-2xl">
+            Browse by genre
+          </h2>
+          <Suspense fallback={<Skeleton className="h-11 w-full max-w-xl rounded-full" />}>
+            <Genres />
+          </Suspense>
+        </section>
 
-      <section aria-labelledby="genres-h" className="flex flex-col gap-3 md:gap-4">
-        <h2 id="genres-h" className="text-xl font-extrabold md:text-2xl">
-          Browse by genre
-        </h2>
-        <Suspense fallback={<Skeleton className="h-11 w-full max-w-xl rounded-full" />}>
-          <Genres />
-        </Suspense>
-      </section>
+        <section aria-labelledby="new-h" className="flex flex-col gap-3 md:gap-4">
+          <SectionHeader id="new-h" title="New releases" href="/browse?sort=new" />
+          <Suspense fallback={<PosterGridSkeleton count={6} />}>
+            <NewReleases />
+          </Suspense>
+        </section>
 
-      <section aria-labelledby="new-h" className="flex flex-col gap-3 md:gap-4">
-        <SectionHeader id="new-h" title="New releases" href="/browse?sort=new" />
-        <Suspense fallback={<PosterGridSkeleton count={6} />}>
-          <NewReleases />
-        </Suspense>
-      </section>
-
-      <VipBand />
+        <VipBand />
+      </div>
     </main>
   );
 }
 
 async function Hero() {
-  const { items } = await listSeries({ withBanner: true, limit: 5 });
+  const { items } = await listSeries({ withBanner: true, limit: 6 });
   if (items.length === 0) return <HeroFallback />;
-  // Câu giới thiệu chỉ có ở trang chi tiết; 5 lượt đọc này đều được cache.
-  const details = await Promise.all(items.map((s) => getSeries(s.slug)));
-  const slides: HeroSlide[] = items.map((s, i) => {
-    const count = details[i]?.episode_count ?? s.total_episodes;
-    return {
-      slug: s.slug,
-      title: s.title,
-      bannerUrl: s.banner_url,
-      meta: [count ? `${count} episodes` : null, ...s.genres.map((g) => g.name)]
-        .filter(Boolean)
-        .join(" · "),
-      tagline: details[i]?.description ?? null,
-    };
-  });
+  // Nhãn HOT chỉ có ở dữ liệu demo (API thật chưa có); nạp động để bản thật không kéo dữ liệu mẫu vào.
+  const demoExtras = IS_DEMO ? (await import("@/lib/demo/extras")).demoExtras : null;
+  const slides: HeroSlide[] = items.map((s) => ({
+    slug: s.slug,
+    title: s.title,
+    bannerUrl: s.banner_url,
+    hot: demoExtras?.(s.slug).badge === "hot",
+  }));
   return <HeroCarousel slides={slides} />;
 }
 

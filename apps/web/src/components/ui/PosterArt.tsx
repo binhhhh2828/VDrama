@@ -15,6 +15,8 @@ export type PosterArtProps = {
   sizes: string;
   preload?: boolean;
   className?: string;
+  /** Chỉnh khối chữ in đè (ví dụ đẩy lên cao để chừa chỗ cho nút ở hero). */
+  titleClassName?: string;
   /** Lớp phủ thêm (nhãn góc...). */
   children?: ReactNode;
 };
@@ -30,6 +32,7 @@ export function PosterArt({
   sizes,
   preload,
   className,
+  titleClassName,
   children,
 }: PosterArtProps) {
   const hero = ratio === "hero";
@@ -41,7 +44,10 @@ export function PosterArt({
       {withTitle ? (
         <div
           aria-hidden
-          className="absolute inset-x-0 bottom-0 flex h-1/2 items-end bg-linear-to-b from-black/0 via-black/35 to-black/80 px-[8%] pb-[9%]"
+          className={cn(
+            "absolute inset-x-0 bottom-0 flex h-1/2 items-end bg-linear-to-b from-black/0 via-black/35 to-black/80 px-[8%] pb-[9%]",
+            titleClassName,
+          )}
         >
           <span
             className={cn(
