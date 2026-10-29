@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { DemoBanner } from "@/components/demo/DemoBanner";
 import { SessionProvider } from "@/components/session/SessionProvider";
+import { IS_DEMO } from "@/lib/demo/config";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,6 +18,7 @@ export const metadata: Metadata = {
   },
   description: "Short AI drama series you can binge in an evening. Watch free episodes or go VIP.",
   applicationName: "VDrama",
+  ...(IS_DEMO ? { robots: { index: false, follow: false } } : {}),
   openGraph: {
     siteName: "VDrama",
     type: "website",
@@ -31,7 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
       <body className="flex min-h-full flex-col font-sans">
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <DemoBanner />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

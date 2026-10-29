@@ -24,7 +24,7 @@ Netlify chỉ host phần giao diện, nên **API được thay bằng một API
     - `src/lib/demo/store.ts` (đọc/ghi `localStorage`, an toàn khi không có), `src/lib/demo/api.ts` (bộ định tuyến `fetch` giả theo `docs/api.md`: auth, me, series, search, genres, play, history, favorites, admin episodes, upload, stream-sync; trả đúng mã lỗi và JSON như thật, gồm `vip_required`, `not_authenticated`, `conflict`, `stream_unavailable`).
     - Vitest cho bộ giả: đăng nhập sai / đúng, tập VIP bị khóa với tài khoản thường, lưu tiến độ, My List, quyền admin.
   - Hoàn thành khi: test xanh; không file nào ngoài `lib/demo` bị đổi.
-- [ ] **Bước N2: Cắm vào web, bật VIP giả**
+- [x] **Bước N2: Cắm vào web, bật VIP giả** (xong 2026-10-29; đã chạy `NEXT_PUBLIC_DEMO=true pnpm dev` với API trỏ vào cổng chết: trang chủ có dữ liệu, đăng nhập một chạm bằng 3 tài khoản demo, tập VIP bị khóa với viewer, "I've paid (demo)" cấp VIP và mở khóa tập, admin thấy tập nháp và Sync status báo "chưa cấu hình", "Reset demo" xóa sạch trạng thái. Lưu ý: bản build thường vẫn chứa một chunk dữ liệu demo tải lười (không bao giờ được tải khi không bật demo), trình biên dịch không loại hẳn được; vô hại. Admin vào bằng menu tài khoản → Admin)
   - Việc: `client.ts` dùng `fetch` giả khi `NEXT_PUBLIC_DEMO`; `lib/api/catalog.ts` đọc thẳng dữ liệu mẫu ở demo; `SeriesForm` thôi gọi `fetch` trực tiếp; trình phát dùng HLS mẫu ở demo; trang đăng nhập có khung "Demo accounts" + nút điền sẵn; checkout bật "I've paid" ở demo; dải "Demo site" ở đầu trang; `robots` chặn công cụ tìm kiếm.
   - Hoàn thành khi: `NEXT_PUBLIC_DEMO=true pnpm dev` chạy đủ luồng người xem và admin **khi API và DB tắt hẳn**; build thường (không demo) không đổi hành vi, mọi kiểm tra xanh.
 - [ ] **Bước N3: Cấu hình Netlify và build thử**

@@ -10,6 +10,8 @@ import { ChevronLeftIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
 import { formatClock, formatVnd } from "@/lib/format";
+import { api } from "@/lib/api/client";
+import { IS_DEMO } from "@/lib/demo/config";
 import { PREVIEW_PLANS, PREVIEW_TRANSFER } from "@/lib/preview-data";
 
 /**
@@ -23,6 +25,7 @@ export function Checkout() {
   const plan = PREVIEW_PLANS.find((p) => p.id === search.get("plan")) ?? PREVIEW_PLANS[1];
   const [method, setMethod] = useState<"transfer" | "paypal">("transfer");
   const [left, setLeft] = useState(PREVIEW_TRANSFER.expiresInSec);
+  const [demoState, setDemoState] = useState<"idle" | "busy" | "done" | "error">("idle");
 
   useEffect(() => {
     const t = window.setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
@@ -68,6 +71,7 @@ export function Checkout() {
       <PreviewNotice>
         Payments are not live yet. This shows how checkout will work. No order is created and the QR
         code below is a placeholder, not a real bank account.
+        {IS_DEMO ? " In this demo, “I've paid” simulates the payment so you can try VIP." : ""}
       </PreviewNotice>
 
       <div className="grid gap-5 md:grid-cols-[1fr_340px]">
@@ -154,9 +158,49 @@ export function Checkout() {
               ? "Added on top of your current VIP, so you don't lose any days."
               : "Starts the moment payment goes through. No automatic renewal."}
           </p>
-          <Button variant="vip" disabled className="mt-auto">
-            Waiting for payment…
-          </Button>
+          {IS_DEMO ? (
+            demoState === "done" ? (
+              <div className="mt-auto flex flex-col gap-3" role="status">
+                <p className="rounded-input border border-success/35 bg-success/10 px-3 py-2 text-sm text-success">
+                  Demo payment received. VIP is now on for {plan.days} days.
+                </p>
+                <ButtonLink href="/browse" variant="vip">
+                  Start watching
+                </ButtonLink>
+              </div>
+            ) : (
+              <>
+                <Button
+                  variant="vip"
+                  className="mt-auto"
+                  disabled={demoState === "busy"}
+                  onClick={async () => {
+                    setDemoState("busy");
+                    try {
+                      session.setUser(await api.demoBuyVip(plan.days));
+                      setDemoState("done");
+                    } catch {
+                      setDemoState("error");
+                    }
+                  }}
+                >
+                  {demoState === "busy" ? "Processing…" : "I've paid (demo)"}
+                </Button>
+                {demoState === "error" ? (
+                  <p role="alert" className="text-center text-sm text-error-soft">
+                    Couldn&apos;t add VIP. Please try again.
+                  </p>
+                ) : null}
+                <p className="text-center text-xs text-muted">
+                  Demo only: no money moves. This simulates the payment arriving.
+                </p>
+              </>
+            )
+          ) : (
+            <Button variant="vip" disabled className="mt-auto">
+              Waiting for payment…
+            </Button>
+          )}
           <p className="text-center text-xs text-muted">
             By paying you agree to the <Link href="/terms">Terms</Link> and{" "}
             <Link href="/refunds">Refund Policy</Link>.

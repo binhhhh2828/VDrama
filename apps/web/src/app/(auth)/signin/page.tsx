@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AuthHeading, AuthTabs } from "@/components/auth/AuthTabs";
+import { DemoAccounts } from "@/components/demo/DemoAccounts";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { safeNext } from "@/lib/safe-next";
@@ -23,6 +24,7 @@ async function Content({ searchParams }: { searchParams: PageProps<"/signin">["s
     <>
       <AuthTabs active="signin" next={next} />
       <AuthHeading title="Welcome back" text="Sign in to keep watching where you left off." />
+      <DemoAccounts next={next} />
       <SignInForm next={next} />
       <p className="text-center text-sm text-muted">
         New to VDrama? <Link href={`/signup${qs}`}>Create a free account</Link>

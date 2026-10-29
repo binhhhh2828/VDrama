@@ -38,7 +38,17 @@ export type ApiClientOptions = {
 
 export function createApiClient(opts: ApiClientOptions = {}) {
   const base = (opts.baseUrl ?? "/api/v1").replace(/\/$/, "");
-  const doFetch = opts.fetch ?? ((...args: Parameters<typeof fetch>) => fetch(...args));
+  const doFetch =
+    opts.fetch ??
+    (async (...args: Parameters<typeof fetch>) => {
+      // Điều kiện viết thẳng ra đây để bản build thường loại hẳn nhánh (và dữ liệu mẫu) khỏi bundle.
+      if (process.env.NEXT_PUBLIC_DEMO === "true") {
+        // Bản demo tĩnh: API giả chạy ngay trong trình duyệt (docs/plans/gd3-netlify-demo.md).
+        const { demoFetch } = await import("@/lib/demo/instance");
+        return demoFetch(...args);
+      }
+      return fetch(...args);
+    });
   let refreshing: Promise<boolean> | null = null;
 
   function refreshOnce(): Promise<boolean> {
@@ -164,6 +174,9 @@ export function createApiClient(opts: ApiClientOptions = {}) {
       }),
     adminStreamSync: (episodeId: number) =>
       request<StreamSyncResult>("POST", `/admin/episodes/${episodeId}/stream-sync`),
+
+    // --- Chỉ có ở bản demo: "mua VIP" giả (không có ở API thật) ---
+    demoBuyVip: (days: number) => request<User>("POST", "/demo/vip", { body: { days } }),
   };
 }
 

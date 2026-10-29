@@ -1,5 +1,6 @@
 "use client";
 
+import { IS_DEMO } from "@/lib/demo/config";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,7 +34,7 @@ type Gate =
 
 async function fetchSource(episodeId: number): Promise<PlayerSource> {
   const info = await api.play(episodeId);
-  return { url: info.hls_url, expiresAt: Date.parse(info.expires_at) || null, sample: false };
+  return { url: info.hls_url, expiresAt: Date.parse(info.expires_at) || null, sample: IS_DEMO };
 }
 
 function gateFor(err: unknown): Gate {

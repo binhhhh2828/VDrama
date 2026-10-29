@@ -12,7 +12,7 @@ export const DEMO_ACCOUNTS = [
     note: "Free episodes only; VIP episodes are locked",
   },
   { email: "vip@example.com", role: "VIP viewer", note: "Can watch every episode" },
-  { email: "admin@example.com", role: "Admin", note: "Opens the admin area" },
+  { email: "admin@example.com", role: "Admin", note: "Account menu → Admin opens the admin area" },
 ] as const;
 
 /** Video mẫu dùng cho mọi tập (luồng HLS thử nghiệm công khai). */

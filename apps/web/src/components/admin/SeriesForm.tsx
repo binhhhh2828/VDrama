@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PreviewNotice } from "@/components/preview/PreviewNotice";
 import { Button } from "@/components/ui/Button";
+import { api } from "@/lib/api/client";
 import type { Genre, SeriesDetail } from "@/lib/api/types";
 import { ReasonAction } from "./kit";
 import { Panel } from "./ui";
@@ -26,8 +27,8 @@ export function SeriesForm({ series }: { series?: SeriesDetail }) {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/v1/genres")
-      .then((r) => (r.ok ? (r.json() as Promise<Genre[]>) : []))
+    api
+      .request<Genre[]>("GET", "/genres")
       .then((g) => active && setGenres(g))
       .catch(() => {});
     return () => {

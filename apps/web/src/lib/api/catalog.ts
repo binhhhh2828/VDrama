@@ -24,7 +24,13 @@ async function cachedGet<T>(path: string): Promise<Cached<T>> {
 
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/api/v1${path}`, { headers: { Accept: "application/json" } });
+    if (process.env.NEXT_PUBLIC_DEMO === "true") {
+      // Bản demo tĩnh: đọc từ dữ liệu mẫu, không có API.
+      const { demoFetch } = await import("@/lib/demo/instance");
+      res = await demoFetch(`/api/v1${path}`);
+    } else {
+      res = await fetch(`${API_BASE}/api/v1${path}`, { headers: { Accept: "application/json" } });
+    }
   } catch {
     throw new ApiError(0, "network_error");
   }
