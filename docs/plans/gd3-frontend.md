@@ -138,7 +138,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
   - Hoàn thành khi:
     - Xem bằng trình duyệt ở 1440px và 390px khớp canvas; menu xuống dòng gọn ở màn hẹp.
     - Phím Tab đi qua được mọi link; build xanh.
-- [ ] **Bước 5: Trang chủ**
+- [x] **Bước 5: Trang chủ** (xong 2026-10-29; banner tự chuyển 5 phim, Trending, thể loại, New releases, dải VIP; Continue watching thử với `viewer@` có 2 tập xem dở; HTML trả về có tên phim, khách không thấy Continue watching; xem ở 1440px và 375px. Mô tả phim mẫu giờ chỉ là câu giới thiệu, bỏ đuôi "(Demo series...)")
   - Việc:
     - Banner (`/series?with_banner=true`), Trending (`sort=hot`), New releases, thể loại: lấy trên server.
     - Continue watching: chỉ hiện khi đã đăng nhập, lấy trên trình duyệt.

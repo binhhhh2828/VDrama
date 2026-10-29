@@ -53,15 +53,19 @@ export function PosterCard({
           <Badge kind="new" className="absolute top-2.5 left-2.5" />
         ) : null}
         {vip ? <Badge kind="vip" className="absolute top-2.5 right-2.5" /> : null}
-        <div className="absolute inset-x-0 bottom-0 bg-linear-to-b from-canvas/0 to-canvas/85 px-3 pt-10 pb-3">
+        <div className="absolute inset-x-0 bottom-0 hidden sm:block bg-linear-to-b from-canvas/0 to-canvas/85 px-3 pt-10 pb-3">
           <span className="line-clamp-2 text-[19px] leading-[1.15] font-extrabold tracking-[-0.02em]">
             {title}
           </span>
         </div>
       </div>
       <div className="flex flex-col gap-[3px]">
-        <span className="truncate text-[15px] font-semibold">{title}</span>
-        {meta ? <span className="truncate text-[13px] text-muted">{meta}</span> : null}
+        <span className="line-clamp-2 text-[13px] leading-[1.3] font-semibold sm:truncate sm:text-[15px]">
+          {title}
+        </span>
+        {meta ? (
+          <span className="hidden truncate text-[13px] text-muted sm:block">{meta}</span>
+        ) : null}
       </div>
     </Link>
   );
