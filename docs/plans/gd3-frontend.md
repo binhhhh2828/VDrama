@@ -147,7 +147,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - Với dữ liệu `seed-demo`, trang chủ hiện đủ các mục; khách không thấy Continue watching.
     - HTML trả về đã có tên phim (kiểm bằng `curl`).
     - Đúng thiết kế ở cả hai khung.
-- [ ] **Bước 6: Duyệt phim và tìm kiếm**
+- [x] **Bước 6: Duyệt phim và tìm kiếm** (xong 2026-10-29; Load more thử với trang 4 phim: 3 trang, 10 phim không trùng, đổi thể loại về trang đầu; tìm `city`, `virtual c`, `SKY` ra đúng phim, từ khóa 1 ký tự không gọi API; xem ở 1440px và 375px)
   - Việc: `/browse` (lọc thể loại, mới / hot, "Load more" theo con trỏ), `/search?q=` (gõ xong mới tìm, có trạng thái không thấy kết quả).
   - Hoàn thành khi:
     - Load more đi hết danh sách không trùng; đổi thể loại thì về trang đầu.

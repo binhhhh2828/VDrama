@@ -125,6 +125,10 @@ export function createApiClient(opts: ApiClientOptions = {}) {
       }
     },
 
+    // --- Catalog (trang sau của danh sách, khi bấm "Load more") ---
+    listSeries: (params: { sort?: string; genre?: string; limit?: number; cursor?: string }) =>
+      request<Page<SeriesCard>>("GET", `/series${q(params)}`),
+
     // --- Xem tập ---
     play: (episodeId: number) => request<PlayInfo>("GET", `/episodes/${episodeId}/play`),
 
