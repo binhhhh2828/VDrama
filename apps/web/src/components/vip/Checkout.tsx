@@ -9,10 +9,8 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { ChevronLeftIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
-import { formatClock } from "@/lib/format";
+import { formatClock, formatVnd } from "@/lib/format";
 import { PREVIEW_PLANS, PREVIEW_TRANSFER } from "@/lib/preview-data";
-
-const vnd = (n: number) => `${new Intl.NumberFormat("en-US").format(n)} VND`;
 
 /**
  * PREVIEW trang thanh toán (Giai đoạn 5: SePay + VietQR). Không tạo đơn, không gửi gì, không bao
@@ -54,7 +52,7 @@ export function Checkout() {
     ["Bank", PREVIEW_TRANSFER.bank],
     ["Account name", PREVIEW_TRANSFER.accountName],
     ["Account number", PREVIEW_TRANSFER.accountNumber],
-    ["Amount", vnd(plan.priceVnd)],
+    ["Amount", formatVnd(plan.priceVnd)],
     ["Transfer note", PREVIEW_TRANSFER.orderCode],
   ];
 
@@ -147,7 +145,7 @@ export function Checkout() {
             <dt className="text-muted">Price</dt>
             <dd className="font-semibold">{plan.priceUsd}</dd>
             <dt className="text-muted">Bank transfer</dt>
-            <dd className="font-semibold">{vnd(plan.priceVnd)}</dd>
+            <dd className="font-semibold">{formatVnd(plan.priceVnd)}</dd>
             <dt className="text-muted">Adds</dt>
             <dd className="font-semibold">{plan.days} days</dd>
           </dl>

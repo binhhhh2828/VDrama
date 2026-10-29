@@ -17,7 +17,7 @@ const variants: Record<ButtonVariant, string> = {
   vip: "bg-vip text-vip-ink hover:text-vip-ink hover:brightness-105 disabled:bg-surface-2 disabled:text-faint",
   ghost: "font-semibold text-fg hover:bg-fg/8 hover:text-fg disabled:text-faint",
   danger:
-    "border border-error/50 font-semibold text-error-soft hover:bg-error/10 hover:text-error-soft",
+    "border border-error/50 font-semibold text-error-soft hover:bg-error/10 hover:text-error-soft disabled:opacity-50 disabled:hover:bg-transparent",
 };
 
 // Cỡ md giữ vùng bấm ≥ 48px, sm ≥ 44px.

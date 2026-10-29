@@ -87,7 +87,9 @@ export function AdminDashboard() {
               <tbody>
                 {PREVIEW_PAYMENTS.slice(0, 4).map((p) => (
                   <tr key={p.id}>
-                    <td className={`${td} font-mono text-xs`}>{p.orderCode}</td>
+                    <td className={`${td} font-mono text-xs`}>
+                      <Link href={`/admin/payments?order=${p.orderCode}`}>{p.orderCode}</Link>
+                    </td>
                     <td className={td}>{p.user}</td>
                     <td className={td}>{p.plan}</td>
                     <td className={td}>

@@ -189,7 +189,6 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - `/vip/checkout?plan=`: VietQR mẫu (ảnh QR giữ chỗ, không phải tài khoản thật), thông tin chuyển khoản mẫu, đếm ngược hạn đơn; nút "I've paid" bị tắt, ghi "Payments are not live yet".
     - `/terms`, `/privacy`, `/refunds`, `/contact` có khung và chỗ trống chờ nội dung pháp lý.
     - `sitemap.xml` (phim lấy từ API), `robots.txt`, Open Graph mặc định.
-  - Hoàn thành khi:
   - Hoàn thành khi: `sitemap.xml` liệt kê phim đã xuất bản (không có `/admin`); `robots.txt` chặn `/admin`, `/account`; build xanh.
 - [x] **Bước 12: Admin: khung, phim, tập, upload video** (xong 2026-10-29; `viewer@` thấy "Admins only", khách bị chuyển sang đăng nhập; tổng quan: số liệu Preview + số phim thật; danh sách phim thật (chỉ phim đã xuất bản, phim nháp mở bằng slug); chi tiết phim thấy cả tập nháp; upload tập nháp báo 503 "chưa cấu hình Stream", tập đã xuất bản báo 409. **Ghi chú backend**: `stream-sync` với id video giả của seed trả 502 (kiểm định dạng id trước khi kiểm cấu hình) thay vì 503)
   - Việc:
@@ -201,7 +200,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - Đăng nhập `admin@` vào được; `viewer@` thấy "Admins only"; khách bị chuyển sang đăng nhập.
     - Bảng tập hiện tập nháp của phim mẫu; upload ở dev không có Stream báo 503 rõ ràng; tập đang xuất bản báo 409.
     - Xem ở 1440px và 390px.
-- [ ] **Bước 13: Admin: người dùng, thanh toán, gói VIP, nhật ký. Mốc bàn giao demo**
+- [x] **Bước 13: Admin: người dùng, thanh toán, gói VIP, nhật ký. Mốc bàn giao demo** (xong 2026-10-29; 4 trang Preview dùng chung bố cục bảng + khung chi tiết (`components/admin/kit.tsx`), bấm cả dòng để mở chi tiết, trên điện thoại chi tiết nằm dưới bảng và tự cuộn tới; tặng VIP / khóa-mở tài khoản / hoàn tiền (chỉ đơn paid) / sửa-tạo gói đều bắt buộc ô Reason, nút tắt; không có nút "đánh dấu đã trả"; `?order=MÃ` mở sẵn một đơn (link từ tổng quan và trang người dùng). Dữ liệu mẫu admin đổi sang VND cho khớp bảng `payments`. Quét 28 trang ở 390px và 1440px: không trang nào tràn ngang. Đã đi luồng người xem trên giao diện (đăng ký → về đúng phim → tập VIP mời mua → tập free phát video mẫu → checkout Preview) và trên API (lưu tiến độ, My List, lịch sử). README có mục "Mở bản demo". Chưa có: xem trên Safari/iPhone thật)
   - Việc:
     - `/admin/users`, `/admin/payments`, `/admin/plans`, `/admin/audit`: bảng dữ liệu mẫu (Preview), lọc, xem chi tiết; tặng VIP / hoàn tiền / khóa tài khoản có ô Reason, nút lưu bị tắt.
     - Một lượt rà cả site (người xem + admin) ở 1440px và 390px.

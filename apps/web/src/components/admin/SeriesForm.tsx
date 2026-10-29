@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PreviewNotice } from "@/components/preview/PreviewNotice";
 import { Button } from "@/components/ui/Button";
 import type { Genre, SeriesDetail } from "@/lib/api/types";
+import { ReasonAction } from "./kit";
 import { Panel } from "./ui";
 
 const input =
@@ -152,28 +153,14 @@ export function SeriesForm({ series }: { series?: SeriesDetail }) {
 
 /** PREVIEW vùng nguy hiểm: xóa (xóa mềm, khôi phục được) bắt buộc có lý do, giống audit_logs. */
 export function DangerZone({ what }: { what: string }) {
-  const [reason, setReason] = useState("");
   return (
-    <Panel title="Remove" className="border-error/30">
-      <p className="text-sm text-fg-soft">
-        Removing hides the {what} everywhere on the site. It stays in the database and can be
-        restored. A reason is required and saved in the audit log.
-      </p>
-      <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        Reason
-        <input
-          className={input}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="e.g. Rights expired"
-        />
-      </label>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="danger" size="sm" disabled>
-          Remove {what}
-        </Button>
-        <span className="text-xs text-muted">Preview: not connected yet.</span>
-      </div>
-    </Panel>
+    <ReasonAction
+      danger
+      title="Remove"
+      variant="danger"
+      actionLabel={`Remove ${what}`}
+      placeholder="e.g. Rights expired"
+      text={`Removing hides the ${what} everywhere on the site. It stays in the database and can be restored.`}
+    />
   );
 }

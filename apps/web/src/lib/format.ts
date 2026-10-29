@@ -63,3 +63,8 @@ export function compactNumber(n: number): string {
     n,
   );
 }
+
+/** Số tiền VND: 259000 → "259,000 VND". */
+export function formatVnd(n: number): string {
+  return `${new Intl.NumberFormat("en-US").format(n)} VND`;
+}

@@ -93,11 +93,18 @@ export function StatusPill({
 }
 
 /** Bảng cuộn ngang trên màn hẹp. */
-export function TableWrap({ children }: { children: ReactNode }) {
+export function TableWrap({ children, narrow }: { children: ReactNode; narrow?: boolean }) {
   return (
     // `relative`: giữ các phần tử ẩn (sr-only, position absolute) trong vùng cuộn, không làm trang rộng ra.
     <div className="relative -mx-5 overflow-x-auto px-5">
-      <table className="w-full min-w-[640px] border-collapse text-left text-sm">{children}</table>
+      <table
+        className={cn(
+          "w-full border-collapse text-left text-sm",
+          narrow ? "min-w-[320px]" : "min-w-[640px]",
+        )}
+      >
+        {children}
+      </table>
     </div>
   );
 }
@@ -105,3 +112,8 @@ export function TableWrap({ children }: { children: ReactNode }) {
 export const th =
   "border-b border-line py-2.5 pr-4 text-xs font-bold tracking-[0.04em] text-muted uppercase";
 export const td = "border-b border-line/60 py-3 pr-4 align-middle";
+
+/** Dòng bấm được (mở chi tiết). Vẫn giữ nút "View" trong dòng cho người dùng bàn phím. */
+export function rowClass(selected: boolean) {
+  return cn("cursor-pointer transition-colors hover:bg-fg/4", selected && "bg-fg/6 hover:bg-fg/6");
+}
