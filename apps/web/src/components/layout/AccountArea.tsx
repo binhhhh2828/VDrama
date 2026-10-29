@@ -128,7 +128,7 @@ function UserMenu() {
         <div
           id={menuId}
           role="menu"
-          className="absolute top-[calc(100%+8px)] right-0 z-30 w-64 rounded-card border border-line bg-surface p-2 shadow-2xl shadow-black/50"
+          className="absolute top-[calc(100%+8px)] right-0 z-30 w-64 max-w-[calc(100vw-2rem)] rounded-card border border-line bg-surface p-2 shadow-2xl shadow-black/50"
         >
           <div className="border-b border-line px-3 pt-2 pb-3">
             <p className="truncate font-semibold">{user.display_name}</p>

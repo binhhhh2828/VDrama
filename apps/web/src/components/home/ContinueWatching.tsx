@@ -41,7 +41,10 @@ export function ContinueWatching() {
       <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-5 sm:overflow-visible sm:px-0">
         {items === null
           ? Array.from({ length: 4 }, (_, i) => (
-              <div key={i} className="flex w-[220px] shrink-0 flex-col gap-2 sm:w-auto">
+              <div
+                key={i}
+                className="flex w-[68%] max-w-56 shrink-0 flex-col gap-2 sm:w-auto sm:max-w-none"
+              >
                 <Skeleton className="aspect-video" />
                 <Skeleton className="h-4 w-2/3 rounded-md" />
               </div>
@@ -54,7 +57,7 @@ export function ContinueWatching() {
                 meta={`EP ${h.episode.number} · ${timeLeft(h.progress_sec, h.episode.duration_sec)}`}
                 thumbnailUrl={h.episode.thumbnail_url}
                 progress={progressRatio(h.progress_sec, h.episode.duration_sec)}
-                className="w-[220px] shrink-0 sm:w-auto"
+                className="w-[68%] max-w-56 shrink-0 sm:w-auto sm:max-w-none"
               />
             ))}
       </div>

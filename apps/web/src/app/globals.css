@@ -58,6 +58,12 @@
     color-scheme: dark;
   }
 
+  /* Lưới an toàn: không bao giờ cuộn ngang cả trang. `clip` (không phải `hidden`) giữ được sticky. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   body {
     background: var(--color-canvas);
     color: var(--color-fg);

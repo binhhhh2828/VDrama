@@ -47,7 +47,7 @@ export function SeriesAdmin({ slug }: { slug: string }) {
   if (state.kind === "loading") {
     return (
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-10 w-72" />
+        <Skeleton className="h-10 w-full max-w-72" />
         <Skeleton className="h-40" />
         <Skeleton className="h-72" />
       </div>

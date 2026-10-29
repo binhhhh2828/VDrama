@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             src={stacked}
             alt="VDrama — AI Drama · Endless Stories"
             preload
-            className="h-auto w-[150px] md:w-[300px]"
+            className="h-auto w-2/5 max-w-40 md:w-[300px] md:max-w-none"
           />
         </Link>
         <p className="hidden max-w-[400px] text-center text-[17px] leading-relaxed text-fg-soft md:block">

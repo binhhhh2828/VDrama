@@ -372,7 +372,7 @@ function UpNext({ next, slug, locked }: { next: Episode; slug: string; locked: b
         locked ? "border-vip-line bg-vip-panel" : "border-line bg-surface",
       )}
     >
-      <div className="relative flex aspect-video w-[120px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-art sm:w-[160px]">
+      <div className="relative flex aspect-video w-[34%] max-w-40 min-w-24 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-art sm:w-40">
         {next.thumbnail_url ? (
           <Image
             src={next.thumbnail_url}
@@ -384,7 +384,7 @@ function UpNext({ next, slug, locked }: { next: Episode; slug: string; locked: b
         ) : null}
         {locked ? <LockIcon size={26} className="relative text-vip" /> : null}
       </div>
-      <div className="flex min-w-[180px] flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 basis-40 flex-col gap-1">
         <span
           className={cn(
             "text-[13px] font-extrabold tracking-[0.08em]",

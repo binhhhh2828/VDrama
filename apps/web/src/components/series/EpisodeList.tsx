@@ -47,7 +47,7 @@ export function EpisodeList({ slug, episodes }: { slug: string; episodes: Episod
                   : "border-line bg-surface hover:border-fg/25",
               )}
             >
-              <div className="relative aspect-video w-[112px] shrink-0 overflow-hidden rounded-[10px] bg-art">
+              <div className="relative aspect-video w-[32%] max-w-28 min-w-20 shrink-0 overflow-hidden rounded-[10px] bg-art">
                 {ep.thumbnail_url ? (
                   <Image
                     src={ep.thumbnail_url}

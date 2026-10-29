@@ -148,7 +148,7 @@ export function WatchHistory() {
               <Link
                 href={watchHref}
                 aria-label={`Continue ${h.series.title}, episode ${h.episode.number}`}
-                className="relative aspect-video w-[120px] shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-[160px]"
+                className="relative aspect-video w-[34%] max-w-40 min-w-24 shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-40"
               >
                 {h.episode.thumbnail_url ? (
                   <Image

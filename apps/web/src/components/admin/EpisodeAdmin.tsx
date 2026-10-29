@@ -236,7 +236,7 @@ export function EpisodeAdmin({ slug, number }: { slug: string; number: number })
             </p>
             {sync.phase === "ok" ? (
               <div className="flex gap-4">
-                <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-input bg-art">
+                <div className="relative aspect-video w-2/5 max-w-36 shrink-0 overflow-hidden rounded-input bg-art">
                   {sync.data.thumbnail_url ? (
                     <Image
                       src={sync.data.thumbnail_url}

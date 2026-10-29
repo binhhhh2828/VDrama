@@ -60,7 +60,7 @@ async function SeriesContent({ params }: { params: PageProps<"/series/[slug]">["
   return (
     <SeriesViewerProvider slug={series.slug} seriesId={series.id}>
       <section className="flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
-        <div className="relative mx-auto aspect-[2/3] w-[200px] shrink-0 overflow-hidden rounded-[18px] border border-line bg-art md:mx-0 md:w-[300px]">
+        <div className="relative mx-auto aspect-[2/3] w-1/2 max-w-52 shrink-0 overflow-hidden rounded-[18px] border border-line bg-art md:mx-0 md:w-[300px] md:max-w-none">
           {series.poster_url ? (
             <Image
               src={series.poster_url}
@@ -174,13 +174,13 @@ function SeriesSkeleton() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-6 md:flex-row md:gap-10">
-        <Skeleton className="mx-auto aspect-[2/3] w-[200px] md:mx-0 md:w-[300px]" />
+        <Skeleton className="mx-auto aspect-[2/3] w-1/2 max-w-52 md:mx-0 md:w-[300px] md:max-w-none" />
         <div className="flex flex-1 flex-col gap-5">
           <Skeleton className="h-8 w-32 rounded-full" />
           <Skeleton className="h-14 w-2/3" />
           <Skeleton className="h-6 w-1/2" />
           <Skeleton className="h-20 w-full max-w-[720px]" />
-          <Skeleton className="h-12 w-72 rounded-full" />
+          <Skeleton className="h-12 w-full max-w-72 rounded-full" />
         </div>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
