@@ -10,7 +10,8 @@ import type { User } from "@/lib/api/types";
 
 export type SessionState =
   | { status: "loading"; user: null }
-  | { status: "guest"; user: null }
+  /** `signedOutAt`: lúc người dùng tự bấm Sign out (khác với phiên hết hạn hoặc chưa đăng nhập). */
+  | { status: "guest"; user: null; signedOutAt?: number }
   | { status: "user"; user: User };
 
 type SessionContextValue = SessionState & {
@@ -43,9 +44,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       await api.logout();
     } finally {
-      setUser(null);
+      setState({ status: "guest", user: null, signedOutAt: Date.now() });
     }
-  }, [setUser]);
+  }, []);
 
   useEffect(() => {
     let active = true;

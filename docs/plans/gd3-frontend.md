@@ -177,7 +177,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
     - Bấm quá nhiều bị 429 thì báo thời gian chờ.
     - Đăng xuất xong vào trang `/account` thì bị chuyển về trang đăng nhập.
     - Màn hình Preview có nhãn rõ, không gửi request nào (kiểm bằng tab Network).
-- [ ] **Bước 10: Tài khoản, My List, lịch sử**
+- [x] **Bước 10: Tài khoản, My List, lịch sử** (xong 2026-10-29; khách vào /account/* bị chuyển sang đăng nhập kèm ?next=; đã thử: xóa một dòng lịch sử, Clear all có hỏi lại và Cancel, bỏ phim khỏi My List cập nhật ngay và đúng API, VIP thấy "VIP until Nov 28, 2026"; tự bấm Sign out ở /account về trang chủ, vào lại /account/list thì bị mời đăng nhập. Các trang /account đặt `instant = false` vì nội dung chỉ có trên trình duyệt)
   - Việc:
     - `/account`: thông tin, trạng thái VIP "VIP until …" hoặc mời VIP.
     - `/account/list`: yêu thích, Load more.
