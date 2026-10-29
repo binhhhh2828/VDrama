@@ -273,7 +273,8 @@ async def test_tampered_body_401(cf: httpx.AsyncClient, db: Session, cloudflare,
     assert reload(db, uploading).stream_status == "uploading"
 
 
-@pytest.mark.parametrize("offset", [-301, 301])
+# Lệch hẳn qua 5 phút: int(time.time()) làm tròn xuống nên ±301 có thể rơi về dưới 300.
+@pytest.mark.parametrize("offset", [-310, 310])
 async def test_stale_or_future_timestamp_401(
     cf: httpx.AsyncClient, db: Session, cloudflare, uploading, offset: int
 ):

@@ -27,6 +27,8 @@ REFRESH_PER_IP = parse("30/minute")
 PLAY_PER_USER = parse("60/minute")
 # Chống đếm trùng lượt xem: mỗi (user, tập) tối đa 1 lượt mỗi 6 giờ.
 VIEW_COUNT_WINDOW = parse("1/6 hours")
+# Báo tiến độ xem: player gửi 2–4 lần/phút, chừa chỗ cho vài tab cùng mở.
+HISTORY_PER_USER = parse("30/minute")
 
 _storage = storage_from_string("memory://")
 _limiter = MovingWindowRateLimiter(_storage)
