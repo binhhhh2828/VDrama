@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    qualities: [75],
+    // Ảnh giữ chỗ của seed-demo (picsum chuyển hướng sang fastly.picsum.photos, Next tự theo).
+    // Khi ảnh chuyển sang R2/Cloudflare Images (Giai đoạn 4) thì thêm domain đó.
+    remotePatterns: [
+      { protocol: "https", hostname: "picsum.photos", pathname: "/seed/**", search: "" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

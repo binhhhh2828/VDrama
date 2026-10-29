@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Hệ thiết kế VDrama: chi tiết và lý do ở docs/design.md. Chỉ có giao diện tối. */
+@theme {
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-canvas: #0b0709;
+  --color-surface: #150e12;
+  --color-surface-2: #1f1419;
+  --color-line: #36252d;
+  --color-fg: #f7eff2;
+  --color-fg-soft: #e7d6dc;
+  --color-muted: #b5a2aa;
+  --color-faint: #8a7880;
+  --color-pink: #ff3d7f;
+  --color-orange: #ff8a3d;
+  --color-link: #ff6fa3;
+  --color-link-hover: #ffb3cf;
+  --color-ink: #16060d;
+  --color-vip: #ffc247;
+  --color-vip-ink: #2b1d00;
+  --color-vip-line: #5a4210;
+  --color-success: #4fd6a0;
+  --color-error: #ff6b6b;
+  --color-error-soft: #ff8f8f;
+
+  --radius-hero: 24px;
+  --radius-panel: 20px;
+  --radius-card: 14px;
+  --radius-input: 12px;
+  --radius-tag: 6px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Gradient thương hiệu: nút chính, nhãn TOP, thanh tiến độ. Chữ trên nền này luôn là màu ink. */
+@utility bg-brand {
+  background-image: linear-gradient(135deg, #ff2e7e 0%, #ff7a3d 100%);
 }
 
-@media (prefers-color-scheme: dark) {
+@utility bg-brand-x {
+  background-image: linear-gradient(90deg, #ff2e7e, #ff7a3d);
+}
+
+@utility bg-vip-panel {
+  background-image: linear-gradient(135deg, #1f1708 0%, #150e12 60%);
+}
+
+/* Nền thay ảnh khi phim chưa có poster/banner. */
+@utility bg-art {
+  background-image:
+    radial-gradient(70% 55% at 62% 28%, rgba(255, 46, 126, 0.85), transparent 70%),
+    radial-gradient(60% 45% at 18% 92%, rgba(255, 138, 61, 0.55), transparent 70%),
+    linear-gradient(180deg, #21111a, #0b0709);
+}
+
+/* Đặt trong layer base để class tiện ích (text-fg, text-ink...) luôn thắng. */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-link);
+  }
+
+  a:hover {
+    color: var(--color-link-hover);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 2px;
+  }
 }
