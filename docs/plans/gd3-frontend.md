@@ -152,7 +152,7 @@ Mỗi bước là một commit, xong thì dừng cho bạn xem. **Bước 1–13
   - Hoàn thành khi:
     - Load more đi hết danh sách không trùng; đổi thể loại thì về trang đầu.
     - Từ khóa một phần tên (ví dụ `city`) tìm ra phim mẫu; từ khóa dưới 2 ký tự không gọi API.
-- [ ] **Bước 7: Chi tiết phim**
+- [x] **Bước 7: Chi tiết phim** (xong 2026-10-29; thử với khách, `viewer@` và `vip@`: khách không ổ khóa và thấy Play Episode 1, viewer có ổ khóa ở tập VIP và Continue Episode 2, VIP không ổ khóa; My List thêm, giữ sau khi tải lại, bỏ đúng. Phim không có hiện trang 404 kèm `noindex`, nhưng mã HTTP là 200 vì trang stream (giới hạn của Next khi `notFound()` nằm trong Suspense))
   - Việc:
     - `/series/[slug]`: thông tin, poster cạnh chữ, danh sách tập lấy trên server.
     - Phần riêng lấy trên trình duyệt: ổ khóa VIP theo `/me.is_vip`, tiến độ từng tập, nút "Continue Episode N", nút My List (yêu thích).
