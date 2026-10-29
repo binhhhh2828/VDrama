@@ -361,3 +361,30 @@ export const NewsIcon = (p: IconProps) => (
     <path d="M8 11h7M8 15h4" />
   </Stroke>
 );
+
+/** Tai nghe hỗ trợ (liên hệ chúng tôi). */
+export const HeadsetIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+    <rect x="3" y="13" width="4" height="6" rx="1.5" />
+    <rect x="17" y="13" width="4" height="6" rx="1.5" />
+    <path d="M19 19a3 3 0 0 1-3 3h-3" />
+  </Stroke>
+);
+
+/** Người có dấu cấm (xóa tài khoản). */
+export const UserBanIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <circle cx="9.5" cy="8" r="4" />
+    <path d="M2.5 21a7 7 0 0 1 9.5-6.5" />
+    <circle cx="18" cy="18" r="3.5" />
+    <path d="m15.6 20.4 4.8-4.8" />
+  </Stroke>
+);
+
+export const CopyIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+  </Stroke>
+);

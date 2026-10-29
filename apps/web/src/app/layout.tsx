@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import { SessionProvider } from "@/components/session/SessionProvider";
+import { VipSheetProvider } from "@/components/vip/VipSheetProvider";
 import { IS_DEMO } from "@/lib/demo/config";
 import "./globals.css";
 
@@ -37,8 +38,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${poppins.variable} h-full`}>
       <body className="flex min-h-full flex-col font-sans">
         <SessionProvider>
-          <DemoBanner />
-          {children}
+          <VipSheetProvider>
+            <DemoBanner />
+            {children}
+          </VipSheetProvider>
         </SessionProvider>
       </body>
     </html>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { useSession } from "@/components/session/SessionProvider";
+import { useVipSheet } from "@/components/vip/VipSheetProvider";
 import { ArrowUpIcon, CloseIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
 
@@ -26,6 +27,7 @@ function readDismissed(): boolean {
 export function FloatingDock() {
   const session = useSession();
   const pathname = usePathname();
+  const vipSheet = useVipSheet();
   // Mặc định ẩn đến khi đọc được trạng thái đã tắt, để không nháy thanh lên rồi biến mất.
   const [dismissed, setDismissed] = useState(true);
   const [showTop, setShowTop] = useState(false);
@@ -79,6 +81,11 @@ export function FloatingDock() {
           </span>
           <Link
             href="/vip"
+            // Mở bảng VIP ngay trên trang đang xem; link /vip vẫn dùng được khi chưa có JS.
+            onClick={(e) => {
+              e.preventDefault();
+              vipSheet.open();
+            }}
             className="hit-44 relative flex h-7 shrink-0 items-center rounded-tag bg-accent px-3 text-[15px] font-semibold text-on-accent no-underline hover:text-on-accent"
           >
             {copy.promo.getVip}
