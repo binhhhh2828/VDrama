@@ -151,7 +151,7 @@ Quy tắc chính nằm ở tầng DB (có test):
 | Auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /me` |
 | Catalog | `GET /series`, `GET /series/{slug}`, `GET /series/{slug}/episodes`, `GET /search?q=` |
 | Play | `GET /episodes/{id}/play` (kiểm tra quyền → signed token) |
-| User | `GET/POST /me/favorites`, `GET/PUT /me/history` |
+| User | `GET /me/favorites`, `PUT/DELETE/GET /me/favorites/{series_id}`, `GET/DELETE /me/history`, `PUT/DELETE /me/history/{episode_id}`, `GET /me/history/series/{slug}` |
 | VIP | `GET /plans`, `POST /payments/checkout`, `POST /payments/webhook` |
 | Webhook | `POST /webhooks/stream` (Cloudflare Stream báo chuyển mã xong/lỗi) |
 | Admin | CRUD series/episodes/plans, `POST /admin/episodes/{id}/upload` (direct upload tus lên Stream), `POST /admin/episodes/{id}/stream-sync`, danh sách user/payment |
@@ -205,8 +205,8 @@ Quy tắc chính nằm ở tầng DB (có test):
 - [x] (cùng plan catalog, Bước 4, xong 2026-10-28: `GET /api/v1/search`) Tìm kiếm tiếng Việt không dấu (extension `unaccent` + `pg_trgm`)
 - [x] (plan chi tiết: [docs/plans/gd2-b4-stream-play.md](docs/plans/gd2-b4-stream-play.md), xong 2026-10-29 trên branch `feat/stream`; **chưa thử với tài khoản Cloudflare thật**, danh sách cần xác nhận ở Bước 5 của plan; lệnh cài đặt `stream-create-signing-key`, `stream-set-webhook`; làm trước xác thực email vì `play` chặn frontend/admin và test được khi chưa có tài khoản Cloudflare) Service Cloudflare Stream: tạo direct upload URL, ký signed token cục bộ, nhận webhook khi video chuyển mã xong (cập nhật trạng thái tập phim)
 - [x] (cùng plan Stream ở trên, Bước 2, xong 2026-10-29: `GET /api/v1/episodes/{id}/play`, có đếm lượt xem) Endpoint `play` có kiểm tra quyền (free / VIP / hết hạn). Đây là **chỗ duy nhất** kiểm tra quyền xem: catalog chỉ trả `access: free | vip` giống nhau cho mọi người (để cache được), frontend tự hiện ổ khóa theo `/me.is_vip` (chốt 2026-10-28)
-- [ ] Watch history, favorites
-- [ ] Test tự động cho auth, play, phân quyền
+- [ ] (plan chi tiết: [docs/plans/gd2-b5-activity.md](docs/plans/gd2-b5-activity.md), duyệt 2026-10-29, đang làm trên branch `feat/activity`, xong Bước 1–2/6) Watch history, favorites
+- [ ] (cùng plan activity ở trên, Bước 4: kiểm kê route, ma trận quyền, tài liệu khớp mã lỗi, luồng đầu-cuối mức API) Test tự động cho auth, play, phân quyền
 
 ### Giai đoạn 3 — Frontend
 - [ ] Layout, header, footer, responsive mobile-first

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.models import (
     Episode,
+    Favorite,
     Genre,
     Payment,
     PaymentEvent,
@@ -19,6 +20,7 @@ from app.models import (
     User,
     UserSession,
     VipPlan,
+    WatchHistory,
 )
 from app.models.enums import PaymentStatus
 from app.models.soft_delete import INCLUDE_DELETED
@@ -136,6 +138,9 @@ GUARDED = [
     "payments",
     "subscriptions",
     "payment_events",
+    # Dữ liệu người dùng tự xóa (migration 0011): người dùng thấy đã xóa, hệ thống vẫn giữ.
+    "watch_history",
+    "favorites",
 ]
 
 
@@ -144,6 +149,8 @@ def one_row_each(db: Session) -> None:
     """Một dòng trong mỗi bảng được bảo vệ (trigger theo dòng chỉ chạy khi có dòng bị xóa)."""
     rows = make_each(db)
     user, plan = rows[User], rows[VipPlan]
+    db.add(WatchHistory(user_id=user.id, episode_id=rows[Episode].id, progress_sec=1))
+    db.add(Favorite(user_id=user.id, series_id=rows[Series].id))
     event = PaymentEvent(provider="sepay", event_id="tx-1", payload={})
     db.add(event)
     db.flush()

@@ -10,7 +10,7 @@ Lưu ý: dòng đã xóa của một bảng chỉ bị ẩn khi chính bảng đ
 from sqlalchemy import event
 from sqlalchemy.orm import ORMExecuteState, Session, with_loader_criteria
 
-from app.models.mixins import SoftDeleteMixin
+from app.models.mixins import DeletedAtMixin
 
 INCLUDE_DELETED = "include_deleted"
 
@@ -25,7 +25,7 @@ def _hide_soft_deleted(state: ORMExecuteState) -> None:
     ):
         state.statement = state.statement.options(
             with_loader_criteria(
-                SoftDeleteMixin,
+                DeletedAtMixin,
                 lambda cls: cls.deleted_at.is_(None),
                 include_aliases=True,
             )

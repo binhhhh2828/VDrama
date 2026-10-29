@@ -5,6 +5,10 @@ watch_history là bảng ghi nhiều nhất (báo tiến độ mỗi ~15–30 gi
 - Không đánh index trên progress_sec/updated_at, để Postgres cập nhật tại chỗ (HOT update,
   không phải sửa index). fillfactor 70 chừa chỗ trống trong trang cho việc đó.
 - "Xem tiếp" lấy theo khóa chính (user_id, ...) rồi sắp xếp: mỗi user chỉ vài trăm dòng.
+
+Người dùng xóa lịch sử / bỏ yêu thích: xóa mềm (`deleted_at`, migration 0011), người dùng thấy
+là đã xóa, hệ thống vẫn giữ; DB chặn xóa thật. Không index `deleted_at` để giữ HOT update.
+Xem lại / yêu thích lại thì dùng lại đúng dòng cũ và đặt `deleted_at = NULL`.
 """
 
 from datetime import datetime
@@ -21,10 +25,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
-from app.models.mixins import CreatedAtMixin
+from app.models.mixins import CreatedAtMixin, DeletedAtMixin
 
 
-class WatchHistory(Base):
+class WatchHistory(DeletedAtMixin, Base):
     __tablename__ = "watch_history"
 
     user_id: Mapped[int] = mapped_column(
@@ -45,7 +49,7 @@ class WatchHistory(Base):
     )
 
 
-class Favorite(CreatedAtMixin, Base):
+class Favorite(DeletedAtMixin, CreatedAtMixin, Base):
     __tablename__ = "favorites"
 
     user_id: Mapped[int] = mapped_column(

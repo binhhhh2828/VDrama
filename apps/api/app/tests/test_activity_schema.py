@@ -7,6 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Episode, Favorite, Series, User, WatchHistory
+from app.models.mixins import DeletedAtMixin, SoftDeleteMixin
+from app.models.soft_delete import INCLUDE_DELETED
 from app.services.activity import upsert_progress_stmt
 from app.tests.conftest import alembic_config, hard_delete
 
@@ -154,3 +156,94 @@ def test_downgrade_to_0005_drops_activity_tables(migrated_db_url: str, db: Sessi
     tables = set(inspect(db.get_bind()).get_table_names())
     assert not {"watch_history", "favorites"} & tables
     assert "payments" in tables
+
+
+# --- xóa mềm (migration 0011) ---------------------------------------------------
+
+
+def hot_counts(db: Session) -> tuple[int, int]:
+    return tuple(
+        db.execute(
+            text(
+                "SELECT n_tup_upd, n_tup_hot_upd FROM pg_stat_xact_user_tables "
+                "WHERE relname = 'watch_history'"
+            )
+        ).one()
+    )
+
+
+def test_activity_models_use_light_soft_delete():
+    """Có deleted_at và bộ lọc tự động, nhưng không phải xóa mềm kiểu admin (deleted_by_id)."""
+    for model in (WatchHistory, Favorite):
+        assert issubclass(model, DeletedAtMixin)
+        assert not issubclass(model, SoftDeleteMixin)
+        assert "deleted_by_id" not in model.__table__.c
+    assert issubclass(SoftDeleteMixin, DeletedAtMixin)
+
+
+def test_deleted_history_hidden_from_orm(db: Session, user: User, episode: Episode):
+    db.execute(upsert_progress_stmt(user.id, episode.id, 30))
+    db.execute(text("UPDATE watch_history SET deleted_at = now()"))
+    db.expire_all()
+    assert db.scalars(select(WatchHistory)).all() == []
+    assert db.get(WatchHistory, (user.id, episode.id)) is None
+    found = db.scalars(select(WatchHistory).execution_options(**{INCLUDE_DELETED: True})).all()
+    assert [(f.progress_sec, f.is_deleted) for f in found] == [(30, True)]
+
+
+def test_deleted_favorite_hidden_from_orm(db: Session, user: User, series: Series):
+    db.add(Favorite(user_id=user.id, series_id=series.id))
+    db.flush()
+    db.execute(text("UPDATE favorites SET deleted_at = now()"))
+    db.expire_all()
+    assert db.scalars(select(Favorite)).all() == []
+    found = db.scalars(select(Favorite).execution_options(**{INCLUDE_DELETED: True})).all()
+    assert len(found) == 1 and found[0].is_deleted
+
+
+def test_watching_again_restores_deleted_row(db: Session, user: User, episode: Episode):
+    db.execute(upsert_progress_stmt(user.id, episode.id, 30))
+    db.execute(text("UPDATE watch_history SET deleted_at = now()"))
+    db.execute(upsert_progress_stmt(user.id, episode.id, 45))
+    db.expire_all()
+    row = db.get(WatchHistory, (user.id, episode.id))
+    assert row is not None and row.deleted_at is None and row.progress_sec == 45
+    # Vẫn đúng một dòng (dùng lại dòng cũ, không chèn dòng mới).
+    count = select(func.count()).select_from(WatchHistory)
+    assert db.scalar(count.execution_options(**{INCLUDE_DELETED: True})) == 1
+
+
+def test_soft_delete_and_restore_are_hot(db: Session, user: User, episode: Episode):
+    """Xóa mềm (đặt deleted_at) và xem lại (đặt NULL) cũng không sửa index."""
+    db.execute(upsert_progress_stmt(user.id, episode.id, 0))
+    db.execute(text("UPDATE watch_history SET deleted_at = now()"))
+    db.execute(upsert_progress_stmt(user.id, episode.id, 15))
+    upd, hot = hot_counts(db)
+    assert upd == 2
+    assert hot == upd
+
+
+def test_no_index_on_deleted_at(db: Session):
+    insp = inspect(db.get_bind())
+    for table in ("watch_history", "favorites"):
+        indexed = {col for ix in insp.get_indexes(table) for col in ix["column_names"]}
+        assert "deleted_at" not in indexed, table
+
+
+def test_downgrade_0011_removes_soft_delete(migrated_db_url: str, db: Session):
+    db.close()
+    command.downgrade(alembic_config(), "0010")
+    insp = inspect(db.get_bind())
+    for table in ("watch_history", "favorites"):
+        assert "deleted_at" not in {c["name"] for c in insp.get_columns(table)}
+    with db.get_bind().connect() as conn:
+        triggers = conn.scalar(
+            text(
+                "SELECT count(*) FROM pg_trigger "
+                "WHERE tgname LIKE 'trg_watch_history_%' OR tgname LIKE 'trg_favorites_%'"
+            )
+        )
+        assert triggers == 0
+    command.upgrade(alembic_config(), "head")
+    insp = inspect(db.get_bind())
+    assert "deleted_at" in {c["name"] for c in insp.get_columns("watch_history")}
