@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: false
   sharp: false
   unrs-resolver: false
+# Cài gói kiểu phẳng (như npm), không dùng symlink: plugin Next.js của Netlify tạo symlink lại và
+# báo EEXIST / EPERM trên Windows nếu dùng bố cục .pnpm mặc định.
+nodeLinker: hoisted
