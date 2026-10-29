@@ -20,6 +20,7 @@ Mọi lỗi có cùng dạng (`app/core/errors.py`):
 
 | code | HTTP | Ý nghĩa |
 |---|---|---|
+| `bad_request` | 400 | Yêu cầu không hợp lệ (ví dụ thân webhook không đọc được) |
 | `validation_error` | 422 | Dữ liệu gửi lên sai (xem `fields`) |
 | `not_authenticated` | 401 | Chưa đăng nhập hoặc access token hết hạn/không hợp lệ → gọi `/auth/refresh` rồi thử lại |
 | `session_expired` | 401 | Phiên hết hạn, đã đăng xuất hoặc bị thu hồi → mời đăng nhập lại |
@@ -28,6 +29,7 @@ Mọi lỗi có cùng dạng (`app/core/errors.py`):
 | `account_disabled` | 403 | Tài khoản bị khóa (chỉ báo khi đã nhập đúng mật khẩu) |
 | `vip_required` | 403 | Cần gói VIP còn hạn (dùng ở endpoint xem tập) |
 | `not_found` | 404 | Không tìm thấy |
+| `method_not_allowed` | 405 | Sai phương thức HTTP cho đường dẫn này |
 | `email_taken` | 409 | Email đã được dùng (không phân biệt hoa/thường, kể cả tài khoản đã xóa) |
 | `video_not_ready` | 409 | Video của tập chưa chuyển mã xong (chỉ gặp khi admin xem trước) |
 | `conflict` | 409 | Thao tác không hợp với trạng thái hiện tại (ví dụ thay video của tập đang xuất bản) |

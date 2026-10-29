@@ -1,6 +1,6 @@
 # Plan: Giai đoạn 2 / Lịch sử xem, yêu thích, test phân quyền tổng thể
 
-> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–4. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
+> Trạng thái: **đã duyệt (2026-10-29), đang làm**: xong Bước 1–5. Câu hỏi 1–4 chốt theo đề xuất. Câu hỏi 5 chốt 2026-10-29 (bản sửa đã duyệt): **người dùng thấy là đã xóa, hệ thống xóa mềm** (giữ dữ liệu cho phân tích sau này) cho cả lịch sử xem lẫn yêu thích. Làm trên branch `feat/activity`, tách từ `feat/stream` (stream và catalog chưa merge vào `main`).
 > Liên quan: `plan.md` Giai đoạn 2, task "Watch history, favorites" và "Test tự động cho auth, play, phân quyền"; mục 5 (User: `/me/favorites`, `/me/history`). Bảng dùng: `watch_history`, `favorites`, `series_stats` (migration `0003`, `0006`). Frontend cần cho: trang xem phim (nhớ tiến độ), trang chi tiết (tiếp tục tập N, nút yêu thích), trang tài khoản (lịch sử, yêu thích) ở Giai đoạn 3.
 
 ## Mục tiêu và phạm vi
@@ -98,7 +98,7 @@ Auth, play, catalog đã có test riêng từng phần. Phần còn thiếu là 
 - [x] **Bước 4: Yêu thích** (xong 2026-10-29: thêm dùng `INSERT … ON CONFLICT DO UPDATE … WHERE deleted_at IS NOT NULL RETURNING` nên chỉ cộng khi thật sự thêm mới/thêm lại, có test 5 request song song; `favorite_count` không xuống dưới 0; bỏ yêu thích phim không tồn tại vẫn 204; thêm và bỏ dùng chung bộ đếm rate limit, đọc không giới hạn; danh sách trả `SeriesPage` như `/series`, con trỏ loại `favorites`)
   - Việc: bốn endpoint `/me/favorites`, `favorite_count` (service + trang chi tiết phim), rate limit.
   - Hoàn thành khi: test thêm hai lần chỉ một dòng và `favorite_count` +1; bỏ hai lần chỉ -1, không âm, dòng vẫn còn với `deleted_at`; thêm lại sau khi bỏ dùng lại dòng cũ, +1, lên đầu danh sách; thêm song song từ hai request vẫn đúng; phim nháp/xóa/không có → 404; phim bị gỡ sau đó ẩn khỏi danh sách; phân trang con trỏ không trùng/sót; `GET /me/favorites/{id}` đúng cả hai trạng thái; trang chi tiết có `favorite_count`.
-- [ ] **Bước 5: Test phân quyền tổng thể**
+- [x] **Bước 5: Test phân quyền tổng thể** (xong 2026-10-29: kiểm kê route đọc từ `app.openapi()` vì FastAPI 0.162 bọc router con trong lớp nội bộ, duyệt `app.routes` không thấy route nào; có test chặn trường hợp danh sách rỗng; test tài liệu bắt được `docs/api.md` thiếu `bad_request`, `method_not_allowed`, đã bổ sung; thử tạm hạ quyền một endpoint admin và bỏ đăng nhập ở một endpoint ghi: 6 test đỏ đúng chỗ, đã khôi phục)
   - Việc: `test_permissions.py` với bốn phần ở mục Thiết kế.
   - Hoàn thành khi: cả bốn phần xanh; thử tạm bỏ `AdminUser` khỏi một endpoint admin hoặc bỏ `CurrentUser` khỏi một endpoint ghi thì test đỏ (kiểm tra tay, không commit thay đổi đó).
 - [ ] **Bước 6: Tài liệu, khép plan**
