@@ -1,52 +1,55 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api/client";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText, fieldErrorText } from "@/lib/i18n/api-errors";
+import type { T } from "@/lib/i18n/translate";
 import { FormAlert } from "./AuthTabs";
+import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
+import { useRouter } from "@/components/i18n/navigation";
 
-type Errors = Partial<Record<"display_name" | "email" | "password" | "accept_terms", string>>;
+type Errors = Partial<Record<"display_name" | "email" | "password", string>>;
 
 const PASSWORD_MIN = 8;
 
 /** Kiểm tra nhanh trên trình duyệt (API vẫn kiểm tra lại đầy đủ). */
-function validate(v: { name: string; email: string; password: string; terms: boolean }): Errors {
+function validate(v: { name: string; email: string; password: string }, t: T): Errors {
   const errors: Errors = {};
-  if (!v.name.trim()) errors.display_name = "Tell us what to call you.";
+  if (!v.name.trim()) errors.display_name = t("auth.nameRequired");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()))
-    errors.email = "Enter a valid email address.";
-  if (v.password.length < PASSWORD_MIN)
-    errors.password = `Use at least ${PASSWORD_MIN} characters.`;
+    errors.email = t("fieldErrors.emailInvalid");
+  if (v.password.length < PASSWORD_MIN) errors.password = t("fieldErrors.passwordShort");
   else if (v.password.trim().toLowerCase() === v.email.trim().toLowerCase())
-    errors.password = "Your password can't be the same as your email.";
-  if (!v.terms) errors.accept_terms = "Please agree to the Terms of Use and Privacy Policy.";
+    errors.password = t("auth.passwordSameAsEmail");
   return errors;
 }
 
 export function SignUpForm({ next }: { next: string }) {
+  const t = useT();
   const session = useSession();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const terms = useTerms();
   useRedirectIfSignedIn(next);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!terms.check()) return;
     const form = new FormData(e.currentTarget);
     const values = {
       name: String(form.get("display_name") ?? ""),
       email: String(form.get("email") ?? ""),
       password: String(form.get("password") ?? ""),
-      terms: form.get("accept_terms") === "on",
     };
-    const local = validate(values);
+    const local = validate(values, t);
     setErrors(local);
     setFormError(null);
     if (Object.keys(local).length) {
@@ -62,7 +65,7 @@ export function SignUpForm({ next }: { next: string }) {
         display_name: values.name.trim(),
         email: values.email.trim(),
         password: values.password,
-        accept_terms: values.terms,
+        accept_terms: true,
       });
       session.setUser(user);
       router.replace(next);
@@ -70,22 +73,22 @@ export function SignUpForm({ next }: { next: string }) {
     } catch (err) {
       setBusy(false);
       if (!(err instanceof ApiError)) {
-        setFormError("Couldn't create your account. Please try again.");
+        setFormError(t("auth.createFailed"));
         return;
       }
       if (err.code === "email_taken") {
-        setErrors({ email: err.userMessage });
+        setErrors({ email: apiErrorText(err, t) });
       } else if (err.code === "validation_error" && err.fields.length) {
         const fieldErrors: Errors = {};
         for (const f of err.fields) {
           const key = f.field as keyof Errors;
-          if (key in { display_name: 1, email: 1, password: 1, accept_terms: 1 })
-            fieldErrors[key] = err.fieldError(f.field);
+          if (key in { display_name: 1, email: 1, password: 1 })
+            fieldErrors[key] = fieldErrorText(f, t);
         }
         if (Object.keys(fieldErrors).length) setErrors(fieldErrors);
-        else setFormError(err.userMessage);
+        else setFormError(apiErrorText(err, t));
       } else {
-        setFormError(err.userMessage);
+        setFormError(apiErrorText(err, t));
       }
     }
   }
@@ -96,53 +99,33 @@ export function SignUpForm({ next }: { next: string }) {
       <Field
         id="signup-name"
         name="display_name"
-        label="Display name"
+        label={t("auth.displayName")}
         autoComplete="nickname"
         maxLength={100}
-        placeholder="How we should call you"
+        placeholder={t("auth.namePlaceholder")}
         error={errors.display_name}
       />
       <Field
         id="signup-email"
         name="email"
-        label="Email"
+        label={t("auth.email")}
         type="email"
         autoComplete="email"
-        placeholder="you@example.com"
+        placeholder={t("auth.emailPlaceholder")}
         error={errors.email}
       />
       <Field
         id="signup-password"
         name="password"
-        label="Password"
+        label={t("auth.password")}
         type="password"
         autoComplete="new-password"
         maxLength={128}
-        hint={`At least ${PASSWORD_MIN} characters.`}
+        hint={t("auth.passwordHint", { n: PASSWORD_MIN })}
         error={errors.password}
       />
-      <div className="flex flex-col gap-1.5">
-        <label className="flex items-start gap-2.5 text-sm leading-normal text-fg-soft">
-          <input
-            type="checkbox"
-            name="accept_terms"
-            aria-invalid={errors.accept_terms ? true : undefined}
-            aria-describedby={errors.accept_terms ? "signup-terms-error" : undefined}
-            className="mt-0.5 size-5 shrink-0 accent-pink"
-          />
-          <span>
-            I agree to the <Link href="/terms">Terms of Use</Link> and{" "}
-            <Link href="/privacy">Privacy Policy</Link>.
-          </span>
-        </label>
-        {errors.accept_terms ? (
-          <span id="signup-terms-error" className="text-[13px] text-error-soft">
-            {errors.accept_terms}
-          </span>
-        ) : null}
-      </div>
       <Button type="submit" disabled={busy} aria-busy={busy} className="h-[52px]">
-        {busy ? "Creating account…" : "Create account"}
+        {busy ? t("auth.creating") : t("gate.createAccount")}
       </Button>
     </form>
   );

@@ -7,12 +7,18 @@ export const DEMO_PASSWORD = "Demo1234!";
 
 export const DEMO_ACCOUNTS = [
   {
+    id: "viewer",
     email: "viewer@example.com",
     role: "Viewer",
     note: "Free episodes only; VIP episodes are locked",
   },
-  { email: "vip@example.com", role: "VIP viewer", note: "Can watch every episode" },
-  { email: "admin@example.com", role: "Admin", note: "Account menu → Admin opens the admin area" },
+  { id: "vip", email: "vip@example.com", role: "VIP viewer", note: "Can watch every episode" },
+  {
+    id: "admin",
+    email: "admin@example.com",
+    role: "Admin",
+    note: "Account menu → Admin opens the admin area",
+  },
 ] as const;
 
 /** Video mẫu dùng cho mọi tập (luồng HLS thử nghiệm công khai). */

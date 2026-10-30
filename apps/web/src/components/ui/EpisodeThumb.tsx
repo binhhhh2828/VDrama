@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Badge } from "./Badge";
 import { LockIcon, PlayIcon } from "./icons";
 import { ProgressBar } from "./ProgressBar";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 export type EpisodeThumbProps = {
   href: string;
@@ -20,7 +20,7 @@ export type EpisodeThumbProps = {
   className?: string;
 };
 
-/** Thumbnail tập 16:9: nút play giữa, thanh tiến độ ở chân, nhãn FREE/VIP, ổ khóa khi chưa có quyền. */
+/** Thumbnail tập dọc 3:4 (phim dọc): nút play giữa, thanh tiến độ ở chân, nhãn FREE/VIP, ổ khóa khi chưa có quyền. */
 export function EpisodeThumb({
   href,
   title,
@@ -40,8 +40,8 @@ export function EpisodeThumb({
     >
       <div
         className={cn(
-          "relative aspect-video overflow-hidden rounded-card border bg-art",
-          current ? "border-pink" : "border-line",
+          "relative aspect-[3/4] overflow-hidden rounded-card border bg-art",
+          current ? "border-accent" : "border-line",
         )}
       >
         {thumbnailUrl ? (
@@ -49,12 +49,12 @@ export function EpisodeThumb({
             src={thumbnailUrl}
             alt=""
             fill
-            sizes="(min-width: 640px) 280px, 100vw"
+            sizes="(min-width: 640px) 200px, 128px"
             className="object-cover"
           />
         ) : null}
         {access ? <Badge kind={access} className="absolute top-2.5 right-2.5" /> : null}
-        <span className="absolute top-1/2 left-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-fg/30 bg-canvas/60 transition group-hover:bg-canvas/80">
+        <span className="absolute top-1/2 left-1/2 flex size-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-fg/30 bg-canvas/60 transition group-hover:bg-canvas/80">
           {locked ? <LockIcon size={18} /> : <PlayIcon size={16} />}
         </span>
         {progress !== undefined ? (

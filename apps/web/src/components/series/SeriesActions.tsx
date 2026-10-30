@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -10,7 +9,10 @@ import { ApiError } from "@/lib/api/errors";
 import type { Episode } from "@/lib/api/types";
 import { isFinished } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { useT } from "@/components/i18n/I18nProvider";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import { useSeriesViewer } from "./SeriesViewer";
+import { usePathname, useRouter } from "@/components/i18n/navigation";
 
 /** Tập nên phát tiếp: tập xem gần nhất (xem xong thì tập sau nó), không có thì tập đầu. */
 export function resumeTarget(
@@ -32,39 +34,37 @@ export function resumeTarget(
   return { episode: latest.ep, resume: true };
 }
 
-export function SeriesActions({
-  slug,
-  seriesId,
-  title,
-  episodes,
-}: {
-  slug: string;
-  seriesId: number;
-  title: string;
-  episodes: Episode[];
-}) {
+/** Nút "Watch now" (ảnh 15): phát tiếp tập đang xem dở, chưa xem thì phát tập đầu. */
+export function WatchNowButton({ slug, episodes }: { slug: string; episodes: Episode[] }) {
+  const t = useT();
   const viewer = useSeriesViewer();
   const target = resumeTarget(episodes, viewer.progress);
+  const shape = "h-[46px] w-[182px] max-w-full rounded-[14px]! text-base";
 
+  if (!target) {
+    return (
+      <Button variant="cta" disabled className={shape}>
+        {t("seriesPage.comingSoonButton")}
+      </Button>
+    );
+  }
   return (
-    <div className="flex flex-wrap gap-3">
-      {target ? (
-        <ButtonLink href={`/series/${slug}/episode/${target.episode.number}`}>
-          <PlayIcon />
-          {target.resume
-            ? `Continue Episode ${target.episode.number}`
-            : `Play Episode ${target.episode.number}`}
-        </ButtonLink>
-      ) : (
-        <Button disabled>Episodes coming soon</Button>
-      )}
-      <MyListButton seriesId={seriesId} />
-      <ShareButton title={title} />
-    </div>
+    <ButtonLink
+      href={`/series/${slug}/episode/${target.episode.number}`}
+      variant="cta"
+      className={shape}
+    >
+      <PlayIcon size={18} />
+      {target.resume
+        ? t("seriesPage.continueEp", { n: target.episode.number })
+        : t("series.watchNow")}
+    </ButtonLink>
   );
 }
 
-export function MyListButton({ seriesId }: { seriesId: number }) {
+/** Bật/tắt My List của một phim. Khách bấm thì chuyển sang đăng nhập rồi quay lại trang này. */
+export function useMyList(seriesId: number) {
+  const t = useT();
   const session = useSession();
   const viewer = useSeriesViewer();
   const router = useRouter();
@@ -86,26 +86,41 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
       else await api.addFavorite(seriesId);
     } catch (err) {
       viewer.setFavorited(on);
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't update My List.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("seriesPage.listFailed"));
     } finally {
       setBusy(false);
     }
   }
+
+  return {
+    on,
+    busy,
+    error,
+    toggle,
+    disabled: busy || (session.status === "user" && !viewer.ready),
+  };
+}
+
+export function MyListButton({ seriesId }: { seriesId: number }) {
+  const t = useT();
+  const { on, error, toggle, disabled } = useMyList(seriesId);
 
   return (
     <>
       <button
         type="button"
         aria-pressed={on}
-        disabled={busy || (session.status === "user" && !viewer.ready)}
+        disabled={disabled}
         onClick={toggle}
         className={cn(
           "inline-flex min-h-12 items-center gap-2.5 rounded-full border px-[22px] text-base font-semibold transition disabled:opacity-70",
-          on ? "border-pink/55 bg-pink/12 text-fg" : "border-fg/22 bg-fg/8 text-fg hover:bg-fg/14",
+          on
+            ? "border-accent/55 bg-accent/12 text-fg"
+            : "border-fg/22 bg-fg/8 text-fg hover:bg-fg/14",
         )}
       >
-        {on ? <CheckIcon size={18} className="text-pink" /> : <PlusIcon size={18} />}
-        {on ? "In My List" : "My List"}
+        {on ? <CheckIcon size={18} className="text-accent" /> : <PlusIcon size={18} />}
+        {on ? t("seriesPage.inList") : t("nav.myList")}
       </button>
       {error ? (
         <p role="alert" className="w-full text-sm text-error-soft">
@@ -117,6 +132,7 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
 }
 
 export function ShareButton({ title }: { title: string }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -142,7 +158,7 @@ export function ShareButton({ title }: { title: string }) {
     <button
       type="button"
       onClick={share}
-      aria-label={copied ? "Link copied" : "Share"}
+      aria-label={copied ? t("seriesPage.linkCopied") : t("seriesPage.share")}
       className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-full border border-line bg-fg/6 px-3.5 text-fg hover:bg-fg/12"
     >
       <svg
@@ -158,7 +174,7 @@ export function ShareButton({ title }: { title: string }) {
       >
         <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" />
       </svg>
-      {copied ? <span className="text-sm font-semibold">Copied</span> : null}
+      {copied ? <span className="text-sm font-semibold">{t("seriesPage.copied")}</span> : null}
     </button>
   );
 }

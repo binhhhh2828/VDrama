@@ -19,6 +19,8 @@ export type SeriesCard = {
 };
 
 export type SeriesDetail = SeriesCard & {
+  /** Poster 3:4 lớn cho trang giới thiệu (720×960); API thật chưa có, khi thiếu thì dùng `poster_url`. */
+  poster_detail_url?: string | null;
   description: string | null;
   episode_count: number;
   latest_episode_number: number | null;

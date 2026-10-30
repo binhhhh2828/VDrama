@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/lib/api/client";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import type { Page, SeriesCard } from "@/lib/api/types";
 import { PosterGrid } from "./PosterGrid";
 
@@ -21,6 +23,7 @@ export function SeriesList({
   params: { sort?: string; genre?: string };
   pageSize: number;
 }) {
+  const t = useT();
   const [items, setItems] = useState(initial.items);
   const [cursor, setCursor] = useState(initial.next_cursor);
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ export function SeriesList({
       });
       setCursor(page.next_cursor);
     } catch (err) {
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't load more series.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("browse.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -57,12 +60,12 @@ export function SeriesList({
           ) : null}
           {cursor ? (
             <Button variant="secondary" onClick={loadMore} disabled={loading} aria-busy={loading}>
-              {loading ? "Loading…" : "Load more"}
+              {loading ? t("browse.loading") : t("browse.loadMore")}
             </Button>
           ) : null}
         </div>
       ) : (
-        <p className="text-center text-sm text-muted">You&apos;ve reached the end.</p>
+        <p className="text-center text-sm text-muted">{t("browse.end")}</p>
       )}
     </div>
   );

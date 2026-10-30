@@ -1,9 +1,11 @@
 "use client";
 
+import { useT } from "@/components/i18n/I18nProvider";
 import { IS_DEMO } from "@/lib/demo/config";
 
 /** Dải nhãn ở đầu mọi trang của bản demo: dữ liệu mẫu, không có gì là thật. */
 export function DemoBanner() {
+  const t = useT();
   if (!IS_DEMO) return null;
 
   async function reset() {
@@ -20,15 +22,15 @@ export function DemoBanner() {
       className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-vip/35 bg-vip/10 px-4 py-2 text-center text-xs text-fg-soft"
     >
       <span>
-        <strong className="font-extrabold tracking-[0.08em] text-vip">DEMO</strong> · Sample data
-        only. Nothing here is real and nothing is sent to a server.
+        <strong className="font-extrabold tracking-[0.08em] text-vip">{t("demo.label")}</strong> ·{" "}
+        {t("demo.text")}
       </span>
       <button
         type="button"
         onClick={reset}
         className="min-h-8 rounded-full border border-vip/40 px-3 font-semibold text-vip hover:bg-vip/15"
       >
-        Reset demo
+        {t("demo.reset")}
       </button>
     </div>
   );

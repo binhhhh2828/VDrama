@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import { cn } from "@/lib/cn";
-import { MAIN_NAV, isActive } from "./nav";
+import { useT } from "@/components/i18n/I18nProvider";
+import { mainNav, isActive } from "./nav";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 const base = "px-3.5 py-2.5 text-[15px] font-medium no-underline border-b-2 transition";
 
 function Links({ pathname }: { pathname: string | null }) {
+  const t = useT();
   return (
     <>
-      {MAIN_NAV.map((item) => {
+      {mainNav(t).map((item) => {
         const active = pathname !== null && isActive(pathname, item.href);
         return (
           <Link
@@ -21,7 +22,7 @@ function Links({ pathname }: { pathname: string | null }) {
             className={cn(
               base,
               active
-                ? "border-pink text-fg hover:text-fg"
+                ? "border-accent text-fg hover:text-fg"
                 : "border-transparent text-muted hover:text-fg",
             )}
           >
@@ -38,7 +39,7 @@ function Links({ pathname }: { pathname: string | null }) {
           pathname !== null && isActive(pathname, "/vip") ? "border-vip" : "border-transparent",
         )}
       >
-        VIP
+        {t("nav.vip")}
       </Link>
     </>
   );
@@ -50,8 +51,9 @@ function ActiveLinks() {
 
 /** Menu ngang trên desktop. Đường dẫn hiện tại chỉ biết lúc request nên phần tô đậm nằm trong Suspense. */
 export function NavLinks() {
+  const t = useT();
   return (
-    <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+    <nav aria-label={t("nav.main")} className="hidden items-center gap-1 md:flex">
       <Suspense fallback={<Links pathname={null} />}>
         <ActiveLinks />
       </Suspense>

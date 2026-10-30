@@ -1,21 +1,26 @@
-import type { ReactNode } from "react";
-import { BottomNav } from "./BottomNav";
+import { Suspense, type ReactNode } from "react";
+import { FloatingDock } from "./FloatingDock";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 
-/** Khung trang người xem: header, nội dung, footer, thanh dưới đáy (điện thoại). */
+/**
+ * Khung trang người xem theo NetShort mobile: header trong suốt (menu nằm trong ngăn kéo), nội dung,
+ * chân trang accordion, thanh Get VIP và nút lên đầu trang dính đáy.
+ */
 export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <>
       <SiteHeader />
-      {/* Chừa chỗ cho thanh dưới đáy trên điện thoại. */}
-      <div id="main" className="flex flex-1 flex-col pb-20 md:pb-0">
+      <div id="main" className="flex flex-1 flex-col">
         {children}
       </div>
-      <div className="pb-20 md:pb-0">
+      {/* Chừa chỗ để thanh dính đáy không che dòng cuối của chân trang. */}
+      <div className="pb-[72px]">
         <SiteFooter />
       </div>
-      <BottomNav />
+      <Suspense fallback={null}>
+        <FloatingDock />
+      </Suspense>
     </>
   );
 }

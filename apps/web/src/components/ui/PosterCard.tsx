@@ -1,70 +1,83 @@
-import Image from "next/image";
-import Link from "next/link";
 import { Badge } from "./Badge";
+import { PosterArt } from "./PosterArt";
+import { GenreList } from "@/components/i18n/GenreName";
+import type { Genre } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 export type PosterCardProps = {
   href: string;
   title: string;
   posterUrl?: string | null;
-  /** Dòng phụ, ví dụ "12 episodes · Romance". */
-  meta?: string;
+  /** Thể loại, hiện dưới tên phim ngăn bằng " • " (tối đa 2 dòng). */
+  genres?: Genre[];
   rank?: number;
   vip?: boolean;
   isNew?: boolean;
-  className?: string;
+  /** Phim độc quyền: nhãn nhỏ ở đáy poster. */
+  original?: boolean;
+  /** `row`: tên đậm 600 (hàng cuộn ngang); `grid`: tên 400 (lưới 3 cột trang Browse). */
+  variant?: "row" | "grid";
   /** Ảnh trong khung đầu màn hình thì nạp trước. */
   preload?: boolean;
+  className?: string;
 };
 
-/** Thẻ phim poster 2:3: nhãn TOP/NEW góc trái, VIP góc phải, tên phim đè lên chân ảnh. */
+/**
+ * Thẻ phim theo NetShort (ảnh 02, 03, 18): poster 3:4 bo 10 (tên phim in đè ảnh), dưới là tên tối đa
+ * 2 dòng và thể loại xám ngăn bằng " • ". Nhãn TOP/NEW góc trái, VIP góc phải, ORIGINAL ở đáy.
+ */
 export function PosterCard({
   href,
   title,
   posterUrl,
-  meta,
+  genres,
   rank,
   vip,
   isNew,
-  className,
+  original,
+  variant = "row",
   preload,
+  className,
 }: PosterCardProps) {
   return (
     <Link
       href={href}
-      className={cn("group flex flex-col gap-2.5 text-fg no-underline hover:text-fg", className)}
+      className={cn(
+        "group flex min-w-0 flex-col gap-2 text-fg no-underline hover:text-fg",
+        className,
+      )}
     >
-      <div className="relative aspect-[2/3] overflow-hidden rounded-card border border-line bg-art">
-        {posterUrl ? (
-          <Image
-            src={posterUrl}
-            alt=""
-            fill
-            sizes="(min-width: 640px) 200px, 50vw"
-            preload={preload}
-            className="object-cover transition duration-300 group-hover:scale-[1.03]"
-          />
-        ) : null}
+      <PosterArt
+        src={posterUrl}
+        title={title}
+        sizes="(min-width: 640px) 200px, 128px"
+        preload={preload}
+        className="rounded-card"
+      >
         {rank ? (
-          <Badge kind="top" className="absolute top-2.5 left-2.5">
+          <Badge kind="top" className="absolute top-1.5 left-1.5">
             TOP {rank}
           </Badge>
         ) : isNew ? (
-          <Badge kind="new" className="absolute top-2.5 left-2.5" />
+          <Badge kind="new" className="absolute top-1.5 left-1.5" />
         ) : null}
-        {vip ? <Badge kind="vip" className="absolute top-2.5 right-2.5" /> : null}
-        <div className="absolute inset-x-0 bottom-0 hidden sm:block bg-linear-to-b from-canvas/0 to-canvas/85 px-3 pt-10 pb-3">
-          <span className="line-clamp-2 text-[19px] leading-[1.15] font-extrabold tracking-[-0.02em]">
-            {title}
-          </span>
-        </div>
-      </div>
-      <div className="flex flex-col gap-[3px]">
-        <span className="line-clamp-2 text-[13px] leading-[1.3] font-semibold sm:truncate sm:text-[15px]">
+        {vip ? <Badge kind="vip" className="absolute top-1.5 right-1.5" /> : null}
+        {original ? <Badge kind="original" className="absolute bottom-1.5 left-1.5" /> : null}
+      </PosterArt>
+      <div className="flex flex-col gap-1">
+        <span
+          className={cn(
+            "line-clamp-2 text-[13px] leading-[16px]",
+            variant === "row" ? "font-semibold" : "font-normal",
+          )}
+        >
           {title}
         </span>
-        {meta ? (
-          <span className="hidden truncate text-[13px] text-muted sm:block">{meta}</span>
+        {genres && genres.length > 0 ? (
+          <span className="line-clamp-2 text-[11px] leading-[13px] text-muted">
+            <GenreList genres={genres} />
+          </span>
         ) : null}
       </div>
     </Link>

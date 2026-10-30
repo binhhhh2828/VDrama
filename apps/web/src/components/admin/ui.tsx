@@ -70,7 +70,7 @@ const STATUS_STYLES: Record<string, string> = {
   amber: "border-vip/40 bg-vip/10 text-vip",
   red: "border-error/40 bg-error/10 text-error-soft",
   gray: "border-fg/20 bg-fg/6 text-fg-soft",
-  pink: "border-pink/45 bg-pink/12 text-link",
+  pink: "border-accent/45 bg-accent/12 text-link",
 };
 
 export function StatusPill({

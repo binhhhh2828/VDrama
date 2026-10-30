@@ -1,10 +1,12 @@
 import { PosterCard } from "@/components/ui/PosterCard";
 import type { SeriesCard } from "@/lib/api/types";
-import { seriesMeta } from "@/lib/format";
+import { IS_DEMO } from "@/lib/demo/config";
+import { demoExtras } from "@/lib/demo/extras";
 
 /**
- * Lưới poster: 3 cột trên điện thoại (theo canvas mobile), tự chia cột từ `sm`.
- * `ranked`: hiện nhãn TOP theo thứ tự; `markNew`: hiện nhãn NEW.
+ * Lưới poster theo NetShort (ảnh 18): 3 cột khoảng cách 10 trên điện thoại, tên phim chữ thường;
+ * từ `sm` tự chia cột. `ranked`: nhãn TOP theo thứ tự; `markNew`: nhãn NEW. Không được async vì
+ * cũng được dùng trong component client (SeriesList).
  */
 export function PosterGrid({
   series,
@@ -18,16 +20,18 @@ export function PosterGrid({
   preloadFirst?: number;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-5">
+    <div className="grid grid-cols-3 gap-x-2.5 gap-y-5 sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-x-5 sm:gap-y-6">
       {series.map((s, i) => (
         <PosterCard
           key={s.id}
+          variant="grid"
           href={`/series/${s.slug}`}
           title={s.title}
           posterUrl={s.poster_url}
-          meta={seriesMeta(s)}
+          genres={s.genres}
           rank={ranked ? i + 1 : undefined}
           isNew={markNew}
+          original={IS_DEMO && demoExtras(s.slug).badge === "original"}
           preload={i < preloadFirst}
         />
       ))}

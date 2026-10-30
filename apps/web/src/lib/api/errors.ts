@@ -1,3 +1,5 @@
+import { en } from "@/lib/i18n/dictionaries/en";
+
 // Lỗi API và câu hiển thị tiếng Anh. Giao diện luôn hiện câu theo `code`, không hiện thẳng
 // `message` của API (API còn trả tiếng Việt tới Bước 15 của plan frontend).
 
@@ -28,30 +30,8 @@ export type ApiErrorCode = (typeof API_ERROR_CODES)[number] | "network_error" | 
 
 export type FieldError = { field: string; type: string; message: string };
 
-const MESSAGES: Record<ApiErrorCode, string> = {
-  bad_request: "Something about that request wasn't right. Please try again.",
-  validation_error: "Please check the highlighted fields.",
-  not_authenticated: "Please sign in to continue.",
-  session_expired: "Your session has ended. Please sign in again.",
-  invalid_credentials: "That email and password don't match.",
-  forbidden: "You don't have access to this.",
-  account_disabled:
-    "This account has been disabled. Contact support if you think this is a mistake.",
-  vip_required: "This episode is for VIP members.",
-  not_found: "We couldn't find that.",
-  method_not_allowed: "That action isn't supported.",
-  email_taken: "An account with this email already exists.",
-  video_not_ready: "This video is still processing. Try again in a few minutes.",
-  conflict: "That can't be done right now because of the item's current state.",
-  payload_too_large: "That file or request is too large.",
-  invalid_signature: "The request signature was invalid.",
-  stream_provider_error: "The video service didn't respond. Please try again shortly.",
-  stream_unavailable: "Video playback isn't set up on this server yet.",
-  rate_limited: "Too many attempts. Please wait a moment and try again.",
-  internal_error: "Something went wrong on our side. Please try again.",
-  network_error: "Can't reach VDrama. Check your connection and try again.",
-  unknown_error: "Something went wrong. Please try again.",
-};
+// Câu tiếng Anh lấy từ từ điển (nguồn duy nhất); giao diện hiện câu theo ngôn ngữ qua `apiErrorText`.
+const MESSAGES: Record<ApiErrorCode, string> = en.apiErrors;
 
 /** Câu tiếng Anh cho một mã lỗi; mã lạ thì dùng câu chung. */
 export function errorMessage(code: string): string {

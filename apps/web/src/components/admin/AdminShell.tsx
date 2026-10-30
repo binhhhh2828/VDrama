@@ -101,7 +101,7 @@ function AdminNav() {
             className={cn(
               "flex min-h-11 shrink-0 items-center gap-3 rounded-input px-3 text-[15px] font-semibold whitespace-nowrap no-underline",
               active
-                ? "bg-pink/14 text-fg hover:text-fg"
+                ? "bg-accent/14 text-fg hover:text-fg"
                 : "text-muted hover:bg-fg/6 hover:text-fg",
             )}
           >

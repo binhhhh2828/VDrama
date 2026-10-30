@@ -86,6 +86,7 @@ Cả bộ local: `docker compose -f docker-compose.dev.yml up --build` (service 
   - Số đếm tóm tắt (`series_stats.favorite_count`) chỉ đổi khi trạng thái thật sự đổi: dùng `… RETURNING` để biết, không đọc rồi ghi.
 - **Phân quyền có lưới test** (`app/tests/test_permissions.py`): tự quét mọi route qua `app.openapi()`. Endpoint ghi dữ liệu mới mà không cần đăng nhập phải thêm vào `PUBLIC_WRITES` kèm lý do; endpoint admin phải dùng `AdminUser`. Mã lỗi mới phải thêm vào bảng mã lỗi của `docs/api.md` (có test so khớp). Đổi quyền thì sửa bảng `MATRIX` cùng bảng Phân quyền trong `docs/api.md`.
 - Next.js ở phiên bản mới có breaking changes: đọc docs trong `apps/web/node_modules/next/dist/docs/` trước khi viết code web (theo `apps/web/AGENTS.md`).
+- **Web đa ngôn ngữ** (`docs/plans/gd4-i18n.md`, `docs/design.md` mục Đa ngôn ngữ): route người xem nằm dưới `app/[lang]` (tiếng Anh ở gốc nhờ `src/proxy.ts`, tiếng Việt ở `/vi`); admin và `/dev` ở `app/(internal)`, chỉ tiếng Anh. Chữ giao diện luôn đi qua từ điển `src/lib/i18n/dictionaries/` (`useT()` ở client, `getServerT(lang)` ở server), không viết chữ thẳng trong JSX và không tạo `lib/copy.ts` mới. Liên kết/điều hướng dùng `Link`, `useRouter`, `usePathname` của `@/components/i18n/navigation`, không dùng `next/link` hay `next/navigation` thô (có test chặn). Thêm khóa mới thì thêm cả `en.ts` lẫn `vi.ts`.
 
 ## Điều không được làm
 

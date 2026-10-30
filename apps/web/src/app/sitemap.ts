@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { listSeries } from "@/lib/api/catalog";
 import type { SeriesCard } from "@/lib/api/types";
+import { LOCALES } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/paths";
 
 const ORIGIN = (process.env.PUBLIC_ORIGIN ?? "http://localhost:3000").replace(/\/$/, "");
 const MAX_PAGES = 50; // 50 × 50 = 2.500 phim; vượt mức này thì chia sitemap (generateSitemaps)
@@ -17,24 +19,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     cursor = page.next_cursor;
   }
 
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: `${ORIGIN}/`, changeFrequency: "daily", priority: 1 },
-    { url: `${ORIGIN}/browse`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${ORIGIN}/vip`, changeFrequency: "monthly", priority: 0.6 },
-    ...["/terms", "/privacy", "/refunds", "/contact"].map((path) => ({
-      url: `${ORIGIN}${path}`,
-      changeFrequency: "yearly" as const,
-      priority: 0.2,
-    })),
-  ];
+  // Mỗi trang có một mục cho từng ngôn ngữ, kèm `alternates` (hreflang) trỏ sang các bản còn lại.
+  const entries = (
+    path: string,
+    rest: Omit<MetadataRoute.Sitemap[number], "url" | "alternates">,
+  ): MetadataRoute.Sitemap => {
+    const languages = Object.fromEntries(
+      LOCALES.map((locale) => [locale, `${ORIGIN}${localePath(locale, path)}`]),
+    );
+    return LOCALES.map((locale) => ({
+      url: languages[locale],
+      alternates: { languages },
+      ...rest,
+    }));
+  };
 
   return [
-    ...staticPages,
-    ...series.map((s) => ({
-      url: `${ORIGIN}/series/${s.slug}`,
-      lastModified: s.published_at ?? undefined,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
+    ...entries("/", { changeFrequency: "daily", priority: 1 }),
+    ...entries("/browse", { changeFrequency: "daily", priority: 0.8 }),
+    ...entries("/vip", { changeFrequency: "monthly", priority: 0.6 }),
+    ...["/terms", "/privacy", "/refunds", "/contact"].flatMap((path) =>
+      entries(path, { changeFrequency: "yearly", priority: 0.2 }),
+    ),
+    ...series.flatMap((s) =>
+      entries(`/series/${s.slug}`, {
+        lastModified: s.published_at ?? undefined,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      }),
+    ),
   ];
 }

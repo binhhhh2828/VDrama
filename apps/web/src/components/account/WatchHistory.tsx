@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { CloseIcon, PlayIcon, TrashIcon } from "@/components/ui/icons";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api/client";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import type { HistoryItem } from "@/lib/api/types";
 import { formatDate, isFinished, progressRatio, timeLeft } from "@/lib/format";
+import { Link } from "@/components/i18n/navigation";
 
 const LIMIT = 50;
 
@@ -19,6 +21,8 @@ const LIMIT = 50;
  * xem trước đó (API quyết định), nên sau khi xóa thì tải lại danh sách.
  */
 export function WatchHistory() {
+  const t = useT();
+  const locale = useLocale();
   const [items, setItems] = useState<HistoryItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -30,9 +34,9 @@ export function WatchHistory() {
       setItems(res.items);
     } catch (err) {
       setItems((prev) => prev ?? []);
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't load your history.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("history.loadFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let active = true;
@@ -41,13 +45,13 @@ export function WatchHistory() {
       (err) => {
         if (!active) return;
         setItems([]);
-        setError(err instanceof ApiError ? err.userMessage : "Couldn't load your history.");
+        setError(err instanceof ApiError ? apiErrorText(err, t) : t("history.loadFailed"));
       },
     );
     return () => {
       active = false;
     };
-  }, []);
+  }, [t]);
 
   async function removeOne(item: HistoryItem) {
     setError(null);
@@ -55,7 +59,7 @@ export function WatchHistory() {
     try {
       await api.removeHistory(item.episode.id);
     } catch (err) {
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't remove that.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("history.removeFailed"));
     }
     await reload();
   }
@@ -67,7 +71,7 @@ export function WatchHistory() {
       await api.clearHistory();
       setItems([]);
     } catch (err) {
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't clear your history.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("history.clearFailed"));
     } finally {
       setBusy(false);
       setConfirmClear(false);
@@ -87,13 +91,11 @@ export function WatchHistory() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-panel border border-line bg-surface px-6 py-16 text-center">
-        <p className="text-lg font-bold">Nothing here yet</p>
-        <p className="max-w-md text-muted">
-          Episodes you watch will show up here so you can pick up where you left off.
-        </p>
+        <p className="text-lg font-bold">{t("history.emptyTitle")}</p>
+        <p className="max-w-md text-muted">{t("history.emptyText")}</p>
         {error ? <p className="text-sm text-error-soft">{error}</p> : null}
         <ButtonLink href="/browse" size="sm" className="mt-2">
-          Find something to watch
+          {t("history.find")}
         </ButtonLink>
       </div>
     );
@@ -102,18 +104,16 @@ export function WatchHistory() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">
-          {items.length} {items.length === 1 ? "series" : "series"} · most recent first
-        </p>
+        <p className="text-sm text-muted">{t("history.count", { n: items.length })}</p>
         {confirmClear ? (
           <div
             role="group"
-            aria-label="Confirm clearing history"
+            aria-label={t("history.confirmGroup")}
             className="flex flex-wrap items-center gap-2"
           >
-            <span className="text-sm font-semibold">Clear all watch history?</span>
+            <span className="text-sm font-semibold">{t("history.clearAsk")}</span>
             <Button variant="danger" size="sm" onClick={clearAll} disabled={busy}>
-              {busy ? "Clearing…" : "Yes, clear"}
+              {busy ? t("history.clearing") : t("history.yesClear")}
             </Button>
             <Button
               variant="ghost"
@@ -121,12 +121,12 @@ export function WatchHistory() {
               onClick={() => setConfirmClear(false)}
               disabled={busy}
             >
-              Cancel
+              {t("account.cancel")}
             </Button>
           </div>
         ) : (
           <Button variant="danger" size="sm" onClick={() => setConfirmClear(true)}>
-            <TrashIcon size={16} /> Clear all
+            <TrashIcon size={16} /> {t("history.clearAll")}
           </Button>
         )}
       </div>
@@ -147,15 +147,18 @@ export function WatchHistory() {
             >
               <Link
                 href={watchHref}
-                aria-label={`Continue ${h.series.title}, episode ${h.episode.number}`}
-                className="relative aspect-video w-[34%] max-w-40 min-w-24 shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-40"
+                aria-label={t("history.continueAria", {
+                  title: h.series.title,
+                  n: h.episode.number,
+                })}
+                className="relative aspect-[3/4] w-[72px] shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-20"
               >
                 {h.episode.thumbnail_url ? (
                   <Image
                     src={h.episode.thumbnail_url}
                     alt=""
                     fill
-                    sizes="160px"
+                    sizes="80px"
                     className="object-cover"
                   />
                 ) : null}
@@ -173,21 +176,24 @@ export function WatchHistory() {
                   {h.series.title}
                 </Link>
                 <span className="text-sm text-fg-soft">
-                  Episode {h.episode.number} · {timeLeft(h.progress_sec, h.episode.duration_sec)}
+                  {t("episodes.episodeN", { n: h.episode.number })} ·{" "}
+                  {timeLeft(h.progress_sec, h.episode.duration_sec, locale)}
                 </span>
-                <span className="text-xs text-muted">Watched {formatDate(h.updated_at)}</span>
+                <span className="text-xs text-muted">
+                  {t("history.watched", { date: formatDate(h.updated_at, locale) })}
+                </span>
               </div>
               {/* Ẩn/hiện ở thẻ bọc: `hidden` đặt thẳng lên nút bị `inline-flex` của nút đè. */}
               <span className="hidden sm:contents">
                 <ButtonLink href={watchHref} size="sm">
-                  <PlayIcon /> {done ? "Watch again" : "Continue"}
+                  <PlayIcon /> {done ? t("history.watchAgain") : t("history.continue")}
                 </ButtonLink>
               </span>
               <button
                 type="button"
                 onClick={() => removeOne(h)}
-                aria-label={`Remove ${h.series.title} episode ${h.episode.number} from history`}
-                title="Remove from history"
+                aria-label={t("history.removeAria", { title: h.series.title, n: h.episode.number })}
+                title={t("history.removeTitle")}
                 className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-fg/8 hover:text-fg"
               >
                 <CloseIcon size={18} />

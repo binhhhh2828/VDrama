@@ -1,25 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api/client";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import { FormAlert } from "./AuthTabs";
+import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
+import { useRouter } from "@/components/i18n/navigation";
 
 export function SignInForm({ next }: { next: string }) {
+  const t = useT();
   const session = useSession();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const terms = useTerms();
   useRedirectIfSignedIn(next);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!terms.check()) return;
     const form = new FormData(e.currentTarget);
     setBusy(true);
     setError(null);
@@ -32,7 +37,7 @@ export function SignInForm({ next }: { next: string }) {
       router.replace(next);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't sign in. Please try again.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("auth.signInFailed"));
       setBusy(false);
     }
   }
@@ -43,25 +48,22 @@ export function SignInForm({ next }: { next: string }) {
       <Field
         id="signin-email"
         name="email"
-        label="Email"
+        label={t("auth.email")}
         type="email"
         autoComplete="email"
         required
-        placeholder="you@example.com"
+        placeholder={t("auth.emailPlaceholder")}
       />
       <Field
         id="signin-password"
         name="password"
-        label="Password"
+        label={t("auth.password")}
         type="password"
         autoComplete="current-password"
         required
       />
-      <div className="-mt-1 text-right text-sm">
-        <Link href="/forgot-password">Forgot password?</Link>
-      </div>
       <Button type="submit" disabled={busy} aria-busy={busy} className="h-[52px]">
-        {busy ? "Signing in…" : "Sign in"}
+        {busy ? t("auth.signingIn") : t("account.signIn")}
       </Button>
     </form>
   );

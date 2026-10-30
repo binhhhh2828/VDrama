@@ -1,28 +1,37 @@
-import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+"use client";
 
-export type BadgeKind = "top" | "vip" | "free" | "new" | "preview" | "original";
+import type { ReactNode } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
+import { cn } from "@/lib/cn";
+import type { TKey } from "@/lib/i18n/translate";
+import { FlameIcon } from "./icons";
+
+export type BadgeKind = "top" | "vip" | "free" | "new" | "preview" | "original" | "hot";
 
 const kinds: Record<BadgeKind, string> = {
-  top: "rounded-tag bg-brand px-2 py-1 text-[11px] font-extrabold tracking-[0.04em] text-ink",
+  top: "rounded-tag bg-brand px-2 py-1 text-[11px] font-extrabold tracking-[0.04em] text-on-accent",
   vip: "rounded-tag bg-vip px-2 py-1 text-[11px] font-extrabold text-vip-ink",
   free: "rounded-tag border border-success/35 bg-success/12 px-2 py-1 text-[11px] font-bold text-success",
   new: "rounded-tag border border-fg/25 bg-canvas/60 px-2 py-1 text-[11px] font-bold text-fg",
   // Nhãn cho màn hình chưa nối API (giao diện tĩnh): luôn nổi bật để không bị hiểu nhầm là đã chạy thật.
   preview:
     "rounded-full border border-vip/45 bg-vip/10 px-2.5 py-1 text-[11px] font-extrabold tracking-[0.1em] text-vip",
+  // Nhãn phim độc quyền, nhỏ, đặt ở góc/đáy poster (như nhãn ĐỘC QUYỀN của NetShort).
   original:
-    "rounded-full border border-fg/18 bg-fg/8 px-3 py-[7px] text-xs font-bold tracking-[0.12em] text-fg",
+    "rounded-tag bg-accent px-1.5 py-[3px] text-[10px] font-bold tracking-[0.06em] text-on-accent",
+  // Nhãn HOT cạnh tên phim ở hero: đỏ gạch, chữ trắng nghiêng, có ngọn lửa.
+  hot: "gap-0.5 rounded-tag bg-hot px-1.5 py-[3px] text-[11px] font-extrabold italic text-white",
 };
 
-const defaultLabel: Record<BadgeKind, string> = {
-  top: "TOP",
-  vip: "VIP",
-  free: "FREE",
-  new: "NEW",
-  preview: "PREVIEW",
-  original: "AI ORIGINAL",
-};
+const labelKey = {
+  top: "badge.top",
+  vip: "badge.vip",
+  free: "badge.free",
+  new: "badge.new",
+  preview: "badge.preview",
+  original: "badge.original",
+  hot: "badge.hot",
+} as const satisfies Record<BadgeKind, TKey>;
 
 export function Badge({
   kind,
@@ -33,9 +42,11 @@ export function Badge({
   children?: ReactNode;
   className?: string;
 }) {
+  const t = useT();
   return (
     <span className={cn("inline-flex items-center leading-none", kinds[kind], className)}>
-      {children ?? defaultLabel[kind]}
+      {kind === "hot" ? <FlameIcon size={11} /> : null}
+      {children ?? t(labelKey[kind])}
     </span>
   );
 }
