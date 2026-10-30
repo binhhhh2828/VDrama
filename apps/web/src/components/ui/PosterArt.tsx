@@ -36,12 +36,14 @@ export function PosterArt({
   children,
 }: PosterArtProps) {
   const hero = ratio === "hero";
+  // Poster thật đã có tên phim trong tranh; chỉ ảnh giữ chỗ (picsum) hoặc chưa có ảnh mới in chữ đè.
+  const showTitle = withTitle && (!src || src.includes("picsum.photos"));
   return (
     <div className={cn("@container relative overflow-hidden bg-art", ratios[ratio], className)}>
       {src ? (
         <Image src={src} alt="" fill sizes={sizes} preload={preload} className="object-cover" />
       ) : null}
-      {withTitle ? (
+      {showTitle ? (
         <div
           aria-hidden
           className={cn(

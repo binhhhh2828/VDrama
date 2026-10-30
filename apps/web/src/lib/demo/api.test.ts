@@ -74,7 +74,7 @@ describe("catalog", () => {
 
   it("searches by title ignoring case, and rejects short terms", async () => {
     const { demoFetch } = setup();
-    const ok = await (await demoFetch("/api/v1/search?q=VIRTUAL")).json();
+    const ok = await (await demoFetch(`/api/v1/search?q=${encodeURIComponent("SÓI về")}`)).json();
     expect(ok.items.map((s: { slug: string }) => s.slug)).toContain("virtual-city");
     expect((await demoFetch("/api/v1/search?q=v")).status).toBe(422);
   });

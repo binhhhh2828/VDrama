@@ -16,7 +16,8 @@ export const NEWS_ARTICLES: NewsArticle[] = [
     tag: "Behind the scenes",
     date: "2026-10-28",
     author: "VDrama Team",
-    title: "Behind Virtual City: how an AI love story was built in six weeks",
+    title:
+      "Behind “Tổng Tài Dành Cả Thanh Xuân Để Yêu Em”: how an AI love story was built in six weeks",
     excerpt:
       "From the first script draft to the final colour grade, the team shares how a lonely coder and the AI she built came to life, and why episode 3 changes everything.",
   },

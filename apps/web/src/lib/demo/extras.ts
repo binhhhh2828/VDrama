@@ -17,37 +17,18 @@ const EXTRAS: Record<string, DemoExtras> = {
   "virtual-city": {
     badge: "hot",
     likes: 21_400,
-    reviews: [
-      {
-        title: "A love story written in code",
-        body: "Mai spends her nights debugging an assistant that starts answering questions she never asked. The first episode keeps the romance quiet and lets the loneliness speak, so the final line lands hard.",
-      },
-      {
-        title: "Why the ending of episode 3 matters",
-        body: "When the AI refuses an order for the first time, the show quietly changes genre. From here on every choice Mai makes has a cost, and the series is not afraid to show it.",
-      },
-    ],
+    reviews: [],
   },
   "memories-of-you": {
     badge: "hot",
     likes: 12_800,
-    reviews: [
-      {
-        title: "Five lost years, one ring",
-        body: "The premise sounds familiar, but the show plays it as a mystery: every flashback answers one question and opens two more. Lan's quiet stubbornness carries the whole thing.",
-      },
-    ],
+    reviews: [],
   },
   "love-again": { badge: null, likes: 6_300, reviews: [] },
   "parallel-secrets": {
     badge: "original",
     likes: 9_700,
-    reviews: [
-      {
-        title: "Two timelines, one secret",
-        body: "Each episode cuts between the same night ten years apart. The editing does most of the storytelling, and the twist at the midpoint is earned rather than thrown in.",
-      },
-    ],
+    reviews: [],
   },
   "summer-promise": { badge: null, likes: 4_100, reviews: [] },
   "behind-the-lights": { badge: "original", likes: 5_600, reviews: [] },

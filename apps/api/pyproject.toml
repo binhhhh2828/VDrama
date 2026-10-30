@@ -16,6 +16,7 @@ dependencies = [
     "limits>=5.8.0",
     "cryptography>=50.0.2",
     "httpx>=0.28.1",
+    "pillow>=11",
 ]
 
 [dependency-groups]

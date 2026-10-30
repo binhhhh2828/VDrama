@@ -98,7 +98,7 @@ async function SeriesContent({ params }: { params: PageProps<"/series/[slug]">["
         </div>
 
         <PosterArt
-          src={series.poster_url}
+          src={series.poster_detail_url ?? series.poster_url}
           title={series.title}
           preload
           sizes="(min-width: 768px) 300px, 260px"

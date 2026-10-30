@@ -29,94 +29,14 @@
     {
       "id": 1,
       "slug": "virtual-city",
-      "title": "Virtual City",
-      "poster_url": "https://picsum.photos/seed/virtual-city/600/800",
-      "banner_url": "https://picsum.photos/seed/virtual-city-hero/800/1000",
+      "title": "Sói Về Đòi Món Nợ Năm Xưa",
+      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
+      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
       "total_episodes": 16,
       "published_at": "2026-10-28T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "romance",
-          "name": "Romance"
-        },
-        {
-          "slug": "drama",
-          "name": "Drama"
-        }
-      ],
-      "description": "Is love real, or just an algorithm? A lonely coder falls for the AI she built.",
-      "episode_count": 12,
-      "latest_episode_number": 12,
-      "view_count": 5200,
-      "favorite_count": 2,
-      "is_published": true
-    },
-    {
-      "id": 2,
-      "slug": "memories-of-you",
-      "title": "Memories of You",
-      "poster_url": "https://picsum.photos/seed/memories-of-you/600/800",
-      "banner_url": "https://picsum.photos/seed/memories-of-you-hero/800/1000",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 12,
-      "published_at": "2026-10-25T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "romance",
-          "name": "Romance"
-        }
-      ],
-      "description": "She wakes up with no memory of the last five years, and a ring on her finger.",
-      "episode_count": 8,
-      "latest_episode_number": 8,
-      "view_count": 3100,
-      "favorite_count": 0,
-      "is_published": true
-    },
-    {
-      "id": 3,
-      "slug": "love-again",
-      "title": "Love Again",
-      "poster_url": "https://picsum.photos/seed/love-again/600/800",
-      "banner_url": "https://picsum.photos/seed/love-again-hero/800/1000",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "completed",
-      "total_episodes": 10,
-      "published_at": "2026-10-22T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "comedy",
-          "name": "Comedy"
-        },
-        {
-          "slug": "family",
-          "name": "Family"
-        }
-      ],
-      "description": "Four sisters, one family restaurant, and a summer none of them saw coming.",
-      "episode_count": 10,
-      "latest_episode_number": 10,
-      "view_count": 8700,
-      "favorite_count": 0,
-      "is_published": true
-    },
-    {
-      "id": 4,
-      "slug": "parallel-secrets",
-      "title": "Parallel Secrets",
-      "poster_url": "https://picsum.photos/seed/parallel-secrets/600/800",
-      "banner_url": "https://picsum.photos/seed/parallel-secrets-hero/800/1000",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 13,
-      "published_at": "2026-10-19T06:34:37.368783Z",
       "genres": [
         {
           "slug": "action",
@@ -127,19 +47,103 @@
           "name": "Fantasy"
         }
       ],
-      "description": "A detective finds a door to the world where her partner never died.",
+      "description": "Trả nợ không chỉ bằng tiền, mà bằng cả mạng sống. Chàng trai trở về để đòi lại món nợ năm xưa.",
+      "episode_count": 12,
+      "latest_episode_number": 12,
+      "view_count": 5200,
+      "favorite_count": 2,
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
+    },
+    {
+      "id": 2,
+      "slug": "memories-of-you",
+      "title": "Tổng Tài Dành Cả Thanh Xuân Để Yêu Em",
+      "poster_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/thumb.webp",
+      "banner_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/hero.webp",
+      "year": 2026,
+      "country": "Vietnam",
+      "status": "ongoing",
+      "total_episodes": 12,
+      "published_at": "2026-10-25T06:34:37.368783Z",
+      "genres": [
+        {
+          "slug": "romance",
+          "name": "Romance"
+        },
+        {
+          "slug": "drama",
+          "name": "Drama"
+        }
+      ],
+      "description": "Một cuộc gặp gỡ, đổi thay cả đời nhau. Anh dành cả thanh xuân chỉ để yêu một người.",
+      "episode_count": 8,
+      "latest_episode_number": 8,
+      "view_count": 3100,
+      "favorite_count": 0,
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/detail.webp"
+    },
+    {
+      "id": 3,
+      "slug": "love-again",
+      "title": "Bí Mật Trong Bóng Tối",
+      "poster_url": "/demo/posters/bi_mat_trong_bong_toi/thumb.webp",
+      "banner_url": "/demo/posters/bi_mat_trong_bong_toi/hero.webp",
+      "year": 2026,
+      "country": "Vietnam",
+      "status": "completed",
+      "total_episodes": 10,
+      "published_at": "2026-10-22T06:34:37.368783Z",
+      "genres": [
+        {
+          "slug": "drama",
+          "name": "Drama"
+        }
+      ],
+      "description": "Sự thật luôn ẩn sau những lời nói dối. Bí mật trong bóng tối dần lộ ra từng chút một.",
+      "episode_count": 10,
+      "latest_episode_number": 10,
+      "view_count": 8700,
+      "favorite_count": 0,
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/bi_mat_trong_bong_toi/detail.webp"
+    },
+    {
+      "id": 4,
+      "slug": "parallel-secrets",
+      "title": "Vương Phi Không Dễ Chọc",
+      "poster_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+      "banner_url": "/demo/posters/vuong_phi_khong_de_choc/hero.webp",
+      "year": 2026,
+      "country": "Vietnam",
+      "status": "ongoing",
+      "total_episodes": 13,
+      "published_at": "2026-10-19T06:34:37.368783Z",
+      "genres": [
+        {
+          "slug": "romance",
+          "name": "Romance"
+        },
+        {
+          "slug": "fantasy",
+          "name": "Fantasy"
+        }
+      ],
+      "description": "Càng yêu càng đau, càng xa càng nhớ. Nàng vương phi nhỏ bé nhưng không dễ chọc.",
       "episode_count": 8,
       "latest_episode_number": 8,
       "view_count": 4400,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/vuong_phi_khong_de_choc/detail.webp"
     },
     {
       "id": 5,
       "slug": "summer-promise",
-      "title": "Summer Promise",
-      "poster_url": "https://picsum.photos/seed/summer-promise/600/800",
-      "banner_url": "https://picsum.photos/seed/summer-promise-hero/800/1000",
+      "title": "Nhà Có Ba Chàng Trai",
+      "poster_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+      "banner_url": "/demo/posters/nha_co_ba_chang_trai/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -149,21 +153,26 @@
         {
           "slug": "comedy",
           "name": "Comedy"
+        },
+        {
+          "slug": "family",
+          "name": "Family"
         }
       ],
-      "description": "Two rival street-food stalls. One very small alley. Zero chance of peace.",
+      "description": "Những cuộc phiêu lưu nhỏ làm nên hạnh phúc lớn của một gia đình có ba cậu con trai và chú chó.",
       "episode_count": 6,
       "latest_episode_number": 6,
       "view_count": 950,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/nha_co_ba_chang_trai/detail.webp"
     },
     {
       "id": 6,
       "slug": "behind-the-lights",
       "title": "Behind the Lights",
-      "poster_url": "https://picsum.photos/seed/behind-the-lights/600/800",
-      "banner_url": "https://picsum.photos/seed/behind-the-lights-hero/800/1000",
+      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
+      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -184,14 +193,15 @@
       "latest_episode_number": 6,
       "view_count": 2200,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
     },
     {
       "id": 7,
       "slug": "sky-of-memories",
       "title": "Sky of Memories",
-      "poster_url": "https://picsum.photos/seed/sky-of-memories/600/800",
-      "banner_url": "https://picsum.photos/seed/sky-of-memories-hero/800/1000",
+      "poster_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/thumb.webp",
+      "banner_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "completed",
@@ -208,14 +218,15 @@
       "latest_episode_number": 5,
       "view_count": 12000,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/detail.webp"
     },
     {
       "id": 8,
       "slug": "crack-in-time",
       "title": "Crack in Time",
-      "poster_url": "https://picsum.photos/seed/crack-in-time/600/800",
-      "banner_url": "https://picsum.photos/seed/crack-in-time-hero/800/1000",
+      "poster_url": "/demo/posters/bi_mat_trong_bong_toi/thumb.webp",
+      "banner_url": "/demo/posters/bi_mat_trong_bong_toi/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -232,14 +243,15 @@
       "latest_episode_number": 8,
       "view_count": 0,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/bi_mat_trong_bong_toi/detail.webp"
     },
     {
       "id": 9,
       "slug": "faded-moonlight",
       "title": "Faded Moonlight",
-      "poster_url": "https://picsum.photos/seed/faded-moonlight/600/800",
-      "banner_url": "https://picsum.photos/seed/faded-moonlight-hero/800/1000",
+      "poster_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+      "banner_url": "/demo/posters/vuong_phi_khong_de_choc/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -260,14 +272,15 @@
       "latest_episode_number": 11,
       "view_count": 6100,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/vuong_phi_khong_de_choc/detail.webp"
     },
     {
       "id": 10,
       "slug": "twin-destinies",
       "title": "Twin Destinies",
-      "poster_url": "https://picsum.photos/seed/twin-destinies/600/800",
-      "banner_url": "https://picsum.photos/seed/twin-destinies-hero/800/1000",
+      "poster_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+      "banner_url": "/demo/posters/nha_co_ba_chang_trai/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "completed",
@@ -288,14 +301,15 @@
       "latest_episode_number": 6,
       "view_count": 1500,
       "favorite_count": 0,
-      "is_published": true
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/nha_co_ba_chang_trai/detail.webp"
     },
     {
       "id": 11,
       "slug": "the-one-in-my-dream",
       "title": "The One in My Dream",
-      "poster_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800",
-      "banner_url": "https://picsum.photos/seed/the-one-in-my-dream-hero/800/1000",
+      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
+      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -312,7 +326,8 @@
       "latest_episode_number": 3,
       "view_count": 0,
       "favorite_count": 0,
-      "is_published": false
+      "is_published": false,
+      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
     }
   ],
   "episodes": {

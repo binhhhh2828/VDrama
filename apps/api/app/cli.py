@@ -4,6 +4,7 @@
     DEMO_PASSWORD=... uv run python -m app.cli seed-demo   # dữ liệu mẫu + tài khoản demo (dev)
     uv run python -m app.cli stream-create-signing-key
     uv run python -m app.cli stream-set-webhook https://vdrama.vn/api/v1/webhooks/stream
+    uv run python -m app.cli poster-build poster.jpg --out thu-muc-ra   # ra 3 bản WebP 3:4
 
 Hai lệnh stream-* gọi API Cloudflare (cần CF_ACCOUNT_ID, CF_STREAM_API_TOKEN) và in giá trị cần
 dán vào .env; không tự ghi file, không lưu ở đâu khác.
@@ -20,13 +21,14 @@ import getpass
 import os
 import sys
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 
 from pydantic import EmailStr, TypeAdapter, ValidationError
 
 from app.core.db import dispose_engine, get_sessionmaker
 from app.core.loop import selector_loop_factory
 from app.schemas.auth import PASSWORD_MAX, PASSWORD_MIN
-from app.services import demo_seed, stream
+from app.services import demo_seed, poster_images, stream
 from app.services.admin_accounts import (
     AdminAccountError,
     create_or_promote_admin,
@@ -112,6 +114,20 @@ async def stream_set_webhook(url: str) -> str:
     )
 
 
+def poster_build(source: Path, out: Path) -> int:
+    try:
+        result = poster_images.process_poster(source.read_bytes())
+    except (OSError, poster_images.PosterError) as exc:
+        print(f"Lỗi: {getattr(exc, 'message', exc)}", file=sys.stderr)
+        return 1
+    out.mkdir(parents=True, exist_ok=True)
+    for name, data in result.files.items():
+        (out / f"{name}.webp").write_bytes(data)
+    note = f"đã cắt viền, vùng tranh {result.art_box}" if result.trimmed else "không có viền thừa"
+    print(f"{source.name}: {note}; ghi {', '.join(f'{n}.webp' for n in result.files)} vào {out}")
+    return 0
+
+
 def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.getpass) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -125,7 +141,15 @@ def main(argv: list[str] | None = None, prompt: Callable[[str], str] = getpass.g
     sub.add_parser("stream-create-signing-key", help="Tạo khóa ký token xem phim trên Cloudflare")
     p = sub.add_parser("stream-set-webhook", help="Đăng ký URL webhook Stream, in secret")
     p.add_argument("url", help="Ví dụ https://vdrama.vn/api/v1/webhooks/stream")
+    p = sub.add_parser(
+        "poster-build", help="Xử lý một ảnh poster thành 3 bản WebP 3:4 (không cần DB)"
+    )
+    p.add_argument("file", help="Ảnh gốc JPEG/PNG/WebP")
+    p.add_argument("--out", required=True, help="Thư mục ghi thumb.webp, detail.webp, hero.webp")
     args = parser.parse_args(argv)
+
+    if args.command == "poster-build":
+        return poster_build(Path(args.file), Path(args.out))
 
     if args.command == "create-admin":
         try:
