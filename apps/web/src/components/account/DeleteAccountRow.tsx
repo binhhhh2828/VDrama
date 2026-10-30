@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ChevronRightIcon, UserBanIcon } from "@/components/ui/icons";
@@ -11,6 +12,7 @@ import { Field } from "@/components/ui/Field";
  * nên nút xóa bị tắt, không gửi gì đi, không bao giờ báo "đã xóa".
  */
 export function DeleteAccountRow() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -30,12 +32,12 @@ export function DeleteAccountRow() {
         className="flex min-h-14 w-full items-center gap-3.5 px-1 text-left text-[22px] text-fg"
       >
         <UserBanIcon size={24} />
-        <span className="min-w-0 flex-1 truncate">Delete account</span>
+        <span className="min-w-0 flex-1 truncate">{t("account.deleteRow")}</span>
         <ChevronRightIcon size={18} className="shrink-0 text-muted" />
       </button>
       <dialog
         ref={ref}
-        aria-label="Delete account"
+        aria-label={t("account.deleteRow")}
         onClose={() => setOpen(false)}
         onClick={(e) => {
           if (e.target === e.currentTarget) setOpen(false);
@@ -44,24 +46,21 @@ export function DeleteAccountRow() {
       >
         <div className="flex flex-col gap-3">
           <Badge kind="preview" className="self-start" />
-          <h2 className="text-xl font-semibold">Delete your account?</h2>
-          <p className="text-sm leading-6 text-fg-soft">
-            This would permanently remove your account, your list and your watch history. Deleting
-            accounts isn&apos;t available yet, so nothing will happen if you continue.
-          </p>
+          <h2 className="text-xl font-semibold">{t("account.deleteTitle")}</h2>
+          <p className="text-sm leading-6 text-fg-soft">{t("account.deleteText")}</p>
           <Field
             id="delete-password"
-            label="Confirm with your password"
+            label={t("account.confirmPassword")}
             type="password"
             autoComplete="current-password"
             disabled
           />
           <div className="mt-1 flex justify-end gap-2.5">
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-              Cancel
+              {t("account.cancel")}
             </Button>
             <Button variant="danger" size="sm" disabled>
-              Delete account
+              {t("account.deleteRow")}
             </Button>
           </div>
         </div>

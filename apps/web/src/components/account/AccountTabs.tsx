@@ -1,27 +1,29 @@
 "use client";
 
+import { useT } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import { Link, usePathname } from "@/components/i18n/navigation";
 
 const TABS = [
-  { href: "/account", label: "Overview" },
-  { href: "/account/list", label: "My List" },
-  { href: "/account/history", label: "Watch history" },
-];
+  { href: "/account", key: "account.overview" },
+  { href: "/account/list", key: "nav.myList" },
+  { href: "/account/history", key: "footer.history" },
+] as const;
 
 export function AccountTabs() {
+  const t = useT();
   const pathname = usePathname();
   return (
     <nav
-      aria-label="Account sections"
+      aria-label={t("account.sections")}
       className="-mx-4 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line px-4 sm:mx-0 sm:px-0"
     >
-      {TABS.map((t) => {
-        const active = pathname === t.href;
+      {TABS.map((tab) => {
+        const active = pathname === tab.href;
         return (
           <Link
-            key={t.href}
-            href={t.href}
+            key={tab.href}
+            href={tab.href}
             aria-current={active ? "page" : undefined}
             className={cn(
               "-mb-px shrink-0 border-b-2 px-3.5 py-3 text-[15px] font-semibold whitespace-nowrap no-underline",
@@ -30,7 +32,7 @@ export function AccountTabs() {
                 : "border-transparent text-muted hover:text-fg",
             )}
           >
-            {t.label}
+            {t(tab.key)}
           </Link>
         );
       })}

@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { DemoAccounts } from "@/components/demo/DemoAccounts";
 import { Badge } from "@/components/ui/Badge";
 import { ChevronLeftIcon } from "@/components/ui/icons";
@@ -28,25 +29,6 @@ export function useTerms(): Terms {
   if (!ctx) throw new Error("useTerms must be used inside <AuthFlow>");
   return ctx;
 }
-
-const COPY = {
-  signin: {
-    title: "Sign in to unlock your own journey",
-    text: "Your list, history and VIP follow you on every device.",
-    email: "Continue with email",
-    switchText: "New to VDrama?",
-    switchLink: "Create a free account",
-    switchHref: "/signup",
-  },
-  signup: {
-    title: "Create your free account",
-    text: "Save your progress and build your list across devices.",
-    email: "Sign up with email",
-    switchText: "Already have an account?",
-    switchLink: "Sign in",
-    switchHref: "/signin",
-  },
-} as const;
 
 function GoogleLogo() {
   return (
@@ -86,7 +68,25 @@ function AppleLogo() {
  * thông báo, không gửi gì đi.
  */
 export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: string }) {
-  const copy = COPY[mode];
+  const t = useT();
+  const copy =
+    mode === "signin"
+      ? {
+          title: t("auth.signinTitle"),
+          text: t("auth.signinText"),
+          email: t("auth.signinEmail"),
+          switchText: t("auth.signinSwitchText"),
+          switchLink: t("auth.signinSwitchLink"),
+          switchHref: "/signup",
+        }
+      : {
+          title: t("auth.signupTitle"),
+          text: t("auth.signupText"),
+          email: t("auth.signupEmail"),
+          switchText: t("auth.signupSwitchText"),
+          switchLink: t("auth.signupSwitchLink"),
+          switchHref: "/signin",
+        };
   const router = useRouter();
   const [showEmail, setShowEmail] = useState(false);
   const [providerNote, setProviderNote] = useState<string | null>(null);
@@ -112,7 +112,7 @@ export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: stri
         <div className="flex h-[58px] items-center md:hidden">
           <button
             type="button"
-            aria-label="Back"
+            aria-label={t("account.back")}
             onClick={() => (window.history.length > 1 ? router.back() : router.push("/"))}
             className="-ml-3 flex size-11 items-center justify-center text-fg-soft"
           >
@@ -121,7 +121,7 @@ export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: stri
         </div>
 
         <div className="flex flex-col items-center gap-2.5 pt-10 text-center md:pt-0 md:text-left">
-          <Link href="/" aria-label="VDrama home" className="leading-none md:hidden">
+          <Link href="/" aria-label={t("nav.homeAria")} className="leading-none md:hidden">
             <Image src={stacked} alt="VDrama" preload className="h-auto w-[140px]" />
           </Link>
           <h1 className="text-[22px] leading-snug font-semibold md:text-[28px]">{copy.title}</h1>
@@ -131,29 +131,29 @@ export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: stri
         <div className="mx-auto mt-8 flex w-full max-w-[325px] flex-col gap-3 md:mx-0 md:max-w-none">
           <button
             type="button"
-            onClick={() => setProviderNote("Google sign-in")}
+            onClick={() => setProviderNote(t("auth.googleName"))}
             className={cn(provider, "bg-[#303030] text-fg")}
           >
             <span className="absolute left-5">
               <GoogleLogo />
             </span>
-            Continue with Google
+            {t("auth.google")}
             <Badge kind="preview" className="absolute right-3 scale-75" />
           </button>
           <button
             type="button"
-            onClick={() => setProviderNote("Apple sign-in")}
+            onClick={() => setProviderNote(t("auth.appleName"))}
             className={cn(provider, "bg-white text-ink")}
           >
             <span className="absolute left-5">
               <AppleLogo />
             </span>
-            Continue with Apple
+            {t("auth.apple")}
             <Badge kind="preview" className="absolute right-3 scale-75 bg-white!" />
           </button>
           {providerNote ? (
             <p role="status" className="text-center text-sm text-muted">
-              {providerNote} isn&apos;t available yet. Please continue with email.
+              {t("auth.providerNote", { name: providerNote })}
             </p>
           ) : null}
 
@@ -176,7 +176,7 @@ export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: stri
           </p>
           {mode === "signin" && showEmail ? (
             <p className="text-center text-sm">
-              <Link href="/forgot-password">Forgot password?</Link>
+              <Link href="/forgot-password">{t("auth.forgot")}</Link>
             </p>
           ) : null}
         </div>
@@ -205,6 +205,7 @@ export function AuthFlow({ mode, next }: { mode: "signin" | "signup"; next: stri
 }
 
 function TermsCheck({ children, error }: { children: ReactNode; error: boolean }) {
+  const t = useT();
   return (
     <div className="mt-4 flex flex-col gap-1.5">
       <label
@@ -213,20 +214,20 @@ function TermsCheck({ children, error }: { children: ReactNode; error: boolean }
       >
         {children}
         <span>
-          If you continue, you agree to the{" "}
+          {t("auth.termsPrefix")}{" "}
           <Link href="/terms" className="text-fg-soft underline">
-            Terms of Use
+            {t("footer.terms")}
           </Link>{" "}
-          and{" "}
+          {t("auth.and")}{" "}
           <Link href="/privacy" className="text-fg-soft underline">
-            Privacy Policy
+            {t("footer.privacy")}
           </Link>
           .
         </span>
       </label>
       {error ? (
         <span id="auth-terms-error" role="alert" className="text-[13px] text-error-soft">
-          Please agree to the Terms of Use and Privacy Policy to continue.
+          {t("auth.termsError")}
         </span>
       ) : null}
     </div>

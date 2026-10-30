@@ -6,6 +6,7 @@ import { useSession } from "@/components/session/SessionProvider";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { ChevronLeftIcon } from "@/components/ui/icons";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import { formatClock, formatVnd } from "@/lib/format";
 import { api } from "@/lib/api/client";
@@ -18,6 +19,8 @@ import { Link, usePathname, useSearchParams } from "@/components/i18n/navigation
  * giờ báo "đã thanh toán". Mã QR là hình vẽ giữ chỗ, không quét được, không chứa tài khoản thật.
  */
 export function Checkout() {
+  const t = useT();
+  const locale = useLocale();
   const session = useSession();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -27,8 +30,8 @@ export function Checkout() {
   const [demoState, setDemoState] = useState<"idle" | "busy" | "done" | "error">("idle");
 
   useEffect(() => {
-    const t = window.setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
-    return () => window.clearInterval(t);
+    const timer = window.setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
   if (session.status === "loading") return <Skeleton className="h-[520px]" />;
@@ -36,14 +39,12 @@ export function Checkout() {
     const next = encodeURIComponent(`${pathname}?plan=${plan.id}`);
     return (
       <div className="flex flex-col items-center gap-4 rounded-panel border border-line bg-surface px-6 py-14 text-center">
-        <p className="text-xl font-extrabold">Sign in to get VIP</p>
-        <p className="max-w-md text-muted">
-          Your VIP is added to your account, so sign in or create a free account first.
-        </p>
+        <p className="text-xl font-extrabold">{t("vip.signInToGet")}</p>
+        <p className="max-w-md text-muted">{t("checkout.signInText")}</p>
         <div className="flex flex-wrap justify-center gap-2.5">
-          <ButtonLink href={`/signin?next=${next}`}>Sign in</ButtonLink>
+          <ButtonLink href={`/signin?next=${next}`}>{t("account.signIn")}</ButtonLink>
           <ButtonLink href={`/signup?next=${next}`} variant="secondary">
-            Create account
+            {t("gate.createAccount")}
           </ButtonLink>
         </div>
       </div>
@@ -51,11 +52,11 @@ export function Checkout() {
   }
 
   const rows: Array<[string, string]> = [
-    ["Bank", PREVIEW_TRANSFER.bank],
-    ["Account name", PREVIEW_TRANSFER.accountName],
-    ["Account number", PREVIEW_TRANSFER.accountNumber],
-    ["Amount", formatVnd(plan.priceVnd)],
-    ["Transfer note", PREVIEW_TRANSFER.orderCode],
+    [t("checkout.bank"), t("checkout.sampleBank")],
+    [t("checkout.accountName"), PREVIEW_TRANSFER.accountName],
+    [t("checkout.accountNumber"), PREVIEW_TRANSFER.accountNumber],
+    [t("checkout.amount"), formatVnd(plan.priceVnd, locale)],
+    [t("checkout.transferNote"), PREVIEW_TRANSFER.orderCode],
   ];
 
   return (
@@ -64,26 +65,25 @@ export function Checkout() {
         href="/vip"
         className="inline-flex min-h-11 items-center gap-2 self-start text-[15px] font-medium text-muted no-underline hover:text-fg"
       >
-        <ChevronLeftIcon size={16} /> All plans
+        <ChevronLeftIcon size={16} /> {t("checkout.allPlans")}
       </Link>
 
       <PreviewNotice>
-        Payments are not live yet. This shows how checkout will work. No order is created and the QR
-        code below is a placeholder, not a real bank account.
-        {IS_DEMO ? " In this demo, “I've paid” simulates the payment so you can try VIP." : ""}
+        {t("checkout.notice")}
+        {IS_DEMO ? ` ${t("checkout.demoNotice")}` : ""}
       </PreviewNotice>
 
       <div className="grid gap-5 md:grid-cols-[1fr_340px]">
         <section className="flex flex-col gap-5 rounded-panel border border-line bg-surface p-5 md:p-7">
           <div
             role="tablist"
-            aria-label="Payment method"
+            aria-label={t("checkout.method")}
             className="flex gap-1.5 rounded-full border border-line bg-canvas p-[5px]"
           >
             {(
               [
-                ["transfer", "Bank transfer (QR)"],
-                ["paypal", "PayPal / card"],
+                ["transfer", t("checkout.tabTransfer")],
+                ["paypal", t("checkout.tabPaypal")],
               ] as const
             ).map(([key, label]) => (
               <button
@@ -108,7 +108,7 @@ export function Checkout() {
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
               <div className="flex flex-col items-center gap-2">
                 <PlaceholderQr />
-                <span className="text-xs text-muted">Scan with your banking app</span>
+                <span className="text-xs text-muted">{t("checkout.scan")}</span>
               </div>
               <div className="flex flex-1 flex-col gap-4">
                 <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 text-[15px]">
@@ -119,52 +119,47 @@ export function Checkout() {
                     </div>
                   ))}
                 </dl>
-                <p className="text-sm text-fg-soft">
-                  Include the transfer note exactly. VIP turns on automatically within a minute of
-                  the payment arriving. You can keep this page open.
-                </p>
+                <p className="text-sm text-fg-soft">{t("checkout.instructions")}</p>
                 <p className="text-sm" aria-live="polite">
-                  Order expires in{" "}
+                  {t("checkout.expires")}{" "}
                   <span className="font-bold text-vip tabular-nums">{formatClock(left)}</span>
                 </p>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <p className="text-lg font-bold">Card and PayPal payments are coming later</p>
-              <p className="max-w-sm text-sm text-muted">
-                For international viewers. Until then, VIP can be bought by bank transfer.
-              </p>
+              <p className="text-lg font-bold">{t("checkout.laterTitle")}</p>
+              <p className="max-w-sm text-sm text-muted">{t("checkout.laterText")}</p>
             </div>
           )}
         </section>
 
         <aside className="flex flex-col gap-4 rounded-panel border border-vip-line bg-vip-panel p-5 md:p-6">
           <span className="text-[13px] font-extrabold tracking-[0.1em] text-vip">
-            ORDER SUMMARY
+            {t("checkout.summary")}
           </span>
-          <p className="text-2xl font-extrabold">VIP · {plan.name}</p>
+          <p className="text-2xl font-extrabold">
+            {t("checkout.planLine", { name: t("vip.months", { n: plan.months }) })}
+          </p>
           <dl className="grid grid-cols-[1fr_auto] gap-y-2 text-[15px]">
-            <dt className="text-muted">Price</dt>
+            <dt className="text-muted">{t("checkout.price")}</dt>
             <dd className="font-semibold">{plan.priceUsd}</dd>
-            <dt className="text-muted">Bank transfer</dt>
-            <dd className="font-semibold">{formatVnd(plan.priceVnd)}</dd>
-            <dt className="text-muted">Adds</dt>
-            <dd className="font-semibold">{plan.days} days</dd>
+            <dt className="text-muted">{t("checkout.transfer")}</dt>
+            <dd className="font-semibold">{formatVnd(plan.priceVnd, locale)}</dd>
+            <dt className="text-muted">{t("checkout.adds")}</dt>
+            <dd className="font-semibold">{t("vip.days", { n: plan.days })}</dd>
           </dl>
           <p className="text-sm text-fg-soft">
-            {session.user.is_vip
-              ? "Added on top of your current VIP, so you don't lose any days."
-              : "Starts the moment payment goes through. No automatic renewal."}
+            {session.user.is_vip ? t("checkout.stackNote") : t("checkout.startNote")}
           </p>
           {IS_DEMO ? (
             demoState === "done" ? (
               <div className="mt-auto flex flex-col gap-3" role="status">
                 <p className="rounded-input border border-success/35 bg-success/10 px-3 py-2 text-sm text-success">
-                  Demo payment received. VIP is now on for {plan.days} days.
+                  {t("checkout.demoDone", { n: plan.days })}
                 </p>
                 <ButtonLink href="/browse" variant="vip">
-                  Start watching
+                  {t("checkout.startWatching")}
                 </ButtonLink>
               </div>
             ) : (
@@ -183,26 +178,24 @@ export function Checkout() {
                     }
                   }}
                 >
-                  {demoState === "busy" ? "Processing…" : "I've paid (demo)"}
+                  {demoState === "busy" ? t("checkout.processing") : t("checkout.paidDemo")}
                 </Button>
                 {demoState === "error" ? (
                   <p role="alert" className="text-center text-sm text-error-soft">
-                    Couldn&apos;t add VIP. Please try again.
+                    {t("checkout.addFailed")}
                   </p>
                 ) : null}
-                <p className="text-center text-xs text-muted">
-                  Demo only: no money moves. This simulates the payment arriving.
-                </p>
+                <p className="text-center text-xs text-muted">{t("checkout.demoOnly")}</p>
               </>
             )
           ) : (
             <Button variant="vip" disabled className="mt-auto">
-              Waiting for payment…
+              {t("checkout.waiting")}
             </Button>
           )}
           <p className="text-center text-xs text-muted">
-            By paying you agree to the <Link href="/terms">Terms</Link> and{" "}
-            <Link href="/refunds">Refund Policy</Link>.
+            {t("checkout.agree")} <Link href="/terms">{t("checkout.terms")}</Link> {t("auth.and")}{" "}
+            <Link href="/refunds">{t("footer.refunds")}</Link>.
           </p>
         </aside>
       </div>
@@ -212,6 +205,7 @@ export function Checkout() {
 
 /** Hình giữ chỗ trông giống mã QR, cố ý KHÔNG quét được (không có ô định vị chuẩn, có chữ SAMPLE). */
 function PlaceholderQr() {
+  const t = useT();
   const cells: Array<[number, number]> = [];
   let seed = 7;
   for (let y = 0; y < 21; y++)
@@ -223,7 +217,7 @@ function PlaceholderQr() {
     <div
       className="relative rounded-card bg-white p-3"
       role="img"
-      aria-label="Sample QR code placeholder"
+      aria-label={t("checkout.qrAria")}
     >
       <svg
         width="168"
@@ -238,7 +232,7 @@ function PlaceholderQr() {
       </svg>
       <span className="absolute inset-0 flex items-center justify-center">
         <span className="rotate-[-18deg] rounded-md border-2 border-accent bg-white/90 px-2.5 py-1 text-sm font-black tracking-[0.2em] text-accent">
-          SAMPLE
+          {t("checkout.sample")}
         </span>
       </span>
     </div>

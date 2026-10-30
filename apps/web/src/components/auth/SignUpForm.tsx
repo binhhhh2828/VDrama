@@ -5,7 +5,10 @@ import { useSession } from "@/components/session/SessionProvider";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { api } from "@/lib/api/client";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText, fieldErrorText } from "@/lib/i18n/api-errors";
+import type { T } from "@/lib/i18n/translate";
 import { FormAlert } from "./AuthTabs";
 import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
@@ -16,19 +19,19 @@ type Errors = Partial<Record<"display_name" | "email" | "password", string>>;
 const PASSWORD_MIN = 8;
 
 /** Kiểm tra nhanh trên trình duyệt (API vẫn kiểm tra lại đầy đủ). */
-function validate(v: { name: string; email: string; password: string }): Errors {
+function validate(v: { name: string; email: string; password: string }, t: T): Errors {
   const errors: Errors = {};
-  if (!v.name.trim()) errors.display_name = "Tell us what to call you.";
+  if (!v.name.trim()) errors.display_name = t("auth.nameRequired");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()))
-    errors.email = "Enter a valid email address.";
-  if (v.password.length < PASSWORD_MIN)
-    errors.password = `Use at least ${PASSWORD_MIN} characters.`;
+    errors.email = t("fieldErrors.emailInvalid");
+  if (v.password.length < PASSWORD_MIN) errors.password = t("fieldErrors.passwordShort");
   else if (v.password.trim().toLowerCase() === v.email.trim().toLowerCase())
-    errors.password = "Your password can't be the same as your email.";
+    errors.password = t("auth.passwordSameAsEmail");
   return errors;
 }
 
 export function SignUpForm({ next }: { next: string }) {
+  const t = useT();
   const session = useSession();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -46,7 +49,7 @@ export function SignUpForm({ next }: { next: string }) {
       email: String(form.get("email") ?? ""),
       password: String(form.get("password") ?? ""),
     };
-    const local = validate(values);
+    const local = validate(values, t);
     setErrors(local);
     setFormError(null);
     if (Object.keys(local).length) {
@@ -70,22 +73,22 @@ export function SignUpForm({ next }: { next: string }) {
     } catch (err) {
       setBusy(false);
       if (!(err instanceof ApiError)) {
-        setFormError("Couldn't create your account. Please try again.");
+        setFormError(t("auth.createFailed"));
         return;
       }
       if (err.code === "email_taken") {
-        setErrors({ email: err.userMessage });
+        setErrors({ email: apiErrorText(err, t) });
       } else if (err.code === "validation_error" && err.fields.length) {
         const fieldErrors: Errors = {};
         for (const f of err.fields) {
           const key = f.field as keyof Errors;
           if (key in { display_name: 1, email: 1, password: 1 })
-            fieldErrors[key] = err.fieldError(f.field);
+            fieldErrors[key] = fieldErrorText(f, t);
         }
         if (Object.keys(fieldErrors).length) setErrors(fieldErrors);
-        else setFormError(err.userMessage);
+        else setFormError(apiErrorText(err, t));
       } else {
-        setFormError(err.userMessage);
+        setFormError(apiErrorText(err, t));
       }
     }
   }
@@ -96,33 +99,33 @@ export function SignUpForm({ next }: { next: string }) {
       <Field
         id="signup-name"
         name="display_name"
-        label="Display name"
+        label={t("auth.displayName")}
         autoComplete="nickname"
         maxLength={100}
-        placeholder="How we should call you"
+        placeholder={t("auth.namePlaceholder")}
         error={errors.display_name}
       />
       <Field
         id="signup-email"
         name="email"
-        label="Email"
+        label={t("auth.email")}
         type="email"
         autoComplete="email"
-        placeholder="you@example.com"
+        placeholder={t("auth.emailPlaceholder")}
         error={errors.email}
       />
       <Field
         id="signup-password"
         name="password"
-        label="Password"
+        label={t("auth.password")}
         type="password"
         autoComplete="new-password"
         maxLength={128}
-        hint={`At least ${PASSWORD_MIN} characters.`}
+        hint={t("auth.passwordHint", { n: PASSWORD_MIN })}
         error={errors.password}
       />
       <Button type="submit" disabled={busy} aria-busy={busy} className="h-[52px]">
-        {busy ? "Creating account…" : "Create account"}
+        {busy ? t("auth.creating") : t("gate.createAccount")}
       </Button>
     </form>
   );

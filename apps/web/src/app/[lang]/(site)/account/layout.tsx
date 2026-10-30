@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AccountHeading } from "@/components/account/AccountHeading";
 import { AccountTabs } from "@/components/account/AccountTabs";
 import { RequireUser } from "@/components/account/RequireUser";
 
@@ -12,7 +13,7 @@ export const instant = false;
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 pt-6 pb-16 sm:px-6 md:gap-8 md:pt-10">
-      <h1 className="text-[28px] font-extrabold tracking-[-0.01em] md:text-[36px]">My account</h1>
+      <AccountHeading />
       <AccountTabs />
       <RequireUser>{children}</RequireUser>
     </main>

@@ -1,6 +1,6 @@
 # Plan: Đa ngôn ngữ giao diện (English, Tiếng Việt) và menu đổi ngôn ngữ
 
-> Trạng thái: đã duyệt 2026-10-30; Bước 1–5 xong
+> Trạng thái: đã duyệt 2026-10-30; Bước 1–6 xong
 > Bối cảnh: sếp hướng tới thị trường nước ngoài (mặc định tiếng Anh), nhưng trước mắt cần bản tiếng Việt để nhà đầu tư người Việt xem hiểu. Giao diện người xem: `docs/plans/gd3-netshort-ui.md`. Ảnh poster: `docs/plans/gd4-poster-images.md`.
 
 ## Mục tiêu và phạm vi
@@ -55,7 +55,7 @@ Mỗi bước giữ giao diện chạy được và có commit riêng.
 - [x] **Bước 5: Dịch trang xem phim** — xong 2026-10-30: trang chủ (hero, các hàng, Continue watching), Series (`/browse`: bộ lọc, sắp xếp, Load more), tìm kiếm, giới thiệu phim (trạng thái, tóm tắt quyền xem, danh sách tập), trang xem (player, chuyển tập, thông tin, các màn khóa/đăng nhập/VIP, thẻ tập kế), bảng danh sách tập, tên thể loại theo `slug` (`GenreName`/`genreLabel`), tên tập mặc định "Episode N" → "Tập N", tiêu đề tab và `hreflang` (`alternates.languages`) của trang phim/tập. Server component lấy `t` từ `params.lang` (`getServerT`). Không tràn ngang ở 320 px (5 trang `/vi`). Chưa dịch (dữ liệu, không phải giao diện): tên/mô tả của 6 phim demo cuối, review mẫu.
   - Việc cần làm: trang chủ, Series, tìm kiếm, giới thiệu phim, trang xem, danh sách tập, review, tên thể loại theo `slug`.
   - Tiêu chí hoàn thành: như bước 4 cho nhóm trang này; không tràn ngang ở 4 độ rộng (chữ tiếng Việt thường dài hơn).
-- [ ] **Bước 6: Dịch tài khoản, đăng nhập, VIP, News và các trang tĩnh**
+- [x] **Bước 6: Dịch tài khoản, đăng nhập, VIP, News và các trang tĩnh** — xong 2026-10-30: Account (thẻ VIP, Ví, hàng liên kết, xóa tài khoản), Danh sách của tôi, Lịch sử xem, đăng nhập/đăng ký (cả khung 2 cột desktop), quên/đặt lại mật khẩu, xác thực email, tài khoản demo, trang VIP + FAQ + thanh gói của bạn, thanh toán, News (bài mẫu), Download, Contact, Terms/Privacy/Refunds (`lib/legal-content.ts`, bản tiếng Việt có ghi chú "bản dịch tham khảo"). Tiêu đề tab của các trang này theo ngôn ngữ (`titleMetadata`). `lib/copy.ts` đã xóa (mọi chữ nằm trong từ điển). Luồng demo ở `/vi`: đăng nhập → Account → VIP → thanh toán demo chạy được. Thông báo lỗi trong biểu mẫu dùng `apiErrorText`/`fieldErrorText`.
   - Việc cần làm: Account, Sign in/up, quên mật khẩu, VIP/checkout (giữ nhãn PREVIEW), News, Download, Contact, Terms/Privacy/Refunds (bản nháp có ghi chú).
   - Tiêu chí hoàn thành: như bước 4; luồng demo khách → đăng nhập → VIP → xem tập chạy được ở cả hai ngôn ngữ.
 - [ ] **Bước 7: Quét toàn site và tài liệu**

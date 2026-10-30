@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { api } from "@/lib/api/client";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ApiError } from "@/lib/api/errors";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, IS_DEMO } from "@/lib/demo/config";
 import { useRouter } from "@/components/i18n/navigation";
 
 /** Khung "tài khoản demo" ở trang đăng nhập: bấm một dòng là đăng nhập luôn. Chỉ có ở bản demo. */
 export function DemoAccounts({ next }: { next: string }) {
+  const t = useT();
   const session = useSession();
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -23,7 +26,7 @@ export function DemoAccounts({ next }: { next: string }) {
       router.replace(next);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't sign in.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("auth.signInFailed"));
       setBusy(null);
     }
   }
@@ -34,10 +37,10 @@ export function DemoAccounts({ next }: { next: string }) {
       className="flex flex-col gap-3 rounded-card border border-vip/35 bg-vip/8 p-4"
     >
       <h2 id="demo-accounts-h" className="text-sm font-extrabold tracking-[0.08em] text-vip">
-        DEMO ACCOUNTS
+        {t("demoAccounts.title")}
       </h2>
       <p className="text-sm text-fg-soft">
-        Tap one to sign in. Or type its email with the password{" "}
+        {t("demoAccounts.tap")}{" "}
         <code className="rounded bg-fg/10 px-1.5 py-0.5 font-mono text-fg">{DEMO_PASSWORD}</code>.
       </p>
       {error ? (
@@ -55,10 +58,10 @@ export function DemoAccounts({ next }: { next: string }) {
               className="flex min-h-14 w-full flex-col items-start justify-center gap-0.5 rounded-input border border-line bg-canvas px-4 py-2 text-left hover:border-vip/60 disabled:opacity-60"
             >
               <span className="text-[15px] font-bold text-fg">
-                {busy === a.email ? "Signing in…" : a.role}
+                {busy === a.email ? t("auth.signingIn") : t(`demoAccounts.${a.id}`)}
                 <span className="ml-2 font-normal text-muted">{a.email}</span>
               </span>
-              <span className="text-xs text-muted">{a.note}</span>
+              <span className="text-xs text-muted">{t(`demoAccounts.${a.id}Note`)}</span>
             </button>
           </li>
         ))}

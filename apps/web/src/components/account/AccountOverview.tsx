@@ -23,17 +23,19 @@ import {
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { User } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
+import type { TKey } from "@/lib/i18n/translate";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
 import { formatDate } from "@/lib/format";
 import { DeleteAccountRow } from "./DeleteAccountRow";
 import { Coin, TopUpSheet } from "./TopUpSheet";
 import { Link, useRouter } from "@/components/i18n/navigation";
 
 /** Quyền lợi VIP ở thẻ vàng, mỗi mục có biểu tượng riêng như NetShort (AD và HD là khung chữ). */
-const VIP_PERKS_SHORT: { label: string; icon: ReactNode }[] = [
-  { label: "All episodes", icon: <PlaySquareIcon size={20} strokeWidth={2.2} /> },
-  { label: "Ad-free", icon: <PerkTag>AD</PerkTag> },
-  { label: "1080P HD", icon: <PerkTag>HD</PerkTag> },
-  { label: "2 devices", icon: <LayersIcon size={20} strokeWidth={2.2} /> },
+const VIP_PERKS_SHORT: { key: TKey; icon: ReactNode }[] = [
+  { key: "account.perkEpisodes", icon: <PlaySquareIcon size={20} strokeWidth={2.2} /> },
+  { key: "account.perkAdFree", icon: <PerkTag>AD</PerkTag> },
+  { key: "account.perkHd", icon: <PerkTag>HD</PerkTag> },
+  { key: "account.perkDevices", icon: <LayersIcon size={20} strokeWidth={2.2} /> },
 ];
 
 function PerkTag({ children }: { children: ReactNode }) {
@@ -50,6 +52,7 @@ function PerkTag({ children }: { children: ReactNode }) {
  * Khách vẫn xem được trang này; các hàng cần đăng nhập chỉ hiện sau khi đăng nhập.
  */
 export function AccountOverview() {
+  const t = useT();
   const session = useSession();
   const vipSheet = useVipSheet();
   const router = useRouter();
@@ -76,29 +79,29 @@ export function AccountOverview() {
         {user ? (
           <>
             <Row href="/account/list" icon={BookmarkIcon}>
-              My List
+              {t("nav.myList")}
             </Row>
             <Row href="/account/history" icon={HistoryIcon}>
-              Watch history
+              {t("footer.history")}
             </Row>
           </>
         ) : null}
         <Row href="/contact" icon={HeadsetIcon}>
-          Contact us
+          {t("footer.contact")}
         </Row>
         {user && !user.email_verified ? (
           <Row href="/verify-email" icon={InfoIcon}>
-            Verify email
+            {t("account.verifyEmail")}
           </Row>
         ) : null}
         {user ? (
           <Row href="/forgot-password" icon={LockIcon}>
-            Change password
+            {t("account.changePassword")}
           </Row>
         ) : null}
         {user?.role === "admin" ? (
           <Row href="/admin" icon={GridIcon}>
-            Admin
+            {t("nav.admin")}
           </Row>
         ) : null}
         {user ? <DeleteAccountRow /> : null}
@@ -115,14 +118,14 @@ export function AccountOverview() {
               router.refresh();
             }}
           >
-            <LogOutIcon size={20} /> Sign out
+            <LogOutIcon size={20} /> {t("account.signOut")}
           </Button>
         ) : (
           <ButtonLink
             href="/signin?next=%2Faccount"
             className="h-12 w-full max-w-[400px] bg-linear-to-r from-accent to-[#fe4f32] text-lg"
           >
-            Sign in
+            {t("account.signIn")}
           </ButtonLink>
         )}
       </div>
@@ -131,6 +134,7 @@ export function AccountOverview() {
 }
 
 function Profile({ user }: { user: User | null }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const uid = user ? `UID:${user.id}` : null;
 
@@ -157,14 +161,14 @@ function Profile({ user }: { user: User | null }) {
       </span>
       <div className="min-w-0">
         <p className="truncate text-2xl leading-8 font-semibold">
-          {user ? user.display_name : "Visitor"}
+          {user ? user.display_name : t("account.visitor")}
         </p>
         {uid ? (
           <p className="flex items-center text-[13px] text-muted">
             {uid}
             <button
               type="button"
-              aria-label={copied ? "Copied" : "Copy account ID"}
+              aria-label={copied ? t("account.copied") : t("account.copyId")}
               onClick={copy}
               className="hit-44 relative ml-2 flex size-6 items-center justify-center text-muted hover:text-fg"
             >
@@ -172,7 +176,7 @@ function Profile({ user }: { user: User | null }) {
             </button>
           </p>
         ) : (
-          <p className="text-[13px] text-muted">Sign in to save your list</p>
+          <p className="text-[13px] text-muted">{t("account.signInToSave")}</p>
         )}
       </div>
     </div>
@@ -181,6 +185,8 @@ function Profile({ user }: { user: User | null }) {
 
 /** Thẻ VIP vàng: "Subscribe" mở bảng VIP; đã là VIP thì ghi ngày hết hạn và nút "Extend". */
 function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
+  const t = useT();
+  const locale = useLocale();
   const isVip = user?.is_vip === true;
   return (
     <section
@@ -193,7 +199,9 @@ function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
             <CrownIcon size={20} strokeWidth={2.2} /> VDrama VIP
           </h2>
           <p className="mt-0.5 text-[13px]">
-            {isVip ? `Active until ${formatDate(user?.vip_expires_at)}` : "Exclusive perks"}
+            {isVip
+              ? t("account.activeUntil", { date: formatDate(user?.vip_expires_at, locale) })
+              : t("account.exclusive")}
           </p>
         </div>
         <button
@@ -201,14 +209,14 @@ function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
           onClick={onOpen}
           className="hit-44 relative h-10 shrink-0 rounded-full bg-vip-ink/90 px-5 text-base font-medium text-vip"
         >
-          {isVip ? "Extend" : "Subscribe"}
+          {isVip ? t("account.extend") : t("account.subscribe")}
         </button>
       </div>
       <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-[14px] bg-white/25 px-3.5 py-2.5 text-[13px]">
         {VIP_PERKS_SHORT.map((perk) => (
-          <li key={perk.label} className="flex items-center gap-2">
+          <li key={perk.key} className="flex items-center gap-2">
             <span className="flex w-5 shrink-0 justify-center">{perk.icon}</span>
-            <span className="truncate">{perk.label}</span>
+            <span className="truncate">{t(perk.key)}</span>
           </li>
         ))}
       </ul>
@@ -218,12 +226,13 @@ function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
 
 /** Thẻ "My Wallet" theo NetShort: số xu, số xu thưởng và nút Top Up mở bảng nạp xu (PREVIEW, chưa bán xu). */
 function WalletCard() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <section aria-labelledby="wallet-h" className="mt-3 rounded-[20px] bg-wallet p-[14px] pb-4">
       <div className="flex items-center justify-between gap-3 px-1">
         <h2 id="wallet-h" className="text-lg leading-7 font-semibold">
-          My Wallet
+          {t("account.wallet")}
         </h2>
         <Button
           variant="gradient"
@@ -231,12 +240,12 @@ function WalletCard() {
           className="h-10 px-5 text-base"
           onClick={() => setOpen(true)}
         >
-          Top Up
+          {t("account.topUp")}
         </Button>
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-3 px-1">
-        <Stat value={0} label="Coins" />
-        <Stat value={0} label="Bonus" />
+        <Stat value={0} label={t("account.coins")} />
+        <Stat value={0} label={t("account.bonus")} />
       </dl>
       <TopUpSheet open={open} onClose={() => setOpen(false)} />
     </section>

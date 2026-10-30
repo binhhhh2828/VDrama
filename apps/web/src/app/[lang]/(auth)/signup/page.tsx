@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { titleMetadata } from "@/lib/i18n/server";
 import { Suspense } from "react";
 import { AuthFlow } from "@/components/auth/AuthFlow";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { safeNext } from "@/lib/safe-next";
 
-export const metadata: Metadata = { title: "Create account", robots: { index: false } };
+export const generateMetadata = titleMetadata("auth.signUpMeta", { robots: { index: false } });
 
 export default function SignUpPage({ searchParams }: PageProps<"/[lang]/signup">) {
   return (

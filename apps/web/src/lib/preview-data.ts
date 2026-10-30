@@ -13,6 +13,8 @@ export type PreviewPlan = {
   priceVnd: number;
   period: string;
   note: string;
+  /** % tiết kiệm so với mua theo tháng (hiện trong ghi chú gói). */
+  savePercent?: number;
   featured?: boolean;
 };
 
@@ -36,6 +38,7 @@ export const PREVIEW_PLANS: PreviewPlan[] = [
     priceVnd: 259_000,
     period: "3 months",
     note: "90 days · save 13%",
+    savePercent: 13,
     featured: true,
   },
   {
@@ -47,6 +50,7 @@ export const PREVIEW_PLANS: PreviewPlan[] = [
     priceVnd: 899_000,
     period: "year",
     note: "365 days · save 25%",
+    savePercent: 25,
   },
 ];
 

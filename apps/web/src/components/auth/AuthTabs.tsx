@@ -1,15 +1,19 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 
 /** Khung nội dung cho các trang phụ của nhóm (auth) (quên mật khẩu, đặt lại, xác thực email). */
 export function AuthPage({ children }: { children: ReactNode }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-6 px-5 pt-4 pb-10 md:p-0">
       <Link
         href="/"
         className="text-sm font-medium text-muted no-underline hover:text-fg md:hidden"
       >
-        ← VDrama
+        {t("auth.backTo")}
       </Link>
       {children}
     </div>
