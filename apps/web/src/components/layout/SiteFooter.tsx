@@ -1,5 +1,6 @@
 import { ChevronDownIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
+import { LanguageRow } from "@/components/i18n/LanguageSheet";
 import { FOOTER_GROUPS } from "./nav";
 import { Link } from "@/components/i18n/navigation";
 
@@ -36,6 +37,7 @@ export function SiteFooter() {
               </ul>
             </details>
           ))}
+          <LanguageRow className="min-h-11 text-sm text-fg" />
         </div>
         <p className="pt-6 text-center text-xs text-muted">{copy.footer.rights}</p>
       </div>

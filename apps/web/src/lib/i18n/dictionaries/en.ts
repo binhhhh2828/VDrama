@@ -7,6 +7,7 @@ export const en = {
   language: {
     label: "Language",
     choose: "Choose language",
+    close: "Close",
   },
   nav: {
     home: "Home",

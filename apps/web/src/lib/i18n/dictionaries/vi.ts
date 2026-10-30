@@ -5,6 +5,7 @@ export const vi: Dictionary = {
   language: {
     label: "Ngôn ngữ",
     choose: "Chọn ngôn ngữ",
+    close: "Đóng",
   },
   nav: {
     home: "Trang chủ",

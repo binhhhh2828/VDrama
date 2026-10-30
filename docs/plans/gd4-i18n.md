@@ -1,6 +1,6 @@
 # Plan: Đa ngôn ngữ giao diện (English, Tiếng Việt) và menu đổi ngôn ngữ
 
-> Trạng thái: đã duyệt 2026-10-30; Bước 1–2 xong
+> Trạng thái: đã duyệt 2026-10-30; Bước 1–3 xong
 > Bối cảnh: sếp hướng tới thị trường nước ngoài (mặc định tiếng Anh), nhưng trước mắt cần bản tiếng Việt để nhà đầu tư người Việt xem hiểu. Giao diện người xem: `docs/plans/gd3-netshort-ui.md`. Ảnh poster: `docs/plans/gd4-poster-images.md`.
 
 ## Mục tiêu và phạm vi
@@ -46,7 +46,7 @@ Mỗi bước giữ giao diện chạy được và có commit riêng.
 - [x] **Bước 2: Định tuyến theo ngôn ngữ (vẫn toàn tiếng Anh)** — xong 2026-10-30: route người xem nằm trong `app/[lang]/` (layout gốc có `<html lang>`), admin và `/dev` chuyển vào nhóm `(internal)` có layout gốc riêng (chỉ tiếng Anh, URL không đổi); `proxy.ts` + `lib/i18n/routing.ts` (rewrite `/…` → `/en/…`, `/en/…` → 308 về không tiền tố, trình duyệt/cookie tiếng Việt → 307 sang `/vi/…`); `components/i18n/` có `I18nProvider` (`useLocale`, `useT`) và `Link`/`useRouter`/`usePathname` bọc (test chặn dùng `next/link` thô); `[lang]/[...rest]` để 404 hiện đúng ngôn ngữ. Khác plan: bỏ `app/not-found.tsx` gốc (chuyển vào `[lang]`), hreflang chỉ đặt ở sitemap (mỗi mục kèm `alternates.languages`) chứ chưa đặt thẻ ở từng trang, robots chặn trang riêng tư ở cả hai ngôn ngữ. Đã thử với server thật: 41 route × 2 ngôn ngữ đều 200, đăng nhập ở `/vi` quay về `/vi/account`.
   - Việc cần làm: chuyển route vào `app/[lang]`, `proxy.ts` (rewrite/redirect, cookie, `Accept-Language`), `generateStaticParams`, `<html lang>`, `Link`/router bọc, `hreflang` + sitemap hai ngôn ngữ; bản demo/`next.config` vẫn chạy.
   - Tiêu chí hoàn thành: mọi route cũ vẫn mở được ở địa chỉ cũ; `/vi/...` mở được (chữ còn tiếng Anh); `/en/x` chuyển về `/x`; test proxy (có/không cookie, các `Accept-Language`, đường dẫn tĩnh như `/_next`, `/demo/...` không bị đụng); `pnpm build` pass; không còn `next/link` thô ngoài admin.
-- [ ] **Bước 3: Menu đổi ngôn ngữ**
+- [x] **Bước 3: Menu đổi ngôn ngữ** — xong 2026-10-30: `components/i18n/LanguageSheet.tsx` (bảng chọn dạng bottom sheet, tên ngôn ngữ viết bằng chính ngôn ngữ đó, có tick) và `LanguageRow` đặt cuối ngăn kéo menu và trong footer; chọn thì ghi cookie `NEXT_LOCALE` 1 năm rồi chuyển sang cùng trang ở ngôn ngữ kia (giữ `?query` và `#mục`). Font đổi sang **Be Vietnam Pro** cho cả hai ngôn ngữ (`lib/site-fonts.ts`, biến `--font-body`); đã xác nhận Poppins không có bộ vietnamese. Đã thử: `/series/x` ↔ `/vi/series/x`, cookie đúng, không tràn ngang ở 320 px (5 trang `/vi`).
   - Việc cần làm: `LanguageSheet` (bảng chọn dạng bottom sheet như bảng VIP), dòng trong ngăn kéo menu và footer, ghi cookie, giữ nguyên trang đang xem; đổi font.
   - Tiêu chí hoàn thành: bấm đổi thì URL và cookie đổi đúng, quay lại trang cũ đúng ngôn ngữ; kiểm tra ở 320/390/440 px.
 - [ ] **Bước 4: Dịch phần khung dùng chung**

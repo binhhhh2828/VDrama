@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import { activeHref } from "./nav";
+import { LanguageRow } from "@/components/i18n/LanguageSheet";
 import { Link, usePathname } from "@/components/i18n/navigation";
 
 type Item = { href: string; label: string; Icon: ComponentType<{ size?: number }> };
@@ -155,6 +156,7 @@ export function MenuDrawer() {
             </Suspense>
           </ul>
         </nav>
+        <LanguageRow className="h-[72px] border-t border-line px-3.5 text-base" />
       </dialog>
     </>
   );

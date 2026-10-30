@@ -3,7 +3,7 @@
 /* Hệ thiết kế VDrama theo bố cục NetShort mobile (docs/design.md, docs/plans/gd3-netshort-ui.md).
    Chỉ có giao diện tối. */
 @theme {
-  --font-sans: var(--font-poppins), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --color-canvas: #141414;
   --color-canvas-black: #000000;

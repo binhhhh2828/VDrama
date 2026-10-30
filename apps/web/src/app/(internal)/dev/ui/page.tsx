@@ -94,7 +94,7 @@ export default async function DevUiPage() {
         </div>
       </Section>
 
-      <Section title="Type (Poppins)">
+      <Section title="Type (Be Vietnam Pro)">
         <div className="flex flex-col gap-4">
           <span className="text-[28px] leading-tight font-bold">
             Explore genres &amp; short dramas

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AppProviders } from "@/components/layout/AppProviders";
 import { isLocale, LOCALES } from "@/lib/i18n/config";
-import { poppins } from "@/lib/site-fonts";
+import { bodyFont } from "@/lib/site-fonts";
 import { siteMetadata, siteViewport } from "@/lib/site-metadata";
 import "../globals.css";
 
@@ -19,7 +19,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   return (
-    <html lang={lang} className={`${poppins.variable} h-full`}>
+    <html lang={lang} className={`${bodyFont.variable} h-full`}>
       <body className="flex min-h-full flex-col font-sans">
         <AppProviders locale={lang}>{children}</AppProviders>
       </body>
