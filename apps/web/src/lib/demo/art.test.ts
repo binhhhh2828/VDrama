@@ -7,6 +7,8 @@ import rawData from "./data.json";
 import { demoExtras, demoExtrasSlugs } from "./extras";
 
 const series = (rawData as unknown as { series: SeriesDetail[] }).series;
+const episodes = (rawData as unknown as { episodes: Record<string, { thumbnail_url: string }[]> })
+  .episodes;
 
 /** Đọc kích thước từ URL picsum `/seed/<seed>/<w>/<h>`. */
 const size = (url: string) => {
@@ -32,15 +34,27 @@ describe("ảnh demo", () => {
       expect(s.poster_detail_url).toBe(demoPosterDetailUrl(s.slug));
       expect(s.banner_url).toBe(demoHeroUrl(s.slug));
       for (const url of [s.poster_url, s.poster_detail_url, s.banner_url]) {
-        expect(existsSync(publicFile(url!)), url!).toBe(true);
+        // Ảnh giữ chỗ picsum nằm trên mạng; ảnh poster thật phải có trong public/.
+        if (!url!.startsWith("https://")) expect(existsSync(publicFile(url!)), url!).toBe(true);
       }
     }
   });
 
-  it("5 poster được xoay vòng cho các phim demo", () => {
-    const posters = series.map((s) => s.poster_url);
-    expect(new Set(posters).size).toBe(5);
-    expect(posters[5]).toBe(posters[0]);
+  it("thumbnail mọi tập là poster dọc của phim (phim dọc, không dùng ảnh ngang)", () => {
+    for (const s of series) {
+      for (const ep of episodes[s.slug] ?? []) {
+        expect(ep.thumbnail_url, s.slug).toBe(s.poster_url);
+      }
+    }
+  });
+
+  it("5 phim công khai mỗi phim một poster riêng; bản nháp dùng ảnh giữ chỗ", () => {
+    const published = series.filter((s) => s.is_published);
+    expect(published).toHaveLength(5);
+    expect(new Set(published.map((s) => s.poster_url)).size).toBe(5);
+    for (const s of series.filter((x) => !x.is_published)) {
+      expect(s.poster_url).toMatch(/^https:\/\/picsum\.photos\//);
+    }
   });
 });
 

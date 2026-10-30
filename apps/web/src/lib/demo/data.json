@@ -28,98 +28,15 @@
   "series": [
     {
       "id": 1,
-      "slug": "virtual-city",
-      "title": "Sói Về Đòi Món Nợ Năm Xưa",
-      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
-      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 16,
-      "published_at": "2026-10-28T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "action",
-          "name": "Action"
-        },
-        {
-          "slug": "fantasy",
-          "name": "Fantasy"
-        }
-      ],
-      "description": "Trả nợ không chỉ bằng tiền, mà bằng cả mạng sống. Chàng trai trở về để đòi lại món nợ năm xưa.",
-      "episode_count": 12,
-      "latest_episode_number": 12,
-      "view_count": 5200,
-      "favorite_count": 2,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
-    },
-    {
-      "id": 2,
-      "slug": "memories-of-you",
-      "title": "Tổng Tài Dành Cả Thanh Xuân Để Yêu Em",
-      "poster_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/thumb.webp",
-      "banner_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 12,
-      "published_at": "2026-10-25T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "romance",
-          "name": "Romance"
-        },
-        {
-          "slug": "drama",
-          "name": "Drama"
-        }
-      ],
-      "description": "Một cuộc gặp gỡ, đổi thay cả đời nhau. Anh dành cả thanh xuân chỉ để yêu một người.",
-      "episode_count": 8,
-      "latest_episode_number": 8,
-      "view_count": 3100,
-      "favorite_count": 0,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/detail.webp"
-    },
-    {
-      "id": 3,
-      "slug": "love-again",
-      "title": "Bí Mật Trong Bóng Tối",
-      "poster_url": "/demo/posters/bi_mat_trong_bong_toi/thumb.webp",
-      "banner_url": "/demo/posters/bi_mat_trong_bong_toi/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "completed",
-      "total_episodes": 10,
-      "published_at": "2026-10-22T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "drama",
-          "name": "Drama"
-        }
-      ],
-      "description": "Sự thật luôn ẩn sau những lời nói dối. Bí mật trong bóng tối dần lộ ra từng chút một.",
-      "episode_count": 10,
-      "latest_episode_number": 10,
-      "view_count": 8700,
-      "favorite_count": 0,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/bi_mat_trong_bong_toi/detail.webp"
-    },
-    {
-      "id": 4,
-      "slug": "parallel-secrets",
+      "slug": "vuong-phi-khong-de-choc",
       "title": "Vương Phi Không Dễ Chọc",
       "poster_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
       "banner_url": "/demo/posters/vuong_phi_khong_de_choc/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
-      "total_episodes": 13,
-      "published_at": "2026-10-19T06:34:37.368783Z",
+      "total_episodes": 16,
+      "published_at": "2026-10-28T06:34:37.368783Z",
       "genres": [
         {
           "slug": "romance",
@@ -131,24 +48,24 @@
         }
       ],
       "description": "Càng yêu càng đau, càng xa càng nhớ. Nàng vương phi nhỏ bé nhưng không dễ chọc.",
-      "episode_count": 8,
-      "latest_episode_number": 8,
-      "view_count": 4400,
-      "favorite_count": 0,
+      "episode_count": 12,
+      "latest_episode_number": 12,
+      "view_count": 5200,
+      "favorite_count": 2,
       "is_published": true,
       "poster_detail_url": "/demo/posters/vuong_phi_khong_de_choc/detail.webp"
     },
     {
-      "id": 5,
-      "slug": "summer-promise",
+      "id": 2,
+      "slug": "nha-co-ba-chang-trai",
       "title": "Nhà Có Ba Chàng Trai",
       "poster_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
       "banner_url": "/demo/posters/nha_co_ba_chang_trai/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
-      "total_episodes": 10,
-      "published_at": "2026-10-16T06:34:37.368783Z",
+      "total_episodes": 12,
+      "published_at": "2026-10-25T06:34:37.368783Z",
       "genres": [
         {
           "slug": "comedy",
@@ -160,103 +77,24 @@
         }
       ],
       "description": "Những cuộc phiêu lưu nhỏ làm nên hạnh phúc lớn của một gia đình có ba cậu con trai và chú chó.",
-      "episode_count": 6,
-      "latest_episode_number": 6,
-      "view_count": 950,
+      "episode_count": 8,
+      "latest_episode_number": 8,
+      "view_count": 3100,
       "favorite_count": 0,
       "is_published": true,
       "poster_detail_url": "/demo/posters/nha_co_ba_chang_trai/detail.webp"
     },
     {
-      "id": 6,
-      "slug": "behind-the-lights",
-      "title": "Behind the Lights",
-      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
-      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 11,
-      "published_at": "2026-10-13T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "comedy",
-          "name": "Comedy"
-        },
-        {
-          "slug": "drama",
-          "name": "Drama"
-        }
-      ],
-      "description": "A shy stylist becomes the only person who knows the pop idol's secret.",
-      "episode_count": 6,
-      "latest_episode_number": 6,
-      "view_count": 2200,
-      "favorite_count": 0,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
-    },
-    {
-      "id": 7,
-      "slug": "sky-of-memories",
-      "title": "Sky of Memories",
-      "poster_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/thumb.webp",
-      "banner_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/hero.webp",
+      "id": 3,
+      "slug": "tien-duyen-ky-ngo",
+      "title": "Tiên Duyên Kỳ Ngộ",
+      "poster_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+      "banner_url": "/demo/posters/tien_duyen_ky_ngo/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "completed",
-      "total_episodes": 5,
-      "published_at": "2026-10-10T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "family",
-          "name": "Family"
-        }
-      ],
-      "description": "Coming home for the new year means facing everything he ran away from.",
-      "episode_count": 5,
-      "latest_episode_number": 5,
-      "view_count": 12000,
-      "favorite_count": 0,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/tong_tai_danh_ca_thanh_xuan_de_yeu_em/detail.webp"
-    },
-    {
-      "id": 8,
-      "slug": "crack-in-time",
-      "title": "Crack in Time",
-      "poster_url": "/demo/posters/bi_mat_trong_bong_toi/thumb.webp",
-      "banner_url": "/demo/posters/bi_mat_trong_bong_toi/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 12,
-      "published_at": "2026-10-07T06:34:37.368783Z",
-      "genres": [
-        {
-          "slug": "action",
-          "name": "Action"
-        }
-      ],
-      "description": "Every night at midnight, one street racer gets ten seconds back.",
-      "episode_count": 8,
-      "latest_episode_number": 8,
-      "view_count": 0,
-      "favorite_count": 0,
-      "is_published": true,
-      "poster_detail_url": "/demo/posters/bi_mat_trong_bong_toi/detail.webp"
-    },
-    {
-      "id": 9,
-      "slug": "faded-moonlight",
-      "title": "Faded Moonlight",
-      "poster_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
-      "banner_url": "/demo/posters/vuong_phi_khong_de_choc/hero.webp",
-      "year": 2026,
-      "country": "Vietnam",
-      "status": "ongoing",
-      "total_episodes": 15,
-      "published_at": "2026-10-04T06:34:37.368783Z",
+      "total_episodes": 10,
+      "published_at": "2026-10-22T06:34:37.368783Z",
       "genres": [
         {
           "slug": "romance",
@@ -267,49 +105,78 @@
           "name": "Fantasy"
         }
       ],
-      "description": "A palace healer must save the prince who sentenced her family.",
-      "episode_count": 11,
-      "latest_episode_number": 11,
-      "view_count": 6100,
+      "description": "Kiếp này kiếp khác, chỉ nguyện bên người. Hai người gặp lại giữa rừng hoa đào và mở ra duyên tiền kiếp.",
+      "episode_count": 10,
+      "latest_episode_number": 10,
+      "view_count": 8700,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/vuong_phi_khong_de_choc/detail.webp"
+      "poster_detail_url": "/demo/posters/tien_duyen_ky_ngo/detail.webp"
     },
     {
-      "id": 10,
-      "slug": "twin-destinies",
-      "title": "Twin Destinies",
-      "poster_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
-      "banner_url": "/demo/posters/nha_co_ba_chang_trai/hero.webp",
+      "id": 4,
+      "slug": "hoa-tuyet-roi-day-troi",
+      "title": "Hoa Tuyết Rơi Đầy Trời",
+      "poster_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+      "banner_url": "/demo/posters/hoa_tuyet_roi_day_troi/hero.webp",
       "year": 2026,
       "country": "Vietnam",
-      "status": "completed",
-      "total_episodes": 6,
-      "published_at": "2026-10-01T06:34:37.368783Z",
+      "status": "ongoing",
+      "total_episodes": 13,
+      "published_at": "2026-10-19T06:34:37.368783Z",
       "genres": [
         {
           "slug": "romance",
           "name": "Romance"
         },
         {
-          "slug": "comedy",
-          "name": "Comedy"
+          "slug": "drama",
+          "name": "Drama"
         }
       ],
-      "description": "Best friends for twenty years. One wedding invitation changes everything.",
-      "episode_count": 6,
-      "latest_episode_number": 6,
-      "view_count": 1500,
+      "description": "Tình yêu này, nguyện gửi vào gió tuyết. Giữa mùa đông lạnh giá, hai trái tim tìm thấy hơi ấm của nhau.",
+      "episode_count": 8,
+      "latest_episode_number": 8,
+      "view_count": 4400,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/nha_co_ba_chang_trai/detail.webp"
+      "poster_detail_url": "/demo/posters/hoa_tuyet_roi_day_troi/detail.webp"
+    },
+    {
+      "id": 5,
+      "slug": "kiem-khach-tinh-duyen",
+      "title": "Kiếm Khách Tình Duyên",
+      "poster_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+      "banner_url": "/demo/posters/kiem_khach_tinh_duyen/hero.webp",
+      "year": 2026,
+      "country": "Vietnam",
+      "status": "ongoing",
+      "total_episodes": 10,
+      "published_at": "2026-10-16T06:34:37.368783Z",
+      "genres": [
+        {
+          "slug": "action",
+          "name": "Action"
+        },
+        {
+          "slug": "romance",
+          "name": "Romance"
+        }
+      ],
+      "description": "Cùng người đi khắp thế gian, dù giông bão cũng chẳng màng. Một kiếm khách và cô gái bước vào cuộc phiêu lưu.",
+      "episode_count": 6,
+      "latest_episode_number": 6,
+      "view_count": 950,
+      "favorite_count": 0,
+      "is_published": true,
+      "poster_detail_url": "/demo/posters/kiem_khach_tinh_duyen/detail.webp"
     },
     {
       "id": 11,
       "slug": "the-one-in-my-dream",
       "title": "The One in My Dream",
-      "poster_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/thumb.webp",
-      "banner_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/hero.webp",
+      "poster_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800",
+      "banner_url": "https://picsum.photos/seed/the-one-in-my-dream-hero/800/1000",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -327,17 +194,17 @@
       "view_count": 0,
       "favorite_count": 0,
       "is_published": false,
-      "poster_detail_url": "/demo/posters/soi_ve_doi_mon_no_nam_xua/detail.webp"
+      "poster_detail_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800"
     }
   ],
   "episodes": {
-    "virtual-city": [
+    "vuong-phi-khong-de-choc": [
       {
         "id": 1,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-1/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "free",
         "published_at": "2026-10-28T07:34:37.368783Z",
         "is_published": true
@@ -347,7 +214,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-2/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "free",
         "published_at": "2026-10-28T08:34:37.368783Z",
         "is_published": true
@@ -357,7 +224,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-3/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T09:34:37.368783Z",
         "is_published": true
@@ -367,7 +234,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-4/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T10:34:37.368783Z",
         "is_published": true
@@ -377,7 +244,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-5/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T11:34:37.368783Z",
         "is_published": true
@@ -387,7 +254,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-6/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T12:34:37.368783Z",
         "is_published": true
@@ -397,7 +264,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-7/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T13:34:37.368783Z",
         "is_published": true
@@ -407,7 +274,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-8/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T14:34:37.368783Z",
         "is_published": true
@@ -417,7 +284,7 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-9/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T15:34:37.368783Z",
         "is_published": true
@@ -427,7 +294,7 @@
         "number": 10,
         "title": "Episode 10",
         "duration_sec": 1270,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-10/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T16:34:37.368783Z",
         "is_published": true
@@ -437,7 +304,7 @@
         "number": 11,
         "title": "Episode 11",
         "duration_sec": 1367,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-11/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T17:34:37.368783Z",
         "is_published": true
@@ -447,19 +314,19 @@
         "number": 12,
         "title": "Episode 12",
         "duration_sec": 1464,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-virtual-city-12/640/360",
+        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T18:34:37.368783Z",
         "is_published": true
       }
     ],
-    "memories-of-you": [
+    "nha-co-ba-chang-trai": [
       {
         "id": 13,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-1/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T07:34:37.368783Z",
         "is_published": true
@@ -469,7 +336,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-2/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T08:34:37.368783Z",
         "is_published": true
@@ -479,7 +346,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-3/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T09:34:37.368783Z",
         "is_published": true
@@ -489,7 +356,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-4/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T10:34:37.368783Z",
         "is_published": true
@@ -499,7 +366,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-5/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T11:34:37.368783Z",
         "is_published": true
@@ -509,7 +376,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-6/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T12:34:37.368783Z",
         "is_published": true
@@ -519,7 +386,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-7/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T13:34:37.368783Z",
         "is_published": true
@@ -529,19 +396,19 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-memories-of-you-8/640/360",
+        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T14:34:37.368783Z",
         "is_published": true
       }
     ],
-    "love-again": [
+    "tien-duyen-ky-ngo": [
       {
         "id": 21,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-1/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "free",
         "published_at": "2026-10-22T07:34:37.368783Z",
         "is_published": true
@@ -551,7 +418,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-2/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "free",
         "published_at": "2026-10-22T08:34:37.368783Z",
         "is_published": true
@@ -561,7 +428,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-3/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T09:34:37.368783Z",
         "is_published": true
@@ -571,7 +438,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-4/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T10:34:37.368783Z",
         "is_published": true
@@ -581,7 +448,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-5/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T11:34:37.368783Z",
         "is_published": true
@@ -591,7 +458,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-6/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T12:34:37.368783Z",
         "is_published": true
@@ -601,7 +468,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-7/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T13:34:37.368783Z",
         "is_published": true
@@ -611,7 +478,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-8/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T14:34:37.368783Z",
         "is_published": true
@@ -621,7 +488,7 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-9/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T15:34:37.368783Z",
         "is_published": true
@@ -631,19 +498,19 @@
         "number": 10,
         "title": "Episode 10",
         "duration_sec": 1270,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-love-again-10/640/360",
+        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T16:34:37.368783Z",
         "is_published": true
       }
     ],
-    "parallel-secrets": [
+    "hoa-tuyet-roi-day-troi": [
       {
         "id": 31,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-1/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T07:34:37.368783Z",
         "is_published": true
@@ -653,7 +520,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-2/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T08:34:37.368783Z",
         "is_published": true
@@ -663,7 +530,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-3/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T09:34:37.368783Z",
         "is_published": true
@@ -673,7 +540,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-4/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T10:34:37.368783Z",
         "is_published": true
@@ -683,7 +550,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-5/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T11:34:37.368783Z",
         "is_published": true
@@ -693,7 +560,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-6/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T12:34:37.368783Z",
         "is_published": true
@@ -703,7 +570,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-7/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T13:34:37.368783Z",
         "is_published": true
@@ -713,7 +580,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-8/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T14:34:37.368783Z",
         "is_published": true
@@ -723,19 +590,19 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-parallel-secrets-9/640/360",
+        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
         "access": "vip",
         "published_at": null,
         "is_published": false
       }
     ],
-    "summer-promise": [
+    "kiem-khach-tinh-duyen": [
       {
         "id": 40,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-1/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "free",
         "published_at": "2026-10-16T07:34:37.368783Z",
         "is_published": true
@@ -745,7 +612,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-2/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "free",
         "published_at": "2026-10-16T08:34:37.368783Z",
         "is_published": true
@@ -755,7 +622,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-3/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T09:34:37.368783Z",
         "is_published": true
@@ -765,7 +632,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-4/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T10:34:37.368783Z",
         "is_published": true
@@ -775,7 +642,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-5/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T11:34:37.368783Z",
         "is_published": true
@@ -785,389 +652,9 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-summer-promise-6/640/360",
+        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T12:34:37.368783Z",
-        "is_published": true
-      }
-    ],
-    "behind-the-lights": [
-      {
-        "id": 46,
-        "number": 1,
-        "title": "Episode 1",
-        "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-1/640/360",
-        "access": "free",
-        "published_at": "2026-10-13T07:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 47,
-        "number": 2,
-        "title": "Episode 2",
-        "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-2/640/360",
-        "access": "free",
-        "published_at": "2026-10-13T08:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 48,
-        "number": 3,
-        "title": "Episode 3",
-        "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-3/640/360",
-        "access": "vip",
-        "published_at": "2026-10-13T09:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 49,
-        "number": 4,
-        "title": "Episode 4",
-        "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-4/640/360",
-        "access": "vip",
-        "published_at": "2026-10-13T10:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 50,
-        "number": 5,
-        "title": "Episode 5",
-        "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-5/640/360",
-        "access": "vip",
-        "published_at": "2026-10-13T11:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 51,
-        "number": 6,
-        "title": "Episode 6",
-        "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-6/640/360",
-        "access": "vip",
-        "published_at": "2026-10-13T12:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 52,
-        "number": 7,
-        "title": "Episode 7",
-        "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-behind-the-lights-7/640/360",
-        "access": "vip",
-        "published_at": null,
-        "is_published": false
-      }
-    ],
-    "sky-of-memories": [
-      {
-        "id": 53,
-        "number": 1,
-        "title": "Episode 1",
-        "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-sky-of-memories-1/640/360",
-        "access": "free",
-        "published_at": "2026-10-10T07:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 54,
-        "number": 2,
-        "title": "Episode 2",
-        "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-sky-of-memories-2/640/360",
-        "access": "free",
-        "published_at": "2026-10-10T08:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 55,
-        "number": 3,
-        "title": "Episode 3",
-        "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-sky-of-memories-3/640/360",
-        "access": "vip",
-        "published_at": "2026-10-10T09:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 56,
-        "number": 4,
-        "title": "Episode 4",
-        "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-sky-of-memories-4/640/360",
-        "access": "vip",
-        "published_at": "2026-10-10T10:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 57,
-        "number": 5,
-        "title": "Episode 5",
-        "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-sky-of-memories-5/640/360",
-        "access": "vip",
-        "published_at": "2026-10-10T11:34:37.368783Z",
-        "is_published": true
-      }
-    ],
-    "crack-in-time": [
-      {
-        "id": 58,
-        "number": 1,
-        "title": "Episode 1",
-        "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-1/640/360",
-        "access": "free",
-        "published_at": "2026-10-07T07:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 59,
-        "number": 2,
-        "title": "Episode 2",
-        "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-2/640/360",
-        "access": "free",
-        "published_at": "2026-10-07T08:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 60,
-        "number": 3,
-        "title": "Episode 3",
-        "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-3/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T09:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 61,
-        "number": 4,
-        "title": "Episode 4",
-        "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-4/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T10:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 62,
-        "number": 5,
-        "title": "Episode 5",
-        "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-5/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T11:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 63,
-        "number": 6,
-        "title": "Episode 6",
-        "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-6/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T12:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 64,
-        "number": 7,
-        "title": "Episode 7",
-        "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-7/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T13:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 65,
-        "number": 8,
-        "title": "Episode 8",
-        "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-crack-in-time-8/640/360",
-        "access": "vip",
-        "published_at": "2026-10-07T14:34:37.368783Z",
-        "is_published": true
-      }
-    ],
-    "faded-moonlight": [
-      {
-        "id": 66,
-        "number": 1,
-        "title": "Episode 1",
-        "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-1/640/360",
-        "access": "free",
-        "published_at": "2026-10-04T07:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 67,
-        "number": 2,
-        "title": "Episode 2",
-        "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-2/640/360",
-        "access": "free",
-        "published_at": "2026-10-04T08:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 68,
-        "number": 3,
-        "title": "Episode 3",
-        "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-3/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T09:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 69,
-        "number": 4,
-        "title": "Episode 4",
-        "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-4/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T10:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 70,
-        "number": 5,
-        "title": "Episode 5",
-        "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-5/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T11:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 71,
-        "number": 6,
-        "title": "Episode 6",
-        "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-6/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T12:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 72,
-        "number": 7,
-        "title": "Episode 7",
-        "duration_sec": 1879,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-7/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T13:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 73,
-        "number": 8,
-        "title": "Episode 8",
-        "duration_sec": 1976,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-8/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T14:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 74,
-        "number": 9,
-        "title": "Episode 9",
-        "duration_sec": 2073,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-9/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T15:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 75,
-        "number": 10,
-        "title": "Episode 10",
-        "duration_sec": 1270,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-10/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T16:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 76,
-        "number": 11,
-        "title": "Episode 11",
-        "duration_sec": 1367,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-faded-moonlight-11/640/360",
-        "access": "vip",
-        "published_at": "2026-10-04T17:34:37.368783Z",
-        "is_published": true
-      }
-    ],
-    "twin-destinies": [
-      {
-        "id": 77,
-        "number": 1,
-        "title": "Episode 1",
-        "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-1/640/360",
-        "access": "free",
-        "published_at": "2026-10-01T07:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 78,
-        "number": 2,
-        "title": "Episode 2",
-        "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-2/640/360",
-        "access": "free",
-        "published_at": "2026-10-01T08:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 79,
-        "number": 3,
-        "title": "Episode 3",
-        "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-3/640/360",
-        "access": "vip",
-        "published_at": "2026-10-01T09:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 80,
-        "number": 4,
-        "title": "Episode 4",
-        "duration_sec": 1588,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-4/640/360",
-        "access": "vip",
-        "published_at": "2026-10-01T10:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 81,
-        "number": 5,
-        "title": "Episode 5",
-        "duration_sec": 1685,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-5/640/360",
-        "access": "vip",
-        "published_at": "2026-10-01T11:34:37.368783Z",
-        "is_published": true
-      },
-      {
-        "id": 82,
-        "number": 6,
-        "title": "Episode 6",
-        "duration_sec": 1782,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-twin-destinies-6/640/360",
-        "access": "vip",
-        "published_at": "2026-10-01T12:34:37.368783Z",
         "is_published": true
       }
     ],
@@ -1177,7 +664,7 @@
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-the-one-in-my-dream-1/640/360",
+        "thumbnail_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800",
         "access": "free",
         "published_at": "2026-09-28T07:34:37.368783Z",
         "is_published": true
@@ -1187,7 +674,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-the-one-in-my-dream-2/640/360",
+        "thumbnail_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800",
         "access": "free",
         "published_at": "2026-09-28T08:34:37.368783Z",
         "is_published": true
@@ -1197,7 +684,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "https://picsum.photos/seed/thumb-the-one-in-my-dream-3/640/360",
+        "thumbnail_url": "https://picsum.photos/seed/the-one-in-my-dream/600/800",
         "access": "vip",
         "published_at": "2026-09-28T09:34:37.368783Z",
         "is_published": true

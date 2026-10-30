@@ -125,6 +125,14 @@ def poster_build(source: Path, out: Path) -> int:
         (out / f"{name}.webp").write_bytes(data)
     note = f"đã cắt viền, vùng tranh {result.art_box}" if result.trimmed else "không có viền thừa"
     print(f"{source.name}: {note}; ghi {', '.join(f'{n}.webp' for n in result.files)} vào {out}")
+    if result.fit != "exact":
+        w, h = poster_images.RECOMMENDED_SIZE
+        why = "độn nền nhòe hai bên" if result.fit == "blur" else "bị cắt bớt một ít"
+        print(
+            f"Lưu ý: tranh tỉ lệ {result.art_ratio} (chuẩn 3:4 = 0.75) nên {why}. "
+            f"Nên up ảnh 3:4, ví dụ {w}×{h}.",
+            file=sys.stderr,
+        )
     return 0
 
 

@@ -51,7 +51,7 @@ describe("catalog", () => {
   it("lists only published series, newest first, and pages with a cursor", async () => {
     const { api } = setup();
     const all = await api.listSeries({ limit: 50 });
-    expect(all.items.length).toBeGreaterThan(5);
+    expect(all.items).toHaveLength(5);
     expect(all.items.some((s) => s.slug === "the-one-in-my-dream")).toBe(false);
     const dates = all.items.map((s) => Date.parse(s.published_at!));
     expect([...dates].sort((a, b) => b - a)).toEqual(dates);
@@ -60,13 +60,14 @@ describe("catalog", () => {
     expect(first.items).toHaveLength(3);
     const second = await api.listSeries({ limit: 3, cursor: first.next_cursor! });
     expect(second.items[0].id).toBe(all.items[3].id);
+    expect(second.next_cursor).toBeNull();
   });
 
   it("sorts hot by view count and filters by genre", async () => {
     const { api } = setup();
     const hot = await api.listSeries({ sort: "hot", limit: 50 });
     const slugs = hot.items.map((s) => s.slug);
-    expect(slugs[0]).toBe("sky-of-memories");
+    expect(slugs[0]).toBe("tien-duyen-ky-ngo");
     const genre = hot.items[0].genres[0].slug;
     const filtered = await api.listSeries({ genre, limit: 50 });
     expect(filtered.items.every((s) => s.genres.some((g) => g.slug === genre))).toBe(true);
@@ -74,8 +75,10 @@ describe("catalog", () => {
 
   it("searches by title ignoring case, and rejects short terms", async () => {
     const { demoFetch } = setup();
-    const ok = await (await demoFetch(`/api/v1/search?q=${encodeURIComponent("SÓI về")}`)).json();
-    expect(ok.items.map((s: { slug: string }) => s.slug)).toContain("virtual-city");
+    const ok = await (
+      await demoFetch(`/api/v1/search?q=${encodeURIComponent("VƯƠNG phi")}`)
+    ).json();
+    expect(ok.items.map((s: { slug: string }) => s.slug)).toContain("vuong-phi-khong-de-choc");
     expect((await demoFetch("/api/v1/search?q=v")).status).toBe(422);
   });
 
@@ -257,7 +260,7 @@ describe("admin", () => {
     const { free } = await episodes(api);
     await api.login({ email: "admin@example.com", password: DEMO_PASSWORD });
     expect((await failure(api.adminStartUpload(free.id, 1000))).code).toBe("conflict");
-    const draft = (await api.adminEpisodes("parallel-secrets")).find((e) => !e.is_published)!;
+    const draft = (await api.adminEpisodes("hoa-tuyet-roi-day-troi")).find((e) => !e.is_published)!;
     expect((await failure(api.adminStartUpload(draft.id, 1000))).code).toBe("stream_unavailable");
     expect((await failure(api.adminStreamSync(draft.id))).code).toBe("stream_unavailable");
     expect((await api.adminStreamSync(free.id)).result).toBe("skipped_published");

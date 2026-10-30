@@ -33,6 +33,15 @@
 - Thư viện: **Pillow** (đủ cho cắt, thu phóng, làm nhòe, WebP; không cần numpy). Xử lý chạy trong thread để không chặn event loop (cùng cách `core/security.py` làm với argon2).
 - Lưu trữ: lớp `ImageStore` trừu tượng với bản **lưu ra thư mục** (dev, bản demo) trước; bản **R2** viết khi có tài khoản Cloudflare, không đổi phần còn lại.
 
+## Quy cách ảnh admin nên upload (để poster không bị nền nhòe hay cắt mất chữ)
+
+- **Tỉ lệ 3:4 (dọc)**, khuyến nghị **1200×1600 px**; tối thiểu 600×800. JPEG, PNG hoặc WebP, tối đa 10 MB.
+- **Không tự thêm viền** (đen, trắng, nền nhòe) quanh tranh: bộ xử lý tự phát hiện và cắt viền, nhưng ảnh đúng 3:4 sát mép là chuẩn nhất.
+- **Chữ tên phim nằm trong vùng giữa** (cách mép khoảng 8% mỗi bên, cách đáy 10%) vì ảnh đôi khi bị cắt một ít để vừa khung.
+- Bộ xử lý báo cách đưa tranh vào khung (`fit`): `exact` (đúng 3:4, tốt nhất), `cover` (lệch quá 3%, bị cắt bớt), `blur` (tranh quá hẹp như 9:16, phải độn nền nhòe hai bên). Admin UI/endpoint (Bước 4–5) hiện cảnh báo "nên up ảnh 3:4" khi `fit` khác `exact`; lệnh `poster-build` đã in cảnh báo này.
+- Poster demo (cập nhật 2026-10-30): giữ 2 ảnh cũ gần 3:4 (Vương Phi Không Dễ Chọc, Nhà Có Ba Chàng Trai) và thêm 3 ảnh mới đúng 3:4 (Tiên Duyên Kỳ Ngộ, Hoa Tuyết Rơi Đầy Trời, Kiếm Khách Tình Duyên); 3 ảnh cũ 9:16 (Sói Về Đòi Món Nợ, Tổng Tài, Bí Mật Trong Bóng Tối) đã bỏ vì hero bị nền nhòe hai bên. **Bản demo còn 5 phim công khai + 1 bản nháp**, mỗi phim một poster, slug theo tên phim; thumbnail mọi tập là poster dọc của phim. Ảnh mới có biểu tượng ngôi sao nhỏ của công cụ tạo ảnh ở góc phải dưới, nên cắt bỏ khi dùng thật.
+- Bộ cắt viền đã chỉnh: dải viền mỏng hơn 7% mỗi cạnh được giữ (gradient tối ở đáy poster từng bị cắt nhầm làm mất dòng chữ phụ).
+
 ## File/module bị ảnh hưởng
 
 - Mới: `apps/api/app/services/poster_images.py`, test `apps/api/app/tests/test_poster_images.py`, `apps/api/app/services/image_store.py`.

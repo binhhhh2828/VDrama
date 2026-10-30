@@ -14,28 +14,11 @@ export type DemoExtras = {
 };
 
 const EXTRAS: Record<string, DemoExtras> = {
-  "virtual-city": {
-    badge: "hot",
-    likes: 21_400,
-    reviews: [],
-  },
-  "memories-of-you": {
-    badge: "hot",
-    likes: 12_800,
-    reviews: [],
-  },
-  "love-again": { badge: null, likes: 6_300, reviews: [] },
-  "parallel-secrets": {
-    badge: "original",
-    likes: 9_700,
-    reviews: [],
-  },
-  "summer-promise": { badge: null, likes: 4_100, reviews: [] },
-  "behind-the-lights": { badge: "original", likes: 5_600, reviews: [] },
-  "sky-of-memories": { badge: "hot", likes: 15_200, reviews: [] },
-  "crack-in-time": { badge: "original", likes: 7_900, reviews: [] },
-  "faded-moonlight": { badge: null, likes: 3_200, reviews: [] },
-  "twin-destinies": { badge: null, likes: 2_700, reviews: [] },
+  "vuong-phi-khong-de-choc": { badge: "hot", likes: 21_400, reviews: [] },
+  "nha-co-ba-chang-trai": { badge: "hot", likes: 12_800, reviews: [] },
+  "tien-duyen-ky-ngo": { badge: null, likes: 6_300, reviews: [] },
+  "hoa-tuyet-roi-day-troi": { badge: "original", likes: 9_700, reviews: [] },
+  "kiem-khach-tinh-duyen": { badge: "original", likes: 4_100, reviews: [] },
   "the-one-in-my-dream": { badge: null, likes: 1_900, reviews: [] },
 };
 

@@ -1,36 +1,30 @@
 // Ảnh poster cho bản demo (docs/plans/gd4-poster-images.md). 5 poster AI thật được xử lý bằng
 // `uv run python -m app.cli poster-build` (cắt viền, ra thumb/detail/hero 3:4, WebP) và nằm ở
-// public/demo/posters/<khóa>/. Phim demo nhiều hơn poster nên xoay vòng theo thứ tự phim.
-// Phim lạ (không có trong bảng) dùng ảnh giữ chỗ picsum theo `seed` cố định.
+// public/demo/posters/<khóa>/. Mỗi phim demo một poster; phim không có trong bảng (bản nháp) dùng ảnh
+// giữ chỗ picsum theo `seed` cố định.
 
 const DEMO_POSTERS = [
-  "soi_ve_doi_mon_no_nam_xua",
-  "tong_tai_danh_ca_thanh_xuan_de_yeu_em",
-  "bi_mat_trong_bong_toi",
   "vuong_phi_khong_de_choc",
   "nha_co_ba_chang_trai",
+  "tien_duyen_ky_ngo",
+  "hoa_tuyet_roi_day_troi",
+  "kiem_khach_tinh_duyen",
 ] as const;
 
-/** Thứ tự slug phim demo; phim thứ i dùng poster thứ i mod 5. */
+/** Slug phim demo có poster, cùng thứ tự với DEMO_POSTERS (phim thứ i dùng poster thứ i). */
 const DEMO_SLUGS = [
-  "virtual-city",
-  "memories-of-you",
-  "love-again",
-  "parallel-secrets",
-  "summer-promise",
-  "behind-the-lights",
-  "sky-of-memories",
-  "crack-in-time",
-  "faded-moonlight",
-  "twin-destinies",
-  "the-one-in-my-dream",
+  "vuong-phi-khong-de-choc",
+  "nha-co-ba-chang-trai",
+  "tien-duyen-ky-ngo",
+  "hoa-tuyet-roi-day-troi",
+  "kiem-khach-tinh-duyen",
 ] as const;
 
 type Rendition = "thumb" | "detail" | "hero";
 
 function posterKey(slug: string): string | null {
   const i = (DEMO_SLUGS as readonly string[]).indexOf(slug);
-  return i < 0 ? null : DEMO_POSTERS[i % DEMO_POSTERS.length];
+  return i < 0 ? null : DEMO_POSTERS[i];
 }
 
 const demoImage = (slug: string, size: Rendition) => {

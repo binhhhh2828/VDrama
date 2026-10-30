@@ -488,8 +488,7 @@ export const en = {
     by: "By {author}",
     team: "VDrama Team",
     behindTag: "Behind the scenes",
-    behindTitle:
-      "Behind “Tổng Tài Dành Cả Thanh Xuân Để Yêu Em”: how an AI love story was built in six weeks",
+    behindTitle: "Behind “Tiên Duyên Kỳ Ngộ”: how an AI love story was built in six weeks",
     behindExcerpt:
       "From the first script draft to the final colour grade, the team shares how a lonely coder and the AI she built came to life, and why episode 3 changes everything.",
     weekTag: "New releases",

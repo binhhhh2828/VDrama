@@ -56,12 +56,22 @@ def test_cat_vien_den_hai_ben():
 
 
 def test_cat_vien_den_phia_duoi():
-    art = noise(900, 900)
-    result = pi.process_poster(framed(art, (1024, 1536), (60, 0)))
+    art = noise(800, 900)
+    result = pi.process_poster(framed(art, (1100, 1536), (150, 0)))
     left, top, right, bottom = result.art_box
     assert result.trimmed
     assert bottom <= 900 and top == 0
-    assert left >= 60 and right <= 960
+    assert left >= 140 and right <= 960
+
+
+def test_dai_toi_mong_o_day_tranh_khong_bi_coi_la_vien():
+    # Đáy tranh có dải gradient tối (phổ biến ở poster có chữ): dải mỏng dưới 7% thì giữ nguyên.
+    art = noise(900, 1200)
+    dark = Image.new("RGB", (900, 60), (6, 6, 8))
+    art.paste(dark, (0, 1140))
+    result = pi.process_poster(png(art))
+    assert result.art_box == (0, 0, 900, 1200)
+    assert not result.trimmed
 
 
 def test_cat_vien_nhoe_cua_chinh_anh():
@@ -172,3 +182,20 @@ def test_lenh_poster_build_bao_loi_khi_file_hong(tmp_path, capsys):
     src.write_bytes(b"khong phai anh")
     assert main(["poster-build", str(src), "--out", str(tmp_path / "ra")]) == 1
     assert "Lỗi" in capsys.readouterr().err
+
+
+def test_bao_cao_cach_dua_vao_khung():
+    exact = pi.process_poster(png(noise(900, 1200)))
+    assert exact.fit == "exact" and abs(exact.art_ratio - 0.75) < 0.01
+    # 900x1250 (0,72): lệch hơn 3% nên bị cắt bớt một ít.
+    assert pi.process_poster(png(noise(900, 1250))).fit == "cover"
+    # 9:16: quá hẹp nên độn nền nhòe.
+    assert pi.process_poster(png(noise(720, 1280))).fit == "blur"
+
+
+def test_quy_cach_khuyen_nghi_la_3_4_va_du_lon():
+    w, h = pi.RECOMMENDED_SIZE
+    assert w * 4 == h * 3
+    assert w >= pi.MIN_WIDTH and h >= pi.MIN_HEIGHT
+    # Ảnh đúng quy cách ra đúng khung, không phóng to hero quá mức.
+    assert pi.process_poster(png(noise(w, h))).fit == "exact"

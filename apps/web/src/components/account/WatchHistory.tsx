@@ -151,14 +151,14 @@ export function WatchHistory() {
                   title: h.series.title,
                   n: h.episode.number,
                 })}
-                className="relative aspect-video w-[34%] max-w-40 min-w-24 shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-40"
+                className="relative aspect-[3/4] w-[72px] shrink-0 overflow-hidden rounded-[10px] bg-art sm:w-20"
               >
                 {h.episode.thumbnail_url ? (
                   <Image
                     src={h.episode.thumbnail_url}
                     alt=""
                     fill
-                    sizes="160px"
+                    sizes="80px"
                     className="object-cover"
                   />
                 ) : null}

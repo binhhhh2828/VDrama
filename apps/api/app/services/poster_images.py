@@ -14,6 +14,7 @@ Hàm thuần, chỉ dùng Pillow; việc nặng chạy trong thread qua `process
 import asyncio
 import io
 from dataclasses import dataclass
+from typing import Literal
 
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 
@@ -32,6 +33,10 @@ WEBP_QUALITY = 82
 # Bản hero không được phóng to quá chừng này so với tranh thật, vì phóng to hơn sẽ vỡ nét.
 MAX_UPSCALE = 1.6
 
+# Quy cách ảnh admin nên up để poster ra đúng khung, không bị nền nhòe hai bên hay cắt mất chữ.
+RECOMMENDED_SIZE = (1200, 1600)  # 3:4
+RECOMMENDED_RATIO_TOLERANCE = 0.03  # lệch dưới 3% so với 3:4 vẫn coi là đúng khung
+
 TARGET_RATIO = 3 / 4
 # Trong khoảng này thì cắt vừa khung; ngoài khoảng thì đặt vào giữa (hẹp) hoặc cắt hai bên (rộng).
 COVER_MIN_RATIO = 0.6
@@ -43,7 +48,7 @@ _EDGE_FLOOR = 1.5
 _EDGE_RATIO = 0.2
 _MIN_TRIM = 0.02  # bỏ qua viền mỏng hơn 2% (thường là nhiễu nén ảnh)
 _MIN_KEEP_AREA = 0.25
-_SNAP = 0.015  # viền mỏng hơn 1,5% sát mép thì coi như không có (tránh cắt cụt đáy tranh)
+_SNAP = 0.07  # dải mỏng hơn 7% mỗi cạnh thì giữ (thường là gradient tối ở đáy tranh)
 
 
 class PosterError(Exception):
@@ -66,9 +71,18 @@ class PosterTooSmall(PosterError):
     pass
 
 
+# Cách tranh được đưa vào khung 3:4:
+# - "exact": tranh đã đúng 3:4 (lệch dưới 3%), không phải cắt hay độn thêm;
+# - "cover": tranh hơi khác 3:4 nên bị cắt bớt một ít để vừa khung;
+# - "blur": tranh quá hẹp (cao/dọc hơn 3:5), phải đặt vào giữa và độn nền nhòe hai bên.
+FitMode = Literal["exact", "cover", "blur"]
+
+
 @dataclass(frozen=True)
 class PosterResult:
     files: dict[str, bytes]  # tên bản -> nội dung WebP
+    fit: FitMode  # admin nên up lại ảnh 3:4 khi không phải "exact"
+    art_ratio: float  # rộng/cao của phần tranh thật (sau khi bỏ viền)
     trimmed: bool  # có cắt viền thừa hay không
     source_size: tuple[int, int]
     art_box: tuple[int, int, int, int]  # vùng tranh (trái, trên, phải, dưới) trong ảnh gốc
@@ -201,8 +215,17 @@ def process_poster(data: bytes) -> PosterResult:
         out = io.BytesIO()
         _fit_frame(art, size).save(out, "WEBP", quality=WEBP_QUALITY, method=4)
         files[name] = out.getvalue()
+    ratio = art.width / art.height
+    if ratio < COVER_MIN_RATIO:
+        fit: FitMode = "blur"
+    elif abs(ratio / TARGET_RATIO - 1) <= RECOMMENDED_RATIO_TOLERANCE:
+        fit = "exact"
+    else:
+        fit = "cover"
     return PosterResult(
         files=files,
+        fit=fit,
+        art_ratio=round(ratio, 3),
         trimmed=box != (0, 0, im.width, im.height),
         source_size=im.size,
         art_box=box,
