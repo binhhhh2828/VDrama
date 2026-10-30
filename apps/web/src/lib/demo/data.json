@@ -57,10 +57,10 @@
     },
     {
       "id": 2,
-      "slug": "chi-tien-cho-trai-dep",
-      "title": "Chi Tiền Cho Trai Đẹp",
-      "poster_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
-      "banner_url": "/demo/posters/chi_tien_cho_trai_dep/hero.webp",
+      "slug": "manh-vo-danh-vong",
+      "title": "Mảnh Vỡ Danh Vọng",
+      "poster_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
+      "banner_url": "/demo/posters/manh_vo_danh_vong/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -76,13 +76,13 @@
           "name": "Drama"
         }
       ],
-      "description": "Đẹp chưa đủ, phải biết giá. Một đêm tiệc xa hoa, ba người đàn ông và một cô gái khiến tình yêu, tiền bạc và danh vọng đảo lộn.",
+      "description": "Đẹp chưa đủ, phải biết giá. Tình yêu, tiền bạc và danh vọng vỡ ra từng mảnh trong một đêm tiệc, ai mới là thật?",
       "episode_count": 8,
       "latest_episode_number": 8,
       "view_count": 3100,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/chi_tien_cho_trai_dep/detail.webp"
+      "poster_detail_url": "/demo/posters/manh_vo_danh_vong/detail.webp"
     },
     {
       "id": 3,
@@ -115,10 +115,10 @@
     },
     {
       "id": 4,
-      "slug": "duoi-nguoi-chot-don-mat-luon-khach-vip",
-      "title": "Đuổi Người Chốt Đơn, Mất Luôn Khách VIP",
-      "poster_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
-      "banner_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/hero.webp",
+      "slug": "luat-choi-ngam",
+      "title": "Luật Chơi Ngầm",
+      "poster_url": "/demo/posters/luat_choi_ngam/thumb.webp",
+      "banner_url": "/demo/posters/luat_choi_ngam/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -130,17 +130,17 @@
           "name": "Drama"
         },
         {
-          "slug": "comedy",
-          "name": "Comedy"
+          "slug": "action",
+          "name": "Action"
         }
       ],
-      "description": "Cô gái chốt đơn giỏi nhất công ty bị đuổi việc, và khách VIP lớn nhất đi theo cô. Cuộc phản công nơi phố tài chính bắt đầu.",
+      "description": "Quyền lực không bao giờ nằm trên bàn, mà ở những cuộc đổi chác ngầm. Một nữ giám đốc bước vào ván cờ của hai kẻ thù.",
       "episode_count": 8,
       "latest_episode_number": 8,
       "view_count": 4400,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/detail.webp"
+      "poster_detail_url": "/demo/posters/luat_choi_ngam/detail.webp"
     },
     {
       "id": 5,
@@ -320,13 +320,13 @@
         "is_published": true
       }
     ],
-    "chi-tien-cho-trai-dep": [
+    "manh-vo-danh-vong": [
       {
         "id": 13,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T07:34:37.368783Z",
         "is_published": true
@@ -336,7 +336,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T08:34:37.368783Z",
         "is_published": true
@@ -346,7 +346,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T09:34:37.368783Z",
         "is_published": true
@@ -356,7 +356,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T10:34:37.368783Z",
         "is_published": true
@@ -366,7 +366,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T11:34:37.368783Z",
         "is_published": true
@@ -376,7 +376,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T12:34:37.368783Z",
         "is_published": true
@@ -386,7 +386,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T13:34:37.368783Z",
         "is_published": true
@@ -396,7 +396,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+        "thumbnail_url": "/demo/posters/manh_vo_danh_vong/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T14:34:37.368783Z",
         "is_published": true
@@ -504,13 +504,13 @@
         "is_published": true
       }
     ],
-    "duoi-nguoi-chot-don-mat-luon-khach-vip": [
+    "luat-choi-ngam": [
       {
         "id": 31,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T07:34:37.368783Z",
         "is_published": true
@@ -520,7 +520,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T08:34:37.368783Z",
         "is_published": true
@@ -530,7 +530,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T09:34:37.368783Z",
         "is_published": true
@@ -540,7 +540,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T10:34:37.368783Z",
         "is_published": true
@@ -550,7 +550,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T11:34:37.368783Z",
         "is_published": true
@@ -560,7 +560,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T12:34:37.368783Z",
         "is_published": true
@@ -570,7 +570,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T13:34:37.368783Z",
         "is_published": true
@@ -580,7 +580,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T14:34:37.368783Z",
         "is_published": true
@@ -590,7 +590,7 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+        "thumbnail_url": "/demo/posters/luat_choi_ngam/thumb.webp",
         "access": "vip",
         "published_at": null,
         "is_published": false

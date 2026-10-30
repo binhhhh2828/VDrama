@@ -260,9 +260,7 @@ describe("admin", () => {
     const { free } = await episodes(api);
     await api.login({ email: "admin@example.com", password: DEMO_PASSWORD });
     expect((await failure(api.adminStartUpload(free.id, 1000))).code).toBe("conflict");
-    const draft = (await api.adminEpisodes("duoi-nguoi-chot-don-mat-luon-khach-vip")).find(
-      (e) => !e.is_published,
-    )!;
+    const draft = (await api.adminEpisodes("luat-choi-ngam")).find((e) => !e.is_published)!;
     expect((await failure(api.adminStartUpload(draft.id, 1000))).code).toBe("stream_unavailable");
     expect((await failure(api.adminStreamSync(draft.id))).code).toBe("stream_unavailable");
     expect((await api.adminStreamSync(free.id)).result).toBe("skipped_published");

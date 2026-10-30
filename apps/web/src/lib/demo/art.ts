@@ -5,18 +5,18 @@
 
 const DEMO_POSTERS = [
   "hoang_tu_va_nu_tu_nhan",
-  "chi_tien_cho_trai_dep",
+  "manh_vo_danh_vong",
   "loi_nguyen_duoi_anh_trang",
-  "duoi_nguoi_chot_don_mat_luon_khach_vip",
+  "luat_choi_ngam",
   "ke_bao_thu",
 ] as const;
 
 /** Slug phim demo có poster, cùng thứ tự với DEMO_POSTERS (phim thứ i dùng poster thứ i). */
 const DEMO_SLUGS = [
   "hoang-tu-va-nu-tu-nhan",
-  "chi-tien-cho-trai-dep",
+  "manh-vo-danh-vong",
   "loi-nguyen-duoi-anh-trang",
-  "duoi-nguoi-chot-don-mat-luon-khach-vip",
+  "luat-choi-ngam",
   "ke-bao-thu",
 ] as const;
 

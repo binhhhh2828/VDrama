@@ -10,4 +10,4 @@
   NODE_VERSION = "24"
   # Bật chế độ demo (API giả, tài khoản demo, "mua VIP" giả, noindex). Bỏ dòng này thì web cần API thật.
   NEXT_PUBLIC_DEMO = "true"
-  PUBLIC_ORIGIN = "https://vdramademo.netlify.app"
+  PUBLIC_ORIGIN = "https://vdramaver3.netlify.app"

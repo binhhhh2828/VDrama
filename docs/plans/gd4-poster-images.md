@@ -78,3 +78,5 @@
 - Bước 1–2 làm trước (không cần hạ tầng mới); bước 3–4 làm tiếp sau khi bạn xem kết quả bước 2 — bạn đồng ý thứ tự này không?
 
 > Cập nhật 2026-10-30 (chiều): thay toàn bộ 5 poster demo bằng 5 poster điện ảnh mới (đều 3:4, 1086×1448, không có viền): Hoàng Tử Và Nữ Tù Nhân, Chi Tiền Cho Trai Đẹp, Lời Nguyền Dưới Ánh Trăng, Đuổi Người Chốt Đơn Mất Luôn Khách VIP, Kẻ Báo Thù. Ảnh gốc ở `apps/web/public/poster/` (không commit).
+
+> Cập nhật 2026-10-30 (chiều muộn): thay 2 poster (Chi Tiền Cho Trai Đẹp, Đuổi Người Chốt Đơn) bằng Mảnh Vỡ Danh Vọng và Luật Chơi Ngầm; giữ Hoàng Tử Và Nữ Tù Nhân, Lời Nguyền Dưới Ánh Trăng, Kẻ Báo Thù.
