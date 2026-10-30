@@ -6,6 +6,11 @@
   command = "pnpm build"
   publish = ".next"
 
+# Khai báo runtime Next.js tường minh: khi đặt `publish`, Netlify coi là "custom publish path" và
+# không tự cài plugin, nên deploy từ Git chỉ ra file tĩnh (404 mọi trang, "0 functions").
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [build.environment]
   NODE_VERSION = "24"
   # Bật chế độ demo (API giả, tài khoản demo, "mua VIP" giả, noindex). Bỏ dòng này thì web cần API thật.
