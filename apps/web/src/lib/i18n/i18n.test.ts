@@ -36,13 +36,23 @@ describe("từ điển", () => {
     const en = Object.fromEntries(leaves(getDictionary("en")));
     const vi = Object.fromEntries(leaves(getDictionary("vi")));
     const same = Object.keys(en).filter((k) => en[k] === vi[k]);
-    expect(same.sort()).toEqual(["badge.hot", "nav.menu", "nav.vip"]);
+    expect(same.sort()).toEqual([
+      "badge.hot",
+      "badge.top",
+      "badge.vip",
+      "demo.label",
+      "nav.menu",
+      "nav.vip",
+      "vip.perk2",
+    ]);
   });
 
   it("copy.ts cũ khớp từ điển tiếng Anh (chưa chuyển hết thì không được lệch)", () => {
     const en = getDictionary("en");
     for (const group of ["nav", "footer", "home", "watch", "promo", "badge"] as const) {
-      expect(copy[group]).toEqual(en[group]);
+      for (const [key, value] of Object.entries(copy[group])) {
+        expect((en[group] as Record<string, unknown>)[key], `${group}.${key}`).toBe(value);
+      }
     }
     for (const key of ["playNow", "watchNow", "allEpisodes", "episodeList", "summary"] as const) {
       expect(copy.series[key]).toBe(en.series[key]);

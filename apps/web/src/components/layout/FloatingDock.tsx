@@ -5,7 +5,7 @@ import { Logo } from "@/components/brand/Logo";
 import { useSession } from "@/components/session/SessionProvider";
 import { useVipSheet } from "@/components/vip/VipSheetProvider";
 import { ArrowUpIcon, CloseIcon } from "@/components/ui/icons";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link, usePathname } from "@/components/i18n/navigation";
 
 const DISMISS_KEY = "vdrama:vip-bar-dismissed";
@@ -25,6 +25,7 @@ function readDismissed(): boolean {
  */
 export function FloatingDock() {
   const session = useSession();
+  const t = useT();
   const pathname = usePathname();
   const vipSheet = useVipSheet();
   // Mặc định ẩn đến khi đọc được trạng thái đã tắt, để không nháy thanh lên rồi biến mất.
@@ -61,7 +62,7 @@ export function FloatingDock() {
       {showTop ? (
         <button
           type="button"
-          aria-label={copy.nav.backToTop}
+          aria-label={t("nav.backToTop")}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="hit-44 pointer-events-auto relative mr-2.5 flex size-10 items-center justify-center rounded-full bg-accent text-on-accent shadow-lg shadow-black/40"
         >
@@ -71,12 +72,12 @@ export function FloatingDock() {
       {showBar ? (
         <div
           role="complementary"
-          aria-label={copy.promo.getVip}
+          aria-label={t("promo.getVip")}
           className="pointer-events-auto flex h-[52px] w-full max-w-[520px] items-center gap-2 self-center rounded-xl bg-promo pr-1 pl-2.5 text-ink shadow-lg shadow-black/40"
         >
           <Logo variant="icon" height={28} className="size-7 shrink-0 rounded-md" />
           <span className="line-clamp-2 min-w-0 flex-1 text-[15px] leading-tight">
-            {copy.promo.getVipLine}
+            {t("promo.getVipLine")}
           </span>
           <Link
             href="/vip"
@@ -87,11 +88,11 @@ export function FloatingDock() {
             }}
             className="hit-44 relative flex h-7 shrink-0 items-center rounded-tag bg-accent px-3 text-[15px] font-semibold text-on-accent no-underline hover:text-on-accent"
           >
-            {copy.promo.getVip}
+            {t("promo.getVip")}
           </Link>
           <button
             type="button"
-            aria-label={copy.promo.dismiss}
+            aria-label={t("promo.dismiss")}
             onClick={dismiss}
             className="flex size-11 shrink-0 items-center justify-center text-ink/55 hover:text-ink"
           >

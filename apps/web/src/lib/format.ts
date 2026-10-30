@@ -1,13 +1,21 @@
-// Định dạng hiển thị dùng chung (tiếng Anh).
+// Định dạng hiển thị dùng chung. Hàm nào có chữ hoặc quy ước số/ngày riêng của ngôn ngữ nhận `locale`
+// (mặc định tiếng Anh).
 
-/** 1297 → "21 min"; 3725 → "1 h 2 min"; null → "". */
-export function formatDuration(sec: number | null | undefined): string {
+import { DEFAULT_LOCALE, LOCALE_INFO, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+
+/** 1297 → "21 min" (vi: "21 phút"); 3725 → "1 h 2 min"; null → "". */
+export function formatDuration(
+  sec: number | null | undefined,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   if (!sec || sec <= 0) return "";
+  const { min, hour } = getDictionary(locale).format;
   const minutes = Math.max(1, Math.round(sec / 60));
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return `${minutes} ${min}`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m ? `${h} h ${m} min` : `${h} h`;
+  return m ? `${h} ${hour} ${m} ${min}` : `${h} ${hour}`;
 }
 
 /** Đồng hồ player: 75 → "1:15"; 3725 → "1:02:05". */
@@ -32,10 +40,15 @@ export function isFinished(progressSec: number, durationSec: number | null | und
 }
 
 /** "12 min left" cho thẻ Continue watching; đã xong thì "Watched". */
-export function timeLeft(progressSec: number, durationSec: number | null | undefined): string {
+export function timeLeft(
+  progressSec: number,
+  durationSec: number | null | undefined,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   if (!durationSec) return "";
-  if (isFinished(progressSec, durationSec)) return "Watched";
-  return `${formatDuration(durationSec - progressSec)} left`;
+  const { left, watched } = getDictionary(locale).format;
+  if (isFinished(progressSec, durationSec)) return watched;
+  return `${formatDuration(durationSec - progressSec, locale)} ${left}`;
 }
 
 /** "12 episodes · Romance" cho thẻ phim. */
@@ -46,10 +59,13 @@ export function seriesMeta(s: { total_episodes: number | null; genres: { name: s
   return parts.join(" · ");
 }
 
-/** Ngày dạng "Nov 28, 2026" (UTC để server và trình duyệt ra cùng chuỗi). */
-export function formatDate(iso: string | null | undefined): string {
+/** Ngày dạng "Nov 28, 2026" (vi: "28 thg 11, 2026"), UTC để server và trình duyệt ra cùng chuỗi. */
+export function formatDate(
+  iso: string | null | undefined,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
   if (!iso) return "";
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(LOCALE_INFO[locale].intl, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -57,14 +73,15 @@ export function formatDate(iso: string | null | undefined): string {
   }).format(new Date(iso));
 }
 
-/** 12000 → "12K"; 1500000 → "1.5M". */
-export function compactNumber(n: number): string {
-  return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(
-    n,
-  );
+/** 12000 → "12K"; 1500000 → "1.5M" (vi: "12 N", "1,5 Tr"). */
+export function compactNumber(n: number, locale: Locale = DEFAULT_LOCALE): string {
+  return new Intl.NumberFormat(LOCALE_INFO[locale].intl, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(n);
 }
 
-/** Số tiền VND: 259000 → "259,000 VND". */
-export function formatVnd(n: number): string {
-  return `${new Intl.NumberFormat("en-US").format(n)} VND`;
+/** Số tiền VND: 259000 → "259,000 VND" (vi: "259.000 VND"). */
+export function formatVnd(n: number, locale: Locale = DEFAULT_LOCALE): string {
+  return `${new Intl.NumberFormat(LOCALE_INFO[locale].intl).format(n)} VND`;
 }

@@ -1,6 +1,6 @@
 # Plan: Đa ngôn ngữ giao diện (English, Tiếng Việt) và menu đổi ngôn ngữ
 
-> Trạng thái: đã duyệt 2026-10-30; Bước 1–3 xong
+> Trạng thái: đã duyệt 2026-10-30; Bước 1–4 xong
 > Bối cảnh: sếp hướng tới thị trường nước ngoài (mặc định tiếng Anh), nhưng trước mắt cần bản tiếng Việt để nhà đầu tư người Việt xem hiểu. Giao diện người xem: `docs/plans/gd3-netshort-ui.md`. Ảnh poster: `docs/plans/gd4-poster-images.md`.
 
 ## Mục tiêu và phạm vi
@@ -49,7 +49,7 @@ Mỗi bước giữ giao diện chạy được và có commit riêng.
 - [x] **Bước 3: Menu đổi ngôn ngữ** — xong 2026-10-30: `components/i18n/LanguageSheet.tsx` (bảng chọn dạng bottom sheet, tên ngôn ngữ viết bằng chính ngôn ngữ đó, có tick) và `LanguageRow` đặt cuối ngăn kéo menu và trong footer; chọn thì ghi cookie `NEXT_LOCALE` 1 năm rồi chuyển sang cùng trang ở ngôn ngữ kia (giữ `?query` và `#mục`). Font đổi sang **Be Vietnam Pro** cho cả hai ngôn ngữ (`lib/site-fonts.ts`, biến `--font-body`); đã xác nhận Poppins không có bộ vietnamese. Đã thử: `/series/x` ↔ `/vi/series/x`, cookie đúng, không tràn ngang ở 320 px (5 trang `/vi`).
   - Việc cần làm: `LanguageSheet` (bảng chọn dạng bottom sheet như bảng VIP), dòng trong ngăn kéo menu và footer, ghi cookie, giữ nguyên trang đang xem; đổi font.
   - Tiêu chí hoàn thành: bấm đổi thì URL và cookie đổi đúng, quay lại trang cũ đúng ngôn ngữ; kiểm tra ở 320/390/440 px.
-- [ ] **Bước 4: Dịch phần khung dùng chung**
+- [x] **Bước 4: Dịch phần khung dùng chung** — xong 2026-10-30: header (logo, ô tìm kiếm, avatar, "Skip to content"), ngăn kéo menu, menu ngang desktop, footer (chuyển sang client + `footerGroups(t)`), thanh Get VIP, bảng VIP, bảng Top Up, 404 (`NotFoundContent`), trang lỗi, dải DEMO, nhãn `Badge` (PREVIEW → XEM TRƯỚC...). `lib/format.ts` nhận `locale` (thời lượng, ngày, số, VND); `lib/i18n/api-errors.ts` có `apiErrorText`/`fieldErrorText` (dùng ở Bước 5–6 khi dịch các chỗ hiện lỗi); `ApiError.message` lấy từ từ điển tiếng Anh. Còn `copy.ts` cho các màn của Bước 5–6. Đã đối chiếu bằng trình duyệt ở `/vi`: 404, menu, footer, dock, bảng VIP, bảng Top Up đều tiếng Việt.
   - Việc cần làm: header, ngăn kéo menu, footer, thanh Get VIP, bảng VIP, bảng Top Up, ô tìm kiếm, trang lỗi/404, định dạng ngày/số/thời lượng theo ngôn ngữ, ánh xạ mã lỗi API.
   - Tiêu chí hoàn thành: ở `/vi` các phần này không còn chữ Anh (có test quét từ điển và kiểm tra bằng mắt); thanh kiểm tra bằng script mở các trang và liệt kê chuỗi tiếng Anh còn sót.
 - [ ] **Bước 5: Dịch trang xem phim**

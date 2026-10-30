@@ -1,5 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
+import type { TKey } from "@/lib/i18n/translate";
 import { FlameIcon } from "./icons";
 
 export type BadgeKind = "top" | "vip" | "free" | "new" | "preview" | "original" | "hot";
@@ -19,15 +23,15 @@ const kinds: Record<BadgeKind, string> = {
   hot: "gap-0.5 rounded-tag bg-hot px-1.5 py-[3px] text-[11px] font-extrabold italic text-white",
 };
 
-const defaultLabel: Record<BadgeKind, string> = {
-  top: "TOP",
-  vip: "VIP",
-  free: "FREE",
-  new: "NEW",
-  preview: "PREVIEW",
-  original: "ORIGINAL",
-  hot: "HOT",
-};
+const labelKey = {
+  top: "badge.top",
+  vip: "badge.vip",
+  free: "badge.free",
+  new: "badge.new",
+  preview: "badge.preview",
+  original: "badge.original",
+  hot: "badge.hot",
+} as const satisfies Record<BadgeKind, TKey>;
 
 export function Badge({
   kind,
@@ -38,10 +42,11 @@ export function Badge({
   children?: ReactNode;
   className?: string;
 }) {
+  const t = useT();
   return (
     <span className={cn("inline-flex items-center leading-none", kinds[kind], className)}>
       {kind === "hot" ? <FlameIcon size={11} /> : null}
-      {children ?? defaultLabel[kind]}
+      {children ?? t(labelKey[kind])}
     </span>
   );
 }

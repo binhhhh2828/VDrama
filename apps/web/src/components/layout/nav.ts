@@ -1,39 +1,43 @@
 // Menu của site người xem: ngăn kéo (điện thoại), menu ngang (desktop) và chân trang.
 
-import { copy } from "@/lib/copy";
+import type { T } from "@/lib/i18n/translate";
 
 export type NavItem = { href: string; label: string };
 
 /** Menu ngang trên header desktop (VIP vẽ riêng màu vàng). */
-export const MAIN_NAV: NavItem[] = [
-  { href: "/", label: copy.nav.home },
-  { href: "/browse", label: copy.nav.browse },
-  { href: "/account/list", label: copy.nav.myList },
-];
+export function mainNav(t: T): NavItem[] {
+  return [
+    { href: "/", label: t("nav.home") },
+    { href: "/browse", label: t("nav.browse") },
+    { href: "/account/list", label: t("nav.myList") },
+  ];
+}
 
 /** Các nhóm accordion ở chân trang. */
-export const FOOTER_GROUPS: { title: string; links: NavItem[] }[] = [
-  {
-    title: copy.footer.about,
-    links: [
-      { href: "/terms", label: "Terms of Use" },
-      { href: "/privacy", label: "Privacy Policy" },
-      { href: "/refunds", label: "Refund Policy" },
-    ],
-  },
-  {
-    title: copy.footer.contact,
-    links: [{ href: "/contact", label: "Contact us" }],
-  },
-  {
-    title: copy.footer.explore,
-    links: [
-      { href: "/browse", label: "Browse all series" },
-      { href: "/vip", label: "VIP plans" },
-      { href: "/account/history", label: "Watch history" },
-    ],
-  },
-];
+export function footerGroups(t: T): { title: string; links: NavItem[] }[] {
+  return [
+    {
+      title: t("footer.about"),
+      links: [
+        { href: "/terms", label: t("footer.terms") },
+        { href: "/privacy", label: t("footer.privacy") },
+        { href: "/refunds", label: t("footer.refunds") },
+      ],
+    },
+    {
+      title: t("footer.contact"),
+      links: [{ href: "/contact", label: t("footer.contact") }],
+    },
+    {
+      title: t("footer.explore"),
+      links: [
+        { href: "/browse", label: t("footer.browseAll") },
+        { href: "/vip", label: t("footer.vipPlans") },
+        { href: "/account/history", label: t("footer.history") },
+      ],
+    },
+  ];
+}
 
 /** Link có đang được chọn không: "/" chỉ khớp đúng trang chủ, link khác khớp cả trang con. */
 export function isActive(pathname: string, href: string): boolean {

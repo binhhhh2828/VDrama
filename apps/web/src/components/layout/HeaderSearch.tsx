@@ -1,9 +1,8 @@
 "use client";
 
 import { SearchIcon } from "@/components/ui/icons";
-import { copy } from "@/lib/copy";
 import { localePath } from "@/lib/i18n/paths";
-import { useLocale } from "@/components/i18n/I18nProvider";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
 import { usePathname, useSearchParams } from "@/components/i18n/navigation";
 
 /** Ô tìm kiếm viên thuốc 183×36 ở header. Là form GET thường tới /search (chạy cả khi chưa có JS). */
@@ -15,6 +14,7 @@ export function SearchForm({
   autoFocus?: boolean;
 }) {
   const locale = useLocale();
+  const t = useT();
   return (
     <form
       role="search"
@@ -23,7 +23,7 @@ export function SearchForm({
     >
       <SearchIcon size={16} className="shrink-0 text-muted" />
       <label htmlFor="site-search" className="sr-only">
-        {copy.nav.searchLabel}
+        {t("nav.searchLabel")}
       </label>
       {/* Ô nhập cao 44px (tràn khỏi viên thuốc 36px) để vùng bấm đủ lớn. */}
       <input
@@ -34,7 +34,7 @@ export function SearchForm({
         maxLength={100}
         defaultValue={defaultValue}
         autoFocus={autoFocus}
-        placeholder={copy.nav.search}
+        placeholder={t("nav.search")}
         className="-my-1 h-11 min-w-0 flex-1 bg-transparent text-[13px] text-fg outline-none placeholder:text-muted"
       />
     </form>

@@ -13,7 +13,8 @@ import {
   ReelIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
+import type { TKey } from "@/lib/i18n/translate";
 import { activeHref } from "./nav";
 import { LanguageRow } from "@/components/i18n/LanguageSheet";
 import { Link, usePathname } from "@/components/i18n/navigation";
@@ -22,13 +23,13 @@ type Item = { href: string; label: string; Icon: ComponentType<{ size?: number }
 
 // Bốn mục như ngăn kéo NetShort (ảnh 05): Home, Series (Phim bộ), Download (Tải xuống), News (Thông tin).
 // My List, VIP và tài khoản nằm ở avatar và trang tài khoản.
-const BASE_ITEMS: Item[] = [
-  { href: "/", label: copy.nav.home, Icon: ReelIcon },
-  { href: "/browse", label: copy.nav.browse, Icon: PlaySquareIcon },
-  { href: "/download", label: copy.nav.download, Icon: DownloadBoxIcon },
-  { href: "/news", label: copy.nav.news, Icon: NewsIcon },
+const BASE_ITEMS: { href: string; key: TKey; Icon: Item["Icon"] }[] = [
+  { href: "/", key: "nav.home", Icon: ReelIcon },
+  { href: "/browse", key: "nav.browse", Icon: PlaySquareIcon },
+  { href: "/download", key: "nav.download", Icon: DownloadBoxIcon },
+  { href: "/news", key: "nav.news", Icon: NewsIcon },
 ];
-const ADMIN_ITEM: Item = { href: "/admin", label: copy.nav.admin, Icon: GridIcon };
+const ADMIN_ITEM = { href: "/admin", key: "nav.admin", Icon: GridIcon } as const;
 
 /** Vuốt sang trái quá chừng này (px) thì đóng ngăn kéo. */
 const SWIPE_CLOSE = 60;
@@ -93,10 +94,12 @@ export function MenuDrawer() {
   const ref = useRef<HTMLDialogElement>(null);
   const touchX = useRef<number | null>(null);
 
-  const items =
+  const t = useT();
+  const items: Item[] = (
     session.status === "user" && session.user.role === "admin"
       ? [...BASE_ITEMS, ADMIN_ITEM]
-      : BASE_ITEMS;
+      : BASE_ITEMS
+  ).map(({ href, key, Icon }) => ({ href, label: t(key), Icon }));
 
   const open = () => ref.current?.showModal();
   const close = useCallback(() => ref.current?.close(), []);
@@ -105,7 +108,7 @@ export function MenuDrawer() {
     <>
       <button
         type="button"
-        aria-label={copy.nav.openMenu}
+        aria-label={t("nav.openMenu")}
         aria-haspopup="dialog"
         onClick={open}
         className="flex size-11 shrink-0 items-center justify-center text-fg md:hidden"
@@ -114,7 +117,7 @@ export function MenuDrawer() {
       </button>
       <dialog
         ref={ref}
-        aria-label={copy.nav.menu}
+        aria-label={t("nav.menu")}
         // Bấm vào nền phủ (::backdrop) thì sự kiện rơi vào chính thẻ dialog.
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
@@ -142,14 +145,14 @@ export function MenuDrawer() {
           <Logo height={22} className="h-[22px] w-auto" />
           <button
             type="button"
-            aria-label={copy.nav.closeMenu}
+            aria-label={t("nav.closeMenu")}
             onClick={close}
             className="flex size-11 items-center justify-center text-fg"
           >
             <CloseIcon size={26} />
           </button>
         </div>
-        <nav aria-label="Main">
+        <nav aria-label={t("nav.main")}>
           <ul>
             <Suspense fallback={<Items pathname={null} items={items} />}>
               <ActiveItems items={items} />

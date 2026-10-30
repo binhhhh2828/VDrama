@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Badge } from "@/components/ui/Badge";
 import { CloseIcon, HeadsetIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
@@ -69,6 +70,7 @@ export function Coin({ size = 24 }: { size?: number }) {
  */
 export function TopUpSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const t = useT();
   const [picked, setPicked] = useState<number>(0);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export function TopUpSheet({ open, onClose }: { open: boolean; onClose: () => vo
   return (
     <dialog
       ref={ref}
-      aria-label="Top up"
+      aria-label={t("topUp.label")}
       onClose={onClose}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -101,19 +103,19 @@ export function TopUpSheet({ open, onClose }: { open: boolean; onClose: () => vo
         <div className="px-5 pt-5 pb-6">
           <div className="flex items-center gap-3">
             <p className="flex flex-1 items-center gap-2 text-[13px] text-fg-soft">
-              Balance: <Coin size={18} /> <span className="text-fg">0</span>
+              {t("topUp.balance")} <Coin size={18} /> <span className="text-fg">0</span>
             </p>
             <Link
               href="/contact"
               onClick={onClose}
-              aria-label="Contact support"
+              aria-label={t("vip.support")}
               className="hit-44 relative flex size-8 items-center justify-center text-fg-soft"
             >
               <HeadsetIcon size={22} />
             </Link>
             <button
               type="button"
-              aria-label="Close"
+              aria-label={t("common.close")}
               onClick={onClose}
               className="hit-44 relative flex size-8 items-center justify-center text-fg-soft"
             >
@@ -121,7 +123,11 @@ export function TopUpSheet({ open, onClose }: { open: boolean; onClose: () => vo
             </button>
           </div>
 
-          <div role="radiogroup" aria-label="Coin pack" className="mt-4 grid grid-cols-2 gap-3">
+          <div
+            role="radiogroup"
+            aria-label={t("topUp.pack")}
+            className="mt-4 grid grid-cols-2 gap-3"
+          >
             {PACKS.map((p, i) => (
               <button
                 key={p.coins}
@@ -153,26 +159,26 @@ export function TopUpSheet({ open, onClose }: { open: boolean; onClose: () => vo
             ))}
           </div>
 
-          <p className="mt-6 text-[13px] text-muted">Select payment method</p>
+          <p className="mt-6 text-[13px] text-muted">{t("topUp.payment")}</p>
           <div className="mt-2.5 grid grid-cols-2 gap-3">
             <button
               type="button"
               disabled
               className="h-11 rounded-lg bg-white/70 text-sm font-semibold text-ink/60"
             >
-              Bank transfer
+              {t("topUp.bank")}
             </button>
             <button
               type="button"
               disabled
               className="h-11 rounded-lg bg-white/70 text-sm font-semibold text-ink/60"
             >
-              Card
+              {t("topUp.card")}
             </button>
           </div>
           <div className="mt-4 flex items-center gap-2 text-xs text-muted">
             <Badge kind="preview" />
-            <span>Coins aren&apos;t on sale yet. Prices are examples.</span>
+            <span>{t("topUp.note")}</span>
           </div>
         </div>
       ) : null}

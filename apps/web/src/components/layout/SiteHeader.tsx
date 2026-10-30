@@ -1,11 +1,10 @@
 import { Suspense } from "react";
-import { Logo } from "@/components/brand/Logo";
 import { AccountArea } from "./AccountArea";
+import { BrandLink, SkipLink } from "./BrandLink";
 import { HeaderBar } from "./HeaderBar";
 import { HeaderSearch, SearchForm } from "./HeaderSearch";
 import { MenuDrawer } from "./MenuDrawer";
 import { NavLinks } from "./NavLinks";
-import { Link } from "@/components/i18n/navigation";
 
 /**
  * Header theo NetShort mobile (ảnh 01, 02, 04): cao 58px, không có nền riêng, nội dung cuộn phía sau;
@@ -14,21 +13,10 @@ import { Link } from "@/components/i18n/navigation";
 export function SiteHeader() {
   return (
     <HeaderBar>
-      <a
-        href="#main"
-        className="sr-only rounded-full bg-fg px-4 py-2 text-ink focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-40"
-      >
-        Skip to content
-      </a>
+      <SkipLink />
       <div className="mx-auto flex h-[58px] max-w-[1360px] items-center pr-[17px] pl-1 sm:pl-3 md:gap-6 md:px-6">
         <MenuDrawer />
-        <Link
-          href="/"
-          aria-label="VDrama home"
-          className="ml-0.5 mr-3 shrink-0 leading-none md:ml-0 md:mr-0"
-        >
-          <Logo height={17} preload className="h-[17px] w-auto md:h-8" />
-        </Link>
+        <BrandLink />
         <NavLinks />
         <Suspense fallback={<SearchForm />}>
           <HeaderSearch />

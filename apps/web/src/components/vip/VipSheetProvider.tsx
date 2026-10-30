@@ -11,6 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import { VipPanel } from "./VipPanel";
 import { usePathname } from "@/components/i18n/navigation";
@@ -51,6 +52,7 @@ const SWIPE_CLOSE = 70;
  * nút X, phím Esc, chạm nền phủ, vuốt xuống hoặc khi đổi trang. Từ `md` là hộp thoại giữa màn hình.
  */
 export function VipSheetProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
   const touchY = useRef<number | null>(null);
@@ -74,7 +76,7 @@ export function VipSheetProvider({ children }: { children: ReactNode }) {
       </Suspense>
       <dialog
         ref={ref}
-        aria-label="VIP plans"
+        aria-label={t("vip.sheetLabel")}
         onClose={close}
         onClick={(e) => {
           if (e.target === e.currentTarget) close();

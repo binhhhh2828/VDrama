@@ -5,6 +5,8 @@
 export type PreviewPlan = {
   id: string;
   name: string;
+  /** Số tháng của gói (để dịch tên gói: "1 month" / "1 tháng"). */
+  months: number;
   days: number;
   priceUsd: string;
   /** Giá chuyển khoản trong nước (khớp gói mẫu của seed-demo). */
@@ -18,6 +20,7 @@ export const PREVIEW_PLANS: PreviewPlan[] = [
   {
     id: "monthly",
     name: "1 month",
+    months: 1,
     days: 30,
     priceUsd: "$4.99",
     priceVnd: 99_000,
@@ -27,6 +30,7 @@ export const PREVIEW_PLANS: PreviewPlan[] = [
   {
     id: "quarterly",
     name: "3 months",
+    months: 3,
     days: 90,
     priceUsd: "$12.99",
     priceVnd: 259_000,
@@ -37,6 +41,7 @@ export const PREVIEW_PLANS: PreviewPlan[] = [
   {
     id: "yearly",
     name: "12 months",
+    months: 12,
     days: 365,
     priceUsd: "$44.99",
     priceVnd: 899_000,

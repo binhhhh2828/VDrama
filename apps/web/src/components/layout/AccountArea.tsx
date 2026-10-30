@@ -2,7 +2,7 @@
 
 import { useSession } from "@/components/session/SessionProvider";
 import { CrownIcon, UserIcon } from "@/components/ui/icons";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 
 function initials(name: string): string {
@@ -19,12 +19,13 @@ const ring =
  */
 export function AccountArea() {
   const session = useSession();
+  const t = useT();
 
   if (session.status !== "user") {
     return (
       <Link
         href="/account"
-        aria-label={copy.nav.account}
+        aria-label={t("nav.account")}
         className={`${ring} border border-fg/25 bg-surface-2 text-muted hover:text-fg`}
       >
         <UserIcon size={16} />
@@ -36,7 +37,7 @@ export function AccountArea() {
   return (
     <Link
       href="/account"
-      aria-label={`${copy.nav.account}: ${user.display_name}`}
+      aria-label={t("nav.accountNamed", { name: user.display_name })}
       className={`${ring} bg-brand text-[11px] font-bold text-on-accent hover:text-on-accent`}
     >
       {initials(user.display_name)}
