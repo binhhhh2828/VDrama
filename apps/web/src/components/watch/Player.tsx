@@ -17,6 +17,7 @@ import { formatClock } from "@/lib/format";
 import { useLocale } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 import { localePath } from "@/lib/i18n/paths";
+import { useT } from "@/components/i18n/I18nProvider";
 
 export type PlayerSource = { url: string; expiresAt: number | null; sample: boolean };
 
@@ -61,6 +62,7 @@ export function Player({
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const srcRef = useRef(source);
@@ -288,7 +290,7 @@ export function Player({
       ref={wrapRef}
       tabIndex={0}
       role="region"
-      aria-label={`Video player: ${label}`}
+      aria-label={t("player.label", { label })}
       onKeyDown={onKeyDown}
       onMouseMove={poke}
       onTouchStart={poke}
@@ -347,7 +349,7 @@ export function Player({
       {/* Nút X (thoát về trang phim), góc trái trên như ảnh 10. */}
       <Link
         href={closeHref}
-        aria-label="Close player"
+        aria-label={t("player.close")}
         className={cn(circle, "absolute top-1.5 left-1.5 bg-black/45 hover:text-fg")}
       >
         <CloseIcon size={20} />
@@ -384,7 +386,7 @@ export function Player({
           {!playing ? (
             <button
               type="button"
-              aria-label="Play"
+              aria-label={t("player.play")}
               onClick={toggle}
               className="absolute top-1/2 left-1/2 flex size-[58px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-fg"
             >
@@ -401,7 +403,7 @@ export function Player({
           showControls ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       >
-        <CtrlButton label={playing ? "Pause" : "Play"} onClick={toggle}>
+        <CtrlButton label={playing ? t("player.pause") : t("player.play")} onClick={toggle}>
           {playing ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
         </CtrlButton>
         <span className="text-[11px] text-fg tabular-nums">{formatClock(time)}</span>
@@ -410,21 +412,24 @@ export function Player({
           duration={duration}
           buffered={buffered}
           progress={progress}
-          onSeek={(t) => {
+          onSeek={(sec) => {
             const v = videoRef.current;
-            if (v) v.currentTime = t;
+            if (v) v.currentTime = sec;
           }}
         />
         <span className="text-[11px] text-fg tabular-nums">{formatClock(duration)}</span>
         {canPip ? (
-          <CtrlButton label="Picture in picture" onClick={togglePip}>
+          <CtrlButton label={t("player.pip")} onClick={togglePip}>
             <PipIcon size={18} />
           </CtrlButton>
         ) : null}
-        <CtrlButton label={muted || volume === 0 ? "Unmute" : "Mute"} onClick={toggleMute}>
+        <CtrlButton
+          label={muted || volume === 0 ? t("player.unmute") : t("player.mute")}
+          onClick={toggleMute}
+        >
           {muted || volume === 0 ? <MuteIcon size={18} /> : <VolumeIcon size={18} />}
         </CtrlButton>
-        <CtrlButton label="Full screen" onClick={toggleFullscreen}>
+        <CtrlButton label={t("player.fullscreen")} onClick={toggleFullscreen}>
           <FullscreenIcon size={18} />
         </CtrlButton>
       </div>
@@ -468,6 +473,7 @@ function SeekBar({
   progress: number;
   onSeek: (t: number) => void;
 }) {
+  const t = useT();
   const pct = `${progress * 100}%`;
   return (
     <div className="relative flex h-9 min-w-0 flex-1 items-center">
@@ -489,7 +495,7 @@ function SeekBar({
         step={1}
         value={Math.min(time, duration || 0)}
         onChange={(e) => onSeek(Number(e.target.value))}
-        aria-label="Seek"
+        aria-label={t("player.seek")}
         aria-valuetext={`${formatClock(time)} of ${formatClock(duration)}`}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
       />

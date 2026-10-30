@@ -7,7 +7,7 @@ import { PosterRow } from "@/components/series/PosterRow";
 import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { listSeries } from "@/lib/api/catalog";
 import type { SeriesCard } from "@/lib/api/types";
-import { copy } from "@/lib/copy";
+import { getServerT } from "@/lib/i18n/server";
 import { IS_DEMO } from "@/lib/demo/config";
 
 // Trang chủ theo NetShort (ảnh 01–04). Phần catalog lấy trên server (HTML có sẵn tên phim, cache vài
@@ -17,10 +17,11 @@ import { IS_DEMO } from "@/lib/demo/config";
 /** Mỗi hàng 6 phim; "You May Like" lấy các phim hot xếp sau 6 phim đầu. */
 const ROW = 6;
 
-export default function HomePage() {
+export default async function HomePage({ params }: PageProps<"/[lang]">) {
+  const { lang } = await params;
   return (
     <main className="flex flex-col">
-      <h1 className="sr-only">VDrama: short AI dramas</h1>
+      <h1 className="sr-only">{getServerT(lang).t("hero.pageTitle")}</h1>
       {/* Hero tràn hai mép, nằm dưới header trong suốt; phần còn lại có lề như cũ. */}
       <Suspense fallback={<HeroSkeleton />}>
         <Hero />
@@ -29,18 +30,18 @@ export default function HomePage() {
         <ContinueWatching />
 
         <Suspense fallback={<RowSkeleton />}>
-          <HotRow />
+          <HotRow lang={lang} />
         </Suspense>
         <Suspense fallback={<RowSkeleton />}>
-          <NewRow />
+          <NewRow lang={lang} />
         </Suspense>
         <Suspense fallback={<RowSkeleton />}>
-          <ForYouRow />
+          <ForYouRow lang={lang} />
         </Suspense>
         {/* Cờ "độc quyền" chỉ có ở dữ liệu demo (API thật chưa có) nên hàng này chỉ có ở bản demo. */}
         {IS_DEMO ? (
           <Suspense fallback={<RowSkeleton />}>
-            <OriginalsRow />
+            <OriginalsRow lang={lang} />
           </Suspense>
         ) : null}
       </div>
@@ -92,26 +93,37 @@ function RowSkeleton() {
   );
 }
 
-async function HotRow() {
+async function HotRow({ lang }: { lang: string }) {
   const { items } = await listSeries({ sort: "hot", limit: ROW * 2 });
-  return <HomeRow id="hot-h" title={copy.home.hot} items={items.slice(0, ROW)} preloadFirst={3} />;
+  return (
+    <HomeRow
+      id="hot-h"
+      title={getServerT(lang).t("home.hot")}
+      items={items.slice(0, ROW)}
+      preloadFirst={3}
+    />
+  );
 }
 
-async function NewRow() {
+async function NewRow({ lang }: { lang: string }) {
   const { items } = await listSeries({ sort: "new", limit: ROW });
-  return <HomeRow id="new-h" title={copy.home.newReleases} items={items} />;
+  return <HomeRow id="new-h" title={getServerT(lang).t("home.newReleases")} items={items} />;
 }
 
-async function ForYouRow() {
+async function ForYouRow({ lang }: { lang: string }) {
   const { items } = await listSeries({ sort: "hot", limit: ROW * 2 });
-  return <HomeRow id="foryou-h" title={copy.home.forYou} items={items.slice(ROW)} />;
+  return (
+    <HomeRow id="foryou-h" title={getServerT(lang).t("home.forYou")} items={items.slice(ROW)} />
+  );
 }
 
-async function OriginalsRow() {
+async function OriginalsRow({ lang }: { lang: string }) {
   const [{ items }, { demoExtras }] = await Promise.all([
     listSeries({ sort: "hot", limit: 50 }),
     import("@/lib/demo/extras"),
   ]);
   const originals = items.filter((s) => demoExtras(s.slug).badge === "original").slice(0, ROW);
-  return <HomeRow id="originals-h" title={copy.home.originals} items={originals} />;
+  return (
+    <HomeRow id="originals-h" title={getServerT(lang).t("home.originals")} items={originals} />
+  );
 }

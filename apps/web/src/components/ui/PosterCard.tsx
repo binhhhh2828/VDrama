@@ -1,5 +1,7 @@
 import { Badge } from "./Badge";
 import { PosterArt } from "./PosterArt";
+import { GenreList } from "@/components/i18n/GenreName";
+import type { Genre } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { Link } from "@/components/i18n/navigation";
 
@@ -8,7 +10,7 @@ export type PosterCardProps = {
   title: string;
   posterUrl?: string | null;
   /** Thể loại, hiện dưới tên phim ngăn bằng " • " (tối đa 2 dòng). */
-  genres?: string[];
+  genres?: Genre[];
   rank?: number;
   vip?: boolean;
   isNew?: boolean;
@@ -74,7 +76,7 @@ export function PosterCard({
         </span>
         {genres && genres.length > 0 ? (
           <span className="line-clamp-2 text-[11px] leading-[13px] text-muted">
-            {genres.join(" • ")}
+            <GenreList genres={genres} />
           </span>
         ) : null}
       </div>

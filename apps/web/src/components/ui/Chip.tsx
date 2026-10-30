@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 import { Link } from "@/components/i18n/navigation";
@@ -26,7 +27,7 @@ export function Chip({
 }
 
 /** Nhãn thể loại nhỏ (chỉ đọc): bo 16, nền surface-3, chữ xám (panel trang xem, kết quả tìm kiếm). */
-export function GenreTag({ children, className }: { children: string; className?: string }) {
+export function GenreTag({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
       className={cn(

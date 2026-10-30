@@ -1,9 +1,12 @@
+"use client";
+
 import { ButtonLink } from "@/components/ui/Button";
 import { PlayIcon } from "@/components/ui/icons";
 import { PosterArt } from "@/components/ui/PosterArt";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { SeriesCard } from "@/lib/api/types";
-import { copy } from "@/lib/copy";
+import { GenreList } from "@/components/i18n/GenreName";
+import { useT } from "@/components/i18n/I18nProvider";
 import { highlight } from "@/lib/highlight";
 import { Link } from "@/components/i18n/navigation";
 
@@ -38,6 +41,7 @@ export function SearchResultList({
   descriptions: Record<string, string | null>;
   q: string;
 }) {
+  const t = useT();
   return (
     <ul className="flex flex-col gap-[26px]">
       {items.map((s, i) => {
@@ -71,7 +75,7 @@ export function SearchResultList({
               ) : null}
               {s.genres.length > 0 ? (
                 <p className="mt-3 line-clamp-2 self-start rounded-2xl bg-[#2e2e2e] px-4 py-2 text-xs text-muted">
-                  {s.genres.map((g) => g.name).join(", ")}
+                  <GenreList genres={s.genres} separator=", " />
                 </p>
               ) : null}
               <ButtonLink
@@ -80,7 +84,7 @@ export function SearchResultList({
                 size="xs"
                 className="mt-4 w-full max-w-[180px] self-end text-[15px] sm:mt-auto"
               >
-                <PlayIcon size={14} /> {copy.series.playNow}
+                <PlayIcon size={14} /> {t("series.playNow")}
               </ButtonLink>
             </div>
           </li>

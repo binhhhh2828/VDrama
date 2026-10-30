@@ -1,5 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 
 /**
@@ -18,6 +20,7 @@ export function SectionHeader({
   href?: string;
   size?: "lg" | "sm";
 }) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -33,7 +36,7 @@ export function SectionHeader({
       </h2>
       {href ? (
         <Link href={href} className="text-[13px] font-medium no-underline">
-          {copy.home.seeAll}
+          {t("home.seeAll")}
         </Link>
       ) : null}
     </div>

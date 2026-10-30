@@ -24,9 +24,11 @@ import {
 } from "@/components/ui/icons";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
-import type { Episode } from "@/lib/api/types";
+import type { Episode, Genre } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
+import { GenreName } from "@/components/i18n/GenreName";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import { compactNumber, isFinished } from "@/lib/format";
 import { EpisodeSheet } from "./EpisodeSheet";
 import { Player } from "./Player";
@@ -45,7 +47,7 @@ type Gate =
   | { kind: "vip" }
   | { kind: "processing" }
   | { kind: "unavailable" }
-  | { kind: "error"; message: string };
+  | { kind: "error"; error: ApiError | null };
 
 async function fetchSource(episodeId: number): Promise<PlayerSource> {
   const info = await api.play(episodeId);
@@ -53,7 +55,7 @@ async function fetchSource(episodeId: number): Promise<PlayerSource> {
 }
 
 function gateFor(err: unknown): Gate {
-  if (!(err instanceof ApiError)) return { kind: "error", message: "Something went wrong." };
+  if (!(err instanceof ApiError)) return { kind: "error", error: null };
   switch (err.code) {
     case "not_authenticated":
     case "session_expired":
@@ -67,7 +69,7 @@ function gateFor(err: unknown): Gate {
         ? { kind: "ready", source: { url: DEV_SAMPLE_HLS, expiresAt: null, sample: true } }
         : { kind: "unavailable" };
     default:
-      return { kind: "error", message: err.userMessage };
+      return { kind: "error", error: err };
   }
 }
 
@@ -75,7 +77,7 @@ export type WatchSeries = {
   id: number;
   slug: string;
   title: string;
-  genres: string[];
+  genres: Genre[];
   description: string | null;
   favoriteCount: number;
 };
@@ -100,6 +102,7 @@ export function WatchView({
   likes: number | null;
   children?: ReactNode;
 }) {
+  const t = useT();
   const session = useSession();
   const viewer = useSeriesViewer();
   const { recordProgress } = viewer;
@@ -187,7 +190,7 @@ export function WatchView({
   const closeSheet = useCallback(() => setSheetOpen(false), []);
 
   const customTitle = episode.title && episode.title !== `Episode ${episode.number}`;
-  const label = `EP ${episode.number}${customTitle ? ` · ${episode.title}` : ""}`;
+  const label = `${t("series.episode", { n: episode.number })}${customTitle ? ` · ${episode.title}` : ""}`;
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:px-6">
@@ -228,16 +231,16 @@ export function WatchView({
             )}
             {/* Chevron tập trước/sau nằm ở khoảng đen bên phải player, như ảnh 10, hạ thấp để người cầm tay trái cũng chạm được. */}
             <nav
-              aria-label="Episode navigation"
+              aria-label={t("gate.nav")}
               className="absolute top-[72%] left-full ml-1.5 flex -translate-y-1/2 flex-col gap-3"
             >
               {prevHref ? (
-                <EpisodeStep href={prevHref} label="Previous episode">
+                <EpisodeStep href={prevHref} label={t("gate.prev")}>
                   <ChevronUpIcon size={18} />
                 </EpisodeStep>
               ) : null}
               {nextHref ? (
-                <EpisodeStep href={nextHref} label="Next episode">
+                <EpisodeStep href={nextHref} label={t("gate.next")}>
                   <ChevronDownIcon size={18} />
                 </EpisodeStep>
               ) : null}
@@ -253,7 +256,7 @@ export function WatchView({
         >
           <LayersIcon size={20} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate">
-            {copy.series.allEpisodes} • {series.title}
+            {t("series.allEpisodes")} • {series.title}
           </span>
           <ChevronRightIcon size={16} className="shrink-0 text-muted" />
         </button>
@@ -286,6 +289,8 @@ function InfoPanel({
   episode: Episode;
   likes: number | null;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const myList = useMyList(series.id);
   const viewer = useSeriesViewer();
   const [expanded, setExpanded] = useState(false);
@@ -304,7 +309,9 @@ function InfoPanel({
     window.open(url, "_blank", "noopener,noreferrer");
   }
   const pageUrl = () => encodeURIComponent(window.location.href);
-  const shareTitle = encodeURIComponent(`${series.title} · Episode ${episode.number} · VDrama`);
+  const shareTitle = encodeURIComponent(
+    `${t("episodes.metaTitle", { title: series.title, n: episode.number })} · VDrama`,
+  );
 
   async function copyLink() {
     try {
@@ -321,11 +328,11 @@ function InfoPanel({
 
   return (
     <section
-      aria-label="Episode details"
+      aria-label={t("gate.details")}
       className="rounded-t-[24px] bg-surface px-[13px] pt-5 pb-6 lg:rounded-[24px]"
     >
       <h1 className="px-0.5 text-base leading-snug">
-        {series.title} Episode {episode.number}
+        {t("gate.titleLine", { title: series.title, n: episode.number })}
         {customTitle ? ` · ${episode.title}` : ""}
       </h1>
 
@@ -333,13 +340,13 @@ function InfoPanel({
         {likes !== null ? (
           <span className="flex items-center gap-1.5">
             <HeartIcon size={18} className="text-fg-soft" />
-            <span aria-label={`${likes} likes`}>{compactNumber(likes)}</span>
+            <span aria-label={t("gate.likes", { n: likes })}>{compactNumber(likes, locale)}</span>
           </span>
         ) : null}
         <button
           type="button"
           aria-pressed={myList.on}
-          aria-label={myList.on ? "Remove from My List" : "Add to My List"}
+          aria-label={myList.on ? t("gate.removeFromList") : t("gate.addToList")}
           disabled={myList.disabled}
           onClick={myList.toggle}
           className={cn(
@@ -348,7 +355,7 @@ function InfoPanel({
           )}
         >
           <BookmarkFillIcon size={18} />
-          <span>{compactNumber(saves)}</span>
+          <span>{compactNumber(saves, locale)}</span>
         </button>
       </div>
       {myList.error ? (
@@ -360,8 +367,8 @@ function InfoPanel({
       {series.genres.length > 0 ? (
         <div className="mt-3.5 flex flex-wrap gap-2.5">
           {series.genres.map((g) => (
-            <GenreTag key={g} className="px-4 py-1.5 text-[13px]">
-              {g}
+            <GenreTag key={g.slug} className="px-4 py-1.5 text-[13px]">
+              <GenreName genre={g} />
             </GenreTag>
           ))}
         </div>
@@ -369,7 +376,7 @@ function InfoPanel({
 
       {series.description ? (
         <div className="mt-4 px-0.5">
-          <p className="text-[13px]">{copy.series.summary}</p>
+          <p className="text-[13px]">{t("series.summary")}</p>
           <button
             type="button"
             aria-expanded={expanded}
@@ -391,7 +398,7 @@ function InfoPanel({
       <div className="mt-4 flex items-center gap-3">
         <button
           type="button"
-          aria-label="Share on Facebook"
+          aria-label={t("gate.shareFacebook")}
           onClick={() => open(`https://www.facebook.com/sharer/sharer.php?u=${pageUrl()}`)}
           className={cn(share, "bg-[#1877f2]")}
         >
@@ -399,7 +406,7 @@ function InfoPanel({
         </button>
         <button
           type="button"
-          aria-label="Share on X"
+          aria-label={t("gate.shareX")}
           onClick={() =>
             open(`https://twitter.com/intent/tweet?url=${pageUrl()}&text=${shareTitle}`)
           }
@@ -409,13 +416,13 @@ function InfoPanel({
         </button>
         <button
           type="button"
-          aria-label={copied ? "Link copied" : "Copy link"}
+          aria-label={copied ? t("seriesPage.linkCopied") : t("gate.copyLink")}
           onClick={copyLink}
           className={cn(share, "bg-accent")}
         >
           <LinkIcon size={20} />
         </button>
-        {copied ? <span className="text-sm text-muted">Copied</span> : null}
+        {copied ? <span className="text-sm text-muted">{t("seriesPage.copied")}</span> : null}
       </div>
     </section>
   );
@@ -431,6 +438,7 @@ function GateScreen({
   episode: Episode;
   thumbnail: string | null;
 }) {
+  const t = useT();
   const pathname = usePathname();
   const next = encodeURIComponent(pathname);
 
@@ -439,7 +447,7 @@ function GateScreen({
       case "loading":
         return (
           <span
-            aria-label="Loading video"
+            aria-label={t("gate.loading")}
             role="status"
             className="size-12 animate-spin rounded-full border-4 border-fg/20 border-t-accent"
           />
@@ -447,49 +455,40 @@ function GateScreen({
       case "signin":
         return (
           <GateBox
-            title="Sign in to watch"
-            text={
-              episode.access === "free"
-                ? "This episode is free. Create a free account or sign in to start watching."
-                : "Sign in first. This episode is for VIP members."
-            }
+            title={t("gate.signInTitle")}
+            text={episode.access === "free" ? t("gate.signInFree") : t("gate.signInVip")}
           >
             <ButtonLink href={`/signin?next=${next}`} size="sm">
-              Sign in
+              {t("gate.signIn")}
             </ButtonLink>
             <ButtonLink href={`/signup?next=${next}`} variant="secondary" size="sm">
-              Create account
+              {t("gate.createAccount")}
             </ButtonLink>
           </GateBox>
         );
       case "vip":
         return (
           <GateBox
-            eyebrow="VIP EPISODE"
-            title="Unlock this episode with VIP"
-            text="VIP gives you every episode, ad-free, in Full HD."
+            eyebrow={t("gate.vipEyebrow")}
+            title={t("gate.vipTitle")}
+            text={t("gate.vipText")}
           >
             <ButtonLink href="/vip" variant="vip" size="sm">
-              <LockIcon size={16} /> See VIP plans
+              <LockIcon size={16} /> {t("gate.seePlans")}
             </ButtonLink>
           </GateBox>
         );
       case "processing":
-        return (
-          <GateBox
-            title="This video is still processing"
-            text="It usually takes a few minutes after upload. Please check back soon."
-          />
-        );
+        return <GateBox title={t("gate.processingTitle")} text={t("gate.processingText")} />;
       case "unavailable":
+        return <GateBox title={t("gate.unavailableTitle")} text={t("gate.unavailableText")} />;
+      case "error":
         return (
           <GateBox
-            title="Video playback isn't set up yet"
-            text="The video service isn't connected on this server, so episodes can't play right now."
+            title={t("gate.errorTitle")}
+            text={gate.error ? apiErrorText(gate.error, t) : t("gate.genericError")}
           />
         );
-      case "error":
-        return <GateBox title="We couldn't load this video" text={gate.message} />;
       default:
         return null;
     }
@@ -550,23 +549,25 @@ function EndCard({
   href: string;
   onCancel: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <span
         className={cn("text-xs font-bold tracking-[0.12em]", locked ? "text-vip" : "text-link")}
       >
-        UP NEXT{locked ? " · VIP" : ""}
+        {locked ? t("gate.upNextVip") : t("gate.upNext")}
       </span>
-      <p className="text-base font-bold">Episode {next.number}</p>
+      <p className="text-base font-bold">{t("episodes.episodeN", { n: next.number })}</p>
       <div className="flex gap-2.5">
         {locked ? (
           <ButtonLink href="/vip" variant="vip" size="sm">
-            <LockIcon size={16} /> Unlock with VIP
+            <LockIcon size={16} /> {t("gate.unlockVip")}
           </ButtonLink>
         ) : (
           <>
             <ButtonLink href={href} size="sm">
-              <PlayIcon /> {seconds !== null ? `Playing in ${seconds}` : "Play now"}
+              <PlayIcon />{" "}
+              {seconds !== null ? t("gate.playingIn", { n: seconds }) : t("series.playNow")}
             </ButtonLink>
             {seconds !== null ? (
               <button
@@ -574,7 +575,7 @@ function EndCard({
                 onClick={onCancel}
                 className="min-h-11 rounded-full border border-fg/25 px-4 text-sm font-semibold hover:bg-fg/10"
               >
-                Cancel
+                {t("gate.cancel")}
               </button>
             ) : null}
           </>

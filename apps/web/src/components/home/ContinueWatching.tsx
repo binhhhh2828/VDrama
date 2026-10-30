@@ -6,7 +6,7 @@ import { EpisodeThumb } from "@/components/ui/EpisodeThumb";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api/client";
 import type { HistoryItem } from "@/lib/api/types";
-import { copy } from "@/lib/copy";
+import { useLocale, useT } from "@/components/i18n/I18nProvider";
 import { progressRatio, timeLeft } from "@/lib/format";
 import { SectionHeader } from "./SectionHeader";
 
@@ -15,6 +15,8 @@ const LIMIT = 8;
 /** "Continue watching": chỉ khi đã đăng nhập và có lịch sử. Lấy trên trình duyệt (dữ liệu riêng). */
 export function ContinueWatching() {
   const session = useSession();
+  const t = useT();
+  const locale = useLocale();
   const userId = session.status === "user" ? session.user.id : null;
   // Kết quả gắn với user đã tải nó, để đổi tài khoản không hiện nhầm lịch sử người trước.
   const [loaded, setLoaded] = useState<{ userId: number; items: HistoryItem[] } | null>(null);
@@ -37,7 +39,7 @@ export function ContinueWatching() {
 
   return (
     <section aria-labelledby="continue-h" className="flex flex-col gap-8">
-      <SectionHeader id="continue-h" title={copy.home.continueWatching} href="/account/history" />
+      <SectionHeader id="continue-h" title={t("home.continueWatching")} href="/account/history" />
       {/* Điện thoại: trượt ngang; desktop: lưới. */}
       <div className="-mx-4 flex gap-2.5 overflow-x-auto px-[22px] pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-5 sm:overflow-visible sm:px-0">
         {items === null
@@ -55,7 +57,7 @@ export function ContinueWatching() {
                 key={h.series.id}
                 href={`/series/${h.series.slug}/episode/${h.episode.number}`}
                 title={h.series.title}
-                meta={`EP ${h.episode.number} · ${timeLeft(h.progress_sec, h.episode.duration_sec)}`}
+                meta={`${t("series.episode", { n: h.episode.number })} · ${timeLeft(h.progress_sec, h.episode.duration_sec, locale)}`}
                 thumbnailUrl={h.episode.thumbnail_url}
                 progress={progressRatio(h.progress_sec, h.episode.duration_sec)}
                 className="w-[68%] max-w-56 shrink-0 sm:w-auto sm:max-w-none"

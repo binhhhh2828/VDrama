@@ -7,13 +7,15 @@ import { PosterGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { listGenres, listSeries } from "@/lib/api/catalog";
 import type { SeriesSort } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { getServerT } from "@/lib/i18n/server";
+import type { T } from "@/lib/i18n/translate";
+import { genreLabel } from "@/lib/i18n/labels";
 import { Link } from "@/components/i18n/navigation";
 
-export const metadata: Metadata = {
-  title: "Browse series",
-  description: "Browse every VDrama series by genre, newest or trending.",
-};
+export async function generateMetadata({ params }: PageProps<"/[lang]/browse">): Promise<Metadata> {
+  const { t } = getServerT((await params).lang);
+  return { title: t("browse.metaTitle"), description: t("browse.metaDescription") };
+}
 
 const PAGE_SIZE = 18;
 
@@ -34,13 +36,14 @@ function href(f: Filters): string {
 }
 
 // /browse?genre=&sort=new|hot theo ảnh 18. Bộ lọc nằm trong URL nên chia sẻ được và nút Back hoạt động.
-export default function BrowsePage({ searchParams }: PageProps<"/[lang]/browse">) {
+export default async function BrowsePage({ params, searchParams }: PageProps<"/[lang]/browse">) {
+  const { t } = getServerT((await params).lang);
   return (
     <main className="mx-auto flex w-full max-w-[1360px] flex-col px-4 pb-16 sm:px-6">
-      <Breadcrumb items={[{ label: copy.nav.home, href: "/" }, { label: copy.nav.browse }]} />
-      <h1 className="mt-5 text-[28px] leading-9 font-bold">Explore genres &amp; short dramas</h1>
+      <Breadcrumb items={[{ label: t("nav.home"), href: "/" }, { label: t("nav.browse") }]} />
+      <h1 className="mt-5 text-[28px] leading-9 font-bold">{t("browse.heading")}</h1>
       <Suspense fallback={<FiltersSkeleton />}>
-        <BrowseContent searchParams={searchParams} />
+        <BrowseContent searchParams={searchParams} t={t} />
       </Suspense>
     </main>
   );
@@ -48,8 +51,10 @@ export default function BrowsePage({ searchParams }: PageProps<"/[lang]/browse">
 
 async function BrowseContent({
   searchParams,
+  t,
 }: {
   searchParams: PageProps<"/[lang]/browse">["searchParams"];
+  t: T;
 }) {
   const filters = readFilters(await searchParams);
   const genres = await listGenres();
@@ -57,13 +62,17 @@ async function BrowseContent({
 
   return (
     <>
-      <h2 className="mt-8 text-2xl leading-8 font-semibold">All series</h2>
+      <h2 className="mt-8 text-2xl leading-8 font-semibold">{t("browse.all")}</h2>
       <div className="mt-5 flex flex-col gap-5">
         <GenreChips
           items={[
-            { label: "All", href: href({ ...filters, genre: null }), active: !filters.genre },
+            {
+              label: t("browse.allChip"),
+              href: href({ ...filters, genre: null }),
+              active: !filters.genre,
+            },
             ...genres.map((g) => ({
-              label: g.name,
+              label: genreLabel(t, g),
               href: href({ ...filters, genre: g.slug }),
               active: filters.genre === g.slug,
             })),
@@ -71,31 +80,31 @@ async function BrowseContent({
         />
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm text-muted" aria-live="polite">
-            {current ? current.name : "All genres"} ·{" "}
-            {filters.sort === "hot" ? "Most watched" : "Newest first"}
+            {current ? genreLabel(t, current) : t("browse.allGenres")} ·{" "}
+            {filters.sort === "hot" ? t("browse.mostWatched") : t("browse.newestFirst")}
           </p>
-          <SortToggle filters={filters} />
+          <SortToggle filters={filters} t={t} />
         </div>
       </div>
 
       <div className="mt-6">
         <Suspense key={href(filters)} fallback={<PosterGridSkeleton count={12} />}>
-          <Results filters={filters} unknownGenre={filters.genre !== null && !current} />
+          <Results filters={filters} unknownGenre={filters.genre !== null && !current} t={t} />
         </Suspense>
       </div>
     </>
   );
 }
 
-function SortToggle({ filters }: { filters: Filters }) {
+function SortToggle({ filters, t }: { filters: Filters; t: T }) {
   const options: Array<[SeriesSort, string]> = [
-    ["new", "Newest"],
-    ["hot", "Trending"],
+    ["new", t("browse.newest")],
+    ["hot", t("browse.trending")],
   ];
   return (
     <div
       role="group"
-      aria-label="Sort"
+      aria-label={t("browse.sort")}
       className="flex rounded-full border border-line bg-surface p-1"
     >
       {options.map(([value, label]) => {
@@ -118,7 +127,15 @@ function SortToggle({ filters }: { filters: Filters }) {
   );
 }
 
-async function Results({ filters, unknownGenre }: { filters: Filters; unknownGenre: boolean }) {
+async function Results({
+  filters,
+  unknownGenre,
+  t,
+}: {
+  filters: Filters;
+  unknownGenre: boolean;
+  t: T;
+}) {
   const params = { sort: filters.sort, genre: filters.genre ?? undefined };
   const page = unknownGenre
     ? { items: [], next_cursor: null }
@@ -127,10 +144,10 @@ async function Results({ filters, unknownGenre }: { filters: Filters; unknownGen
   if (page.items.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-panel border border-line bg-surface px-6 py-16 text-center">
-        <p className="text-lg font-bold">No series here yet</p>
-        <p className="text-muted">New dramas land every week. Try another genre for now.</p>
+        <p className="text-lg font-bold">{t("browse.emptyTitle")}</p>
+        <p className="text-muted">{t("browse.emptyText")}</p>
         <Link href="/browse" className="font-semibold">
-          See all series
+          {t("browse.seeAll")}
         </Link>
       </div>
     );

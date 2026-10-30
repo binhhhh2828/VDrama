@@ -6,7 +6,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { PlayIcon } from "@/components/ui/icons";
 import { PosterArt } from "@/components/ui/PosterArt";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 
 export type HeroSlide = {
@@ -28,6 +28,7 @@ const UNDER_HEADER = "-mt-[58px] md:mt-0";
  * chạm/rê chuột/focus bên trong hoặc khi bật giảm chuyển động. Desktop: các thẻ 3:4 xếp cạnh nhau.
  */
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+  const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -68,7 +69,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Featured series"
+      aria-label={t("hero.label")}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={() => setPaused(true)}
@@ -87,7 +88,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             key={s.slug}
             role="group"
             aria-roledescription="slide"
-            aria-label={`${i + 1} of ${slides.length}: ${s.title}`}
+            aria-label={t("hero.slide", { i: i + 1, n: slides.length, title: s.title })}
             className="relative w-full shrink-0 snap-start snap-always md:w-[400px] md:overflow-hidden md:rounded-hero"
           >
             <PosterArt
@@ -112,7 +113,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 size="xs"
                 className="w-60 max-w-full text-sm"
               >
-                <PlayIcon size={14} /> {copy.series.playNow}
+                <PlayIcon size={14} /> {t("series.playNow")}
               </ButtonLink>
             </div>
           </div>

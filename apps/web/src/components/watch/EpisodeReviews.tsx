@@ -1,5 +1,7 @@
+"use client";
+
 import { Badge } from "@/components/ui/Badge";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link } from "@/components/i18n/navigation";
 
 export type Review = { title: string; body: string };
@@ -9,16 +11,17 @@ export type Review = { title: string; body: string };
  * văn bản mẫu (nhãn PREVIEW).
  */
 export function EpisodeReviews({ reviews, seriesHref }: { reviews: Review[]; seriesHref: string }) {
+  const t = useT();
   if (reviews.length === 0) return null;
   return (
     <section aria-labelledby="reviews-h" className="flex flex-col gap-4 px-[13px]">
       <div className="flex items-center justify-between gap-3">
         <h2 id="reviews-h" className="flex items-center gap-3 text-xl leading-7 font-bold">
-          {copy.watch.reviews}
+          {t("watch.reviews")}
           <Badge kind="preview" />
         </h2>
         <Link href={seriesHref} className="text-[13px] font-medium no-underline">
-          {copy.watch.seeMore}
+          {t("watch.seeMore")}
         </Link>
       </div>
       <ul className="flex flex-col gap-3">

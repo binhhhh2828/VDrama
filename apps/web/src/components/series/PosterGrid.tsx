@@ -28,7 +28,7 @@ export function PosterGrid({
           href={`/series/${s.slug}`}
           title={s.title}
           posterUrl={s.poster_url}
-          genres={s.genres.map((g) => g.name)}
+          genres={s.genres}
           rank={ranked ? i + 1 : undefined}
           isNew={markNew}
           original={IS_DEMO && demoExtras(s.slug).badge === "original"}

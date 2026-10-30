@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BarsIcon, ChevronRightIcon, CloseIcon, LockIcon } from "@/components/ui/icons";
 import type { Episode } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Link, usePathname } from "@/components/i18n/navigation";
 
 const TAB_SIZE = 30;
@@ -40,6 +40,7 @@ export function EpisodeSheet({
   currentNumber: number;
   isVip: boolean;
 }) {
+  const t = useT();
   const ref = useRef<HTMLDialogElement>(null);
   const touchY = useRef<number | null>(null);
   const pathname = usePathname();
@@ -90,7 +91,7 @@ export function EpisodeSheet({
   return (
     <dialog
       ref={ref}
-      aria-label={copy.series.episodeList}
+      aria-label={t("series.episodeList")}
       onClose={onClose}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -109,10 +110,10 @@ export function EpisodeSheet({
       )}
     >
       <div className="px-[13px] pt-5 pb-6">
-        <h2 className="px-0.5 text-base">{copy.series.episodeList}</h2>
+        <h2 className="px-0.5 text-base">{t("series.episodeList")}</h2>
 
         <div className="mt-2 flex items-center border-b border-line">
-          <div role="tablist" aria-label="Episode ranges" className="flex items-center">
+          <div role="tablist" aria-label={t("series.episodeList")} className="flex items-center">
             {tabs.map((t, i) => (
               <button
                 key={t.from}
@@ -134,7 +135,7 @@ export function EpisodeSheet({
           </div>
           <button
             type="button"
-            aria-label="Close episode list"
+            aria-label={t("episodes.closeList")}
             onClick={onClose}
             className="flex size-11 items-center justify-center text-fg"
           >
@@ -144,7 +145,7 @@ export function EpisodeSheet({
             href={`/series/${slug}`}
             className="ml-auto flex min-h-11 items-center gap-0.5 text-[13px] text-muted no-underline hover:text-fg"
           >
-            {copy.series.allEpisodes} <ChevronRightIcon size={14} />
+            {t("series.allEpisodes")} <ChevronRightIcon size={14} />
           </Link>
         </div>
 
@@ -158,7 +159,7 @@ export function EpisodeSheet({
                   href={`/series/${slug}/episode/${e.number}`}
                   onClick={onClose}
                   aria-current={current ? "page" : undefined}
-                  aria-label={`Episode ${e.number}${locked ? ", VIP" : ""}`}
+                  aria-label={t(locked ? "episodes.ariaVip" : "episodes.aria", { n: e.number })}
                   className={cn(
                     "hit-44 relative flex h-[33px] items-center justify-center rounded-md text-sm font-semibold no-underline",
                     current

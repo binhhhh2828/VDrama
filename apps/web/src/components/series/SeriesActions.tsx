@@ -9,7 +9,8 @@ import { ApiError } from "@/lib/api/errors";
 import type { Episode } from "@/lib/api/types";
 import { isFinished } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { copy } from "@/lib/copy";
+import { useT } from "@/components/i18n/I18nProvider";
+import { apiErrorText } from "@/lib/i18n/api-errors";
 import { useSeriesViewer } from "./SeriesViewer";
 import { usePathname, useRouter } from "@/components/i18n/navigation";
 
@@ -35,6 +36,7 @@ export function resumeTarget(
 
 /** Nút "Watch now" (ảnh 15): phát tiếp tập đang xem dở, chưa xem thì phát tập đầu. */
 export function WatchNowButton({ slug, episodes }: { slug: string; episodes: Episode[] }) {
+  const t = useT();
   const viewer = useSeriesViewer();
   const target = resumeTarget(episodes, viewer.progress);
   const shape = "h-[46px] w-[182px] max-w-full rounded-[14px]! text-base";
@@ -42,7 +44,7 @@ export function WatchNowButton({ slug, episodes }: { slug: string; episodes: Epi
   if (!target) {
     return (
       <Button variant="cta" disabled className={shape}>
-        Coming soon
+        {t("seriesPage.comingSoonButton")}
       </Button>
     );
   }
@@ -53,13 +55,16 @@ export function WatchNowButton({ slug, episodes }: { slug: string; episodes: Epi
       className={shape}
     >
       <PlayIcon size={18} />
-      {target.resume ? `Continue EP ${target.episode.number}` : copy.series.watchNow}
+      {target.resume
+        ? t("seriesPage.continueEp", { n: target.episode.number })
+        : t("series.watchNow")}
     </ButtonLink>
   );
 }
 
 /** Bật/tắt My List của một phim. Khách bấm thì chuyển sang đăng nhập rồi quay lại trang này. */
 export function useMyList(seriesId: number) {
+  const t = useT();
   const session = useSession();
   const viewer = useSeriesViewer();
   const router = useRouter();
@@ -81,7 +86,7 @@ export function useMyList(seriesId: number) {
       else await api.addFavorite(seriesId);
     } catch (err) {
       viewer.setFavorited(on);
-      setError(err instanceof ApiError ? err.userMessage : "Couldn't update My List.");
+      setError(err instanceof ApiError ? apiErrorText(err, t) : t("seriesPage.listFailed"));
     } finally {
       setBusy(false);
     }
@@ -97,6 +102,7 @@ export function useMyList(seriesId: number) {
 }
 
 export function MyListButton({ seriesId }: { seriesId: number }) {
+  const t = useT();
   const { on, error, toggle, disabled } = useMyList(seriesId);
 
   return (
@@ -114,7 +120,7 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
         )}
       >
         {on ? <CheckIcon size={18} className="text-accent" /> : <PlusIcon size={18} />}
-        {on ? "In My List" : "My List"}
+        {on ? t("seriesPage.inList") : t("nav.myList")}
       </button>
       {error ? (
         <p role="alert" className="w-full text-sm text-error-soft">
@@ -126,6 +132,7 @@ export function MyListButton({ seriesId }: { seriesId: number }) {
 }
 
 export function ShareButton({ title }: { title: string }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -151,7 +158,7 @@ export function ShareButton({ title }: { title: string }) {
     <button
       type="button"
       onClick={share}
-      aria-label={copied ? "Link copied" : "Share"}
+      aria-label={copied ? t("seriesPage.linkCopied") : t("seriesPage.share")}
       className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-full border border-line bg-fg/6 px-3.5 text-fg hover:bg-fg/12"
     >
       <svg
@@ -167,7 +174,7 @@ export function ShareButton({ title }: { title: string }) {
       >
         <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" />
       </svg>
-      {copied ? <span className="text-sm font-semibold">Copied</span> : null}
+      {copied ? <span className="text-sm font-semibold">{t("seriesPage.copied")}</span> : null}
     </button>
   );
 }

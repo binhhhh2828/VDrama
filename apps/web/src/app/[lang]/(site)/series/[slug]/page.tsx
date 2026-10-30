@@ -12,27 +12,41 @@ import { PosterArt } from "@/components/ui/PosterArt";
 import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { getSeries, listEpisodes, listSeries } from "@/lib/api/catalog";
 import type { Episode, SeriesDetail } from "@/lib/api/types";
-import { copy } from "@/lib/copy";
+import { getServerT } from "@/lib/i18n/server";
+import { GenreName } from "@/components/i18n/GenreName";
 import { compactNumber } from "@/lib/format";
+import { genreLabel } from "@/lib/i18n/labels";
+import { localePath } from "@/lib/i18n/paths";
+import { LOCALES, type Locale } from "@/lib/i18n/config";
+import type { T } from "@/lib/i18n/translate";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[lang]/series/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, lang } = await params;
+  const { t, locale } = getServerT(lang);
   const series = await getSeries(slug);
-  if (!series) return { title: "Series not found" };
+  if (!series) return { title: t("seriesPage.notFound") };
   const description =
-    series.description ?? `Watch ${series.title} on VDrama. ${series.genres[0]?.name ?? ""}`.trim();
+    series.description ??
+    t("seriesPage.metaDescription", {
+      title: series.title,
+      genre: series.genres[0] ? genreLabel(t, series.genres[0]) : "",
+    }).trim();
   const image = series.banner_url ?? series.poster_url;
+  const path = `/series/${series.slug}`;
   return {
     title: series.title,
     description,
-    alternates: { canonical: `/series/${series.slug}` },
+    alternates: {
+      canonical: localePath(locale, path),
+      languages: Object.fromEntries(LOCALES.map((l: Locale) => [l, localePath(l, path)])),
+    },
     openGraph: {
       type: "video.tv_show",
       title: series.title,
       description,
-      url: `/series/${series.slug}`,
+      url: localePath(locale, path),
       images: image ? [{ url: image }] : undefined,
     },
     twitter: { card: "summary_large_image", title: series.title, description },
@@ -52,7 +66,8 @@ export default function SeriesPage({ params }: PageProps<"/[lang]/series/[slug]"
 }
 
 async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[slug]">["params"] }) {
-  const { slug } = await params;
+  const { slug, lang } = await params;
+  const { t, locale } = getServerT(lang);
   const [series, episodes] = await Promise.all([getSeries(slug), listEpisodes(slug)]);
   if (!series || !episodes) notFound();
 
@@ -60,8 +75,8 @@ async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[sl
     <SeriesViewerProvider slug={series.slug} seriesId={series.id}>
       <Breadcrumb
         items={[
-          { label: copy.nav.home, href: "/" },
-          { label: copy.nav.browse, href: "/browse" },
+          { label: t("nav.home"), href: "/" },
+          { label: t("nav.browse"), href: "/browse" },
           { label: series.title.toLowerCase() },
         ]}
       />
@@ -77,15 +92,17 @@ async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[sl
           >
             {series.title}
           </h1>
-          <p className="text-base text-fg-soft">{statusLine(series)}</p>
+          <p className="text-base text-fg-soft">{statusLine(series, t)}</p>
           {series.genres.length > 0 ? (
             <ul
-              aria-label="Genres"
+              aria-label={t("browse.genres")}
               className="flex flex-wrap justify-center gap-2 md:justify-start"
             >
               {series.genres.map((g) => (
                 <li key={g.slug}>
-                  <GenreTag className="bg-fg/12 px-3.5 py-1.5 text-[13px]">{g.name}</GenreTag>
+                  <GenreTag className="bg-fg/12 px-3.5 py-1.5 text-[13px]">
+                    <GenreName genre={g} />
+                  </GenreTag>
                 </li>
               ))}
             </ul>
@@ -112,14 +129,16 @@ async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[sl
         {series.description ? (
           <section aria-labelledby="about-h" className="flex flex-col gap-2 px-1">
             <h2 id="about-h" className="text-base font-bold">
-              {copy.series.summary}
+              {t("series.summary")}
             </h2>
             <p className="max-w-[720px] text-[15px] leading-7 text-fg-soft">{series.description}</p>
             <p className="text-sm text-muted">
               {[
                 series.year ? String(series.year) : null,
-                series.view_count ? `${compactNumber(series.view_count)} views` : null,
-                accessSummary(episodes),
+                series.view_count
+                  ? t("seriesPage.views", { n: compactNumber(series.view_count, locale) })
+                  : null,
+                accessSummary(episodes, t),
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -130,21 +149,21 @@ async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[sl
         <section aria-labelledby="eps-h" className="flex flex-col gap-4">
           <div className="flex flex-wrap items-baseline justify-between gap-3 px-1">
             <h2 id="eps-h" className="text-xl font-semibold md:text-2xl">
-              Episodes
+              {t("seriesPage.episodes")}
             </h2>
-            <span className="text-sm text-muted">{episodeCountLabel(series)}</span>
+            <span className="text-sm text-muted">{episodeCountLabel(series, t)}</span>
           </div>
           {episodes.length ? (
             <EpisodeList slug={series.slug} episodes={episodes} />
           ) : (
             <p className="rounded-card border border-line bg-surface p-6 text-muted">
-              The first episode is on its way. Add this series to My List to find it later.
+              {t("seriesPage.firstSoon")}
             </p>
           )}
         </section>
 
         <Suspense fallback={<PosterRowSkeleton />}>
-          <Related series={series} />
+          <Related series={series} t={t} />
         </Suspense>
       </div>
     </SeriesViewerProvider>
@@ -152,39 +171,46 @@ async function SeriesContent({ params }: { params: PageProps<"/[lang]/series/[sl
 }
 
 /** "35 episodes, Fully updated" như ảnh 15. */
-function statusLine(series: SeriesDetail): string {
+function statusLine(series: SeriesDetail, t: T): string {
   const count = series.episode_count || series.total_episodes || 0;
-  const episodes = count ? `${count} episodes` : "Episodes coming soon";
-  return `${episodes}, ${series.status === "completed" ? "Fully updated" : "New episodes weekly"}`;
+  const episodes = count ? t("series.totalEpisodes", { n: count }) : t("seriesPage.comingSoon");
+  return `${episodes}, ${series.status === "completed" ? t("seriesPage.fullyUpdated") : t("seriesPage.weekly")}`;
 }
 
 /** "Episodes 1–2 are free. VIP unlocks episodes 3–12." */
-function accessSummary(episodes: Episode[]): string {
+function accessSummary(episodes: Episode[], t: T): string {
   const free = episodes.filter((e) => e.access === "free").map((e) => e.number);
   const vip = episodes.filter((e) => e.access === "vip").map((e) => e.number);
-  const range = (ns: number[]) =>
-    ns.length === 1 ? `episode ${ns[0]}` : `episodes ${ns[0]}–${ns[ns.length - 1]}`;
   if (!episodes.length) return "";
-  if (!vip.length) return "Every episode is free with an account.";
-  if (!free.length) return "Every episode is for VIP members.";
-  const freeText = range(free);
-  return `${freeText[0].toUpperCase()}${freeText.slice(1)} ${free.length === 1 ? "is" : "are"} free. VIP unlocks ${range(vip)}.`;
+  if (!vip.length) return t("seriesPage.allFree");
+  if (!free.length) return t("seriesPage.allVip");
+  const freeText =
+    free.length === 1
+      ? t("seriesPage.freeOne", { n: free[0] })
+      : t("seriesPage.freeMany", { from: free[0], to: free[free.length - 1] });
+  const vipText =
+    vip.length === 1
+      ? t("seriesPage.vipOne", { n: vip[0] })
+      : t("seriesPage.vipMany", { from: vip[0], to: vip[vip.length - 1] });
+  return `${freeText} ${vipText}`;
 }
 
-function episodeCountLabel(series: SeriesDetail): string {
+function episodeCountLabel(series: SeriesDetail, t: T): string {
   const have = series.episode_count;
-  if (series.status === "completed" || !series.total_episodes) return `${have} episodes`;
-  return `${have} of ${series.total_episodes} · new episodes weekly`;
+  if (series.status === "completed" || !series.total_episodes) {
+    return t("series.totalEpisodes", { n: have });
+  }
+  return t("seriesPage.countOf", { have, total: series.total_episodes });
 }
 
-async function Related({ series }: { series: SeriesDetail }) {
+async function Related({ series, t }: { series: SeriesDetail; t: T }) {
   const genre = series.genres[0]?.slug;
   const { items } = await listSeries({ genre, sort: "hot", limit: 8 });
   const others = items.filter((s) => s.id !== series.id).slice(0, 6);
   if (others.length === 0) return null;
   return (
     <section aria-labelledby="like-h" className="flex flex-col gap-4">
-      <SectionHeader id="like-h" title={copy.home.forYou} size="sm" />
+      <SectionHeader id="like-h" title={t("home.forYou")} size="sm" />
       <PosterRow series={others} />
     </section>
   );

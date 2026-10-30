@@ -9,7 +9,10 @@ import { PosterRowSkeleton, Skeleton } from "@/components/ui/Skeleton";
 import { EpisodeReviews } from "@/components/watch/EpisodeReviews";
 import { WatchView } from "@/components/watch/WatchView";
 import { getSeries, listEpisodes, listSeries } from "@/lib/api/catalog";
-import { copy } from "@/lib/copy";
+import { getServerT } from "@/lib/i18n/server";
+import { localePath } from "@/lib/i18n/paths";
+import { LOCALES } from "@/lib/i18n/config";
+import type { T } from "@/lib/i18n/translate";
 import { IS_DEMO } from "@/lib/demo/config";
 
 type Props = PageProps<"/[lang]/series/[slug]/episode/[number]">;
@@ -26,15 +29,21 @@ async function load(params: Props["params"]) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await load(params);
-  if (!data) return { title: "Episode not found" };
+  const { t, locale } = getServerT((await params).lang);
+  if (!data) return { title: t("episodes.notFound") };
   const { series, episode } = data;
+  const title = t("episodes.metaTitle", { title: series.title, n: episode.number });
+  const path = `/series/${series.slug}/episode/${episode.number}`;
   return {
-    title: `${series.title} · Episode ${episode.number}`,
+    title,
     description: series.description ?? undefined,
-    alternates: { canonical: `/series/${series.slug}/episode/${episode.number}` },
+    alternates: {
+      canonical: localePath(locale, path),
+      languages: Object.fromEntries(LOCALES.map((l) => [l, localePath(l, path)])),
+    },
     openGraph: {
       type: "video.episode",
-      title: `${series.title} · Episode ${episode.number}`,
+      title,
       images: episode.thumbnail_url ? [{ url: episode.thumbnail_url }] : undefined,
     },
   };
@@ -53,6 +62,7 @@ export default function WatchPage({ params }: Props) {
 async function WatchContent({ params }: { params: Props["params"] }) {
   const data = await load(params);
   if (!data) notFound();
+  const { t } = getServerT((await params).lang);
   const { series, episodes, episode } = data;
   // Số thích và bài đánh giá chỉ có ở dữ liệu demo (API thật chưa có); nạp động để bản thật không kéo
   // dữ liệu mẫu vào.
@@ -62,8 +72,8 @@ async function WatchContent({ params }: { params: Props["params"] }) {
       <div className="px-[13px]">
         <Breadcrumb
           items={[
-            { label: copy.nav.home, href: "/" },
-            { label: copy.nav.browse, href: "/browse" },
+            { label: t("nav.home"), href: "/" },
+            { label: t("nav.browse"), href: "/browse" },
             { label: series.title.toLowerCase() },
           ]}
         />
@@ -74,7 +84,7 @@ async function WatchContent({ params }: { params: Props["params"] }) {
             id: series.id,
             slug: series.slug,
             title: series.title,
-            genres: series.genres.map((g) => g.name),
+            genres: series.genres,
             description: series.description,
             favoriteCount: series.favorite_count,
           }}
@@ -84,10 +94,10 @@ async function WatchContent({ params }: { params: Props["params"] }) {
         >
           <div className="flex flex-col gap-8 px-4">
             <Suspense fallback={<RowFallback />}>
-              <RecommendedRow excludeSlug={series.slug} />
+              <RecommendedRow excludeSlug={series.slug} t={t} />
             </Suspense>
             <Suspense fallback={<RowFallback />}>
-              <LatestRow excludeSlug={series.slug} />
+              <LatestRow excludeSlug={series.slug} t={t} />
             </Suspense>
           </div>
           {extras ? (
@@ -108,25 +118,25 @@ function RowFallback() {
   );
 }
 
-async function RecommendedRow({ excludeSlug }: { excludeSlug: string }) {
+async function RecommendedRow({ excludeSlug, t }: { excludeSlug: string; t: T }) {
   const { items } = await listSeries({ sort: "hot", limit: 8 });
   const list = items.filter((s) => s.slug !== excludeSlug).slice(0, 6);
   if (list.length === 0) return null;
   return (
     <section aria-labelledby="rec-h" className="flex flex-col gap-4">
-      <SectionHeader id="rec-h" title={copy.watch.recommended} size="sm" />
+      <SectionHeader id="rec-h" title={t("watch.recommended")} size="sm" />
       <PosterRow series={list} />
     </section>
   );
 }
 
-async function LatestRow({ excludeSlug }: { excludeSlug: string }) {
+async function LatestRow({ excludeSlug, t }: { excludeSlug: string; t: T }) {
   const { items } = await listSeries({ sort: "new", limit: 8 });
   const list = items.filter((s) => s.slug !== excludeSlug).slice(0, 6);
   if (list.length === 0) return null;
   return (
     <section aria-labelledby="latest-h" className="flex flex-col gap-4">
-      <SectionHeader id="latest-h" title={copy.watch.latest} size="sm" />
+      <SectionHeader id="latest-h" title={t("watch.latest")} size="sm" />
       <PosterRow series={list} />
     </section>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/I18nProvider";
 import { Chip } from "@/components/ui/Chip";
 import { ChevronDownIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
@@ -15,6 +16,7 @@ const COLLAPSED_PX = 119;
  * nút tròn mũi tên ở góc phải dưới để mở hết; không đủ dài để tràn thì không có nút.
  */
 export function GenreChips({ items }: { items: GenreChip[] }) {
+  const t = useT();
   const listRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
@@ -29,7 +31,7 @@ export function GenreChips({ items }: { items: GenreChip[] }) {
   }, [items]);
 
   return (
-    <nav aria-label="Genres" className="relative">
+    <nav aria-label={t("browse.genres")} className="relative">
       <div
         ref={listRef}
         style={expanded ? undefined : { maxHeight: COLLAPSED_PX }}
@@ -47,7 +49,7 @@ export function GenreChips({ items }: { items: GenreChip[] }) {
         <button
           type="button"
           aria-expanded={expanded}
-          aria-label={expanded ? "Show fewer genres" : "Show all genres"}
+          aria-label={expanded ? t("browse.showFewer") : t("browse.showAllGenres")}
           onClick={() => setExpanded((v) => !v)}
           className="hit-44 absolute right-0 bottom-0 flex size-9 items-center justify-center rounded-full bg-surface-3 text-fg"
         >
