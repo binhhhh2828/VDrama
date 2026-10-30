@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 export type ButtonVariant =
   "primary" | "gradient" | "cta" | "secondary" | "vip" | "ghost" | "danger";

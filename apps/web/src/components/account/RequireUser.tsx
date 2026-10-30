@@ -1,10 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { usePathname, useRouter } from "@/components/i18n/navigation";
 
 /**
  * Trang chỉ dành cho người đã đăng nhập: khách bị chuyển sang /signin (kèm ?next= để quay lại).

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
@@ -8,6 +7,7 @@ import { PlayIcon } from "@/components/ui/icons";
 import { PosterArt } from "@/components/ui/PosterArt";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { Link } from "@/components/i18n/navigation";
 
 export type HeroSlide = {
   slug: string;

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ChevronLeftIcon } from "@/components/ui/icons";
+import { Link, useRouter } from "@/components/i18n/navigation";
 
 /** Header riêng của trang tài khoản (ảnh 06): nút quay lại bên trái, logo ở giữa. */
 export function AccountHeader() {

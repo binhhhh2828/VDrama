@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -19,6 +17,7 @@ import { cn } from "@/lib/cn";
 import stacked from "../../../public/brand/logo-stacked.png";
 import { SignInForm } from "./SignInForm";
 import { SignUpForm } from "./SignUpForm";
+import { Link, useRouter } from "@/components/i18n/navigation";
 
 type Terms = { accepted: boolean; check: () => boolean };
 const TermsCtx = createContext<Terms | null>(null);

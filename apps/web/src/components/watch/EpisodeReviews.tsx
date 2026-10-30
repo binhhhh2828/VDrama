@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { copy } from "@/lib/copy";
+import { Link } from "@/components/i18n/navigation";
 
 export type Review = { title: string; body: string };
 

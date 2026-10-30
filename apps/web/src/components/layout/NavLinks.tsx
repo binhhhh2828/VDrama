@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import { cn } from "@/lib/cn";
 import { MAIN_NAV, isActive } from "./nav";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 const base = "px-3.5 py-2.5 text-[15px] font-medium no-underline border-b-2 transition";
 

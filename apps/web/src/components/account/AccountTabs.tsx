@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 const TABS = [
   { href: "/account", label: "Overview" },

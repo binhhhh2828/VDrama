@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useSession } from "@/components/session/SessionProvider";
 import { CrownIcon, UserIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
+import { Link } from "@/components/i18n/navigation";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);

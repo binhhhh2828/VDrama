@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +9,7 @@ import { ApiError } from "@/lib/api/errors";
 import { FormAlert } from "./AuthTabs";
 import { useTerms } from "./AuthFlow";
 import { useRedirectIfSignedIn } from "./useRedirectIfSignedIn";
+import { useRouter } from "@/components/i18n/navigation";
 
 type Errors = Partial<Record<"display_name" | "email" | "password", string>>;
 

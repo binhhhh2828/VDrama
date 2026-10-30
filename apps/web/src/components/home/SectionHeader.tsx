@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { Link } from "@/components/i18n/navigation";
 
 /**
  * Tiêu đề hàng theo NetShort. `lg` (trang chủ, ảnh 02, 03): 24px đậm vừa, thụt vào hơn thẻ phim

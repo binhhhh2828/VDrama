@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ChevronDownIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
 import { FOOTER_GROUPS } from "./nav";
+import { Link } from "@/components/i18n/navigation";
 
 /**
  * Chân trang theo ảnh 04: đường kẻ, các hàng accordion (chữ 18px, mũi tên xuống), dòng bản quyền xám.

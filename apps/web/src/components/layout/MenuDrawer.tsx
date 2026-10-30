@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, type ComponentType } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { useSession } from "@/components/session/SessionProvider";
@@ -17,6 +15,7 @@ import {
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import { activeHref } from "./nav";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 type Item = { href: string; label: string; Icon: ComponentType<{ size?: number }> };
 

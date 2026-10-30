@@ -1,8 +1,10 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
 import { SearchIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
+import { localePath } from "@/lib/i18n/paths";
+import { useLocale } from "@/components/i18n/I18nProvider";
+import { usePathname, useSearchParams } from "@/components/i18n/navigation";
 
 /** Ô tìm kiếm viên thuốc 183×36 ở header. Là form GET thường tới /search (chạy cả khi chưa có JS). */
 export function SearchForm({
@@ -12,10 +14,11 @@ export function SearchForm({
   defaultValue?: string;
   autoFocus?: boolean;
 }) {
+  const locale = useLocale();
   return (
     <form
       role="search"
-      action="/search"
+      action={localePath(locale, "/search")}
       className="ml-auto flex h-8 max-w-[150px] min-w-0 flex-1 items-center gap-1.5 rounded-full bg-surface-2 px-3 focus-within:ring-2 focus-within:ring-link md:max-w-[360px]"
     >
       <SearchIcon size={16} className="shrink-0 text-muted" />

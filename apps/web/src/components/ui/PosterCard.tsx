@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Badge } from "./Badge";
 import { PosterArt } from "./PosterArt";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 export type PosterCardProps = {
   href: string;

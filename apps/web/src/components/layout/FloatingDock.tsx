@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { useSession } from "@/components/session/SessionProvider";
 import { useVipSheet } from "@/components/vip/VipSheetProvider";
 import { ArrowUpIcon, CloseIcon } from "@/components/ui/icons";
 import { copy } from "@/lib/copy";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 const DISMISS_KEY = "vdrama:vip-bar-dismissed";
 

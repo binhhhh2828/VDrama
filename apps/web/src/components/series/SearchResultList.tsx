@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 import { PlayIcon } from "@/components/ui/icons";
 import { PosterArt } from "@/components/ui/PosterArt";
@@ -6,6 +5,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import type { SeriesCard } from "@/lib/api/types";
 import { copy } from "@/lib/copy";
 import { highlight } from "@/lib/highlight";
+import { Link } from "@/components/i18n/navigation";
 
 /** Văn bản có phần khớp từ khóa tô màu accent. */
 function Highlighted({ text, q }: { text: string; q: string }) {

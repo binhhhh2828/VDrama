@@ -1,9 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Badge } from "./Badge";
 import { LockIcon, PlayIcon } from "./icons";
 import { ProgressBar } from "./ProgressBar";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 export type EpisodeThumbProps = {
   href: string;

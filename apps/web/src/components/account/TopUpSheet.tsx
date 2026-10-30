@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { CloseIcon, HeadsetIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 /** Gói xu mẫu (PREVIEW): VDrama chưa có ví xu nên chưa bán và chưa trừ gì. */
 const PACKS = [

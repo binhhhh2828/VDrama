@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type ComponentType, type ReactNode } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { useVipSheet } from "@/components/vip/VipSheetProvider";
@@ -28,6 +26,7 @@ import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { DeleteAccountRow } from "./DeleteAccountRow";
 import { Coin, TopUpSheet } from "./TopUpSheet";
+import { Link, useRouter } from "@/components/i18n/navigation";
 
 /** Quyền lợi VIP ở thẻ vàng, mỗi mục có biểu tượng riêng như NetShort (AD và HD là khung chữ). */
 const VIP_PERKS_SHORT: { label: string; icon: ReactNode }[] = [

@@ -2,8 +2,6 @@
 
 import { IS_DEMO } from "@/lib/demo/config";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useSession } from "@/components/session/SessionProvider";
@@ -33,6 +31,7 @@ import { compactNumber, isFinished } from "@/lib/format";
 import { EpisodeSheet } from "./EpisodeSheet";
 import { Player } from "./Player";
 import type { PlayerSource } from "./Player";
+import { Link, usePathname, useRouter } from "@/components/i18n/navigation";
 
 // Luồng HLS mẫu công khai, CHỈ dùng khi chạy dev mà API báo chưa cấu hình Cloudflare Stream (503).
 // Bản build production luôn bỏ qua (NODE_ENV được thay cố định lúc build).

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useSession } from "@/components/session/SessionProvider";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDate } from "@/lib/format";
+import { Link } from "@/components/i18n/navigation";
 
 /** Dải "gói của bạn" trên trang VIP (đọc /me trên trình duyệt). */
 export function MembershipBar() {

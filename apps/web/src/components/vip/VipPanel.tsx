@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Badge } from "@/components/ui/Badge";
@@ -9,6 +7,7 @@ import { CheckIcon, CloseIcon, HeadsetIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { PREVIEW_PLANS, VIP_PERKS } from "@/lib/preview-data";
+import { Link, useRouter } from "@/components/i18n/navigation";
 
 /** Bốn ý của "How VIP works" (ảnh 09), viết lại theo cách VDrama bán VIP. */
 const GUIDE = [

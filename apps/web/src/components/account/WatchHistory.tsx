@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { CloseIcon, PlayIcon, TrashIcon } from "@/components/ui/icons";
@@ -11,6 +10,7 @@ import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { HistoryItem } from "@/lib/api/types";
 import { formatDate, isFinished, progressRatio, timeLeft } from "@/lib/format";
+import { Link } from "@/components/i18n/navigation";
 
 const LIMIT = 50;
 

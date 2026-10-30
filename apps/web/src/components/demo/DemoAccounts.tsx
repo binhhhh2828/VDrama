@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { api } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, IS_DEMO } from "@/lib/demo/config";
+import { useRouter } from "@/components/i18n/navigation";
 
 /** Khung "tài khoản demo" ở trang đăng nhập: bấm một dòng là đăng nhập luôn. Chỉ có ở bản demo. */
 export function DemoAccounts({ next }: { next: string }) {

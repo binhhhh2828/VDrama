@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useSession } from "@/components/session/SessionProvider";
 import { LockIcon } from "@/components/ui/icons";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { formatDuration, isFinished, progressRatio, timeLeft } from "@/lib/format";
 import { resumeTarget } from "./SeriesActions";
 import { useSeriesViewer } from "./SeriesViewer";
+import { Link } from "@/components/i18n/navigation";
 
 /**
  * Danh sách tập. Server render sẵn (nhãn FREE / VIP như khách thấy); trên trình duyệt thêm phần

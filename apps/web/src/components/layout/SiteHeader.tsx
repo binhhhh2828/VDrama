@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { AccountArea } from "./AccountArea";
@@ -6,6 +5,7 @@ import { HeaderBar } from "./HeaderBar";
 import { HeaderSearch, SearchForm } from "./HeaderSearch";
 import { MenuDrawer } from "./MenuDrawer";
 import { NavLinks } from "./NavLinks";
+import { Link } from "@/components/i18n/navigation";
 
 /**
  * Header theo NetShort mobile (ảnh 01, 02, 04): cao 58px, không có nền riêng, nội dung cuộn phía sau;

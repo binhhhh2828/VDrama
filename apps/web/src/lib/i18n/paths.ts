@@ -1,11 +1,14 @@
 import { DEFAULT_LOCALE, isLocale, type Locale } from "./config";
 
+/** Khu không chia ngôn ngữ: admin (chỉ tiếng Anh), trang dev và API. */
+export const UNLOCALIZED = /^\/(admin|dev|api)(?=[/?#]|$)/;
+
 /**
  * Đường dẫn theo ngôn ngữ: tiếng Anh ở gốc, ngôn ngữ khác có tiền tố (`/vi/series/a`).
  * Giữ nguyên địa chỉ ngoài, `#mục`, `mailto:`... và phần `?query#hash` phía sau.
  */
 export function localePath(locale: Locale, href: string): string {
-  if (!href.startsWith("/") || href.startsWith("//")) return href;
+  if (!href.startsWith("/") || href.startsWith("//") || UNLOCALIZED.test(href)) return href;
   // Đã có tiền tố ngôn ngữ thì đổi sang ngôn ngữ đích thay vì chồng hai tiền tố.
   const { path } = splitLocale(href);
   if (locale === DEFAULT_LOCALE) return path;

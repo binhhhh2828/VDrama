@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "@/components/session/SessionProvider";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -12,6 +11,7 @@ import { isFinished } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import { useSeriesViewer } from "./SeriesViewer";
+import { usePathname, useRouter } from "@/components/i18n/navigation";
 
 /** Tập nên phát tiếp: tập xem gần nhất (xem xong thì tập sau nó), không có thì tập đầu. */
 export function resumeTarget(

@@ -85,6 +85,14 @@ describe("đường dẫn theo ngôn ngữ", () => {
     expect(localePath("vi", "//cdn.example.com/x")).toBe("//cdn.example.com/x");
   });
 
+  it("admin, dev và API không có tiền tố ngôn ngữ", () => {
+    expect(localePath("vi", "/admin")).toBe("/admin");
+    expect(localePath("vi", "/admin/series/a?x=1")).toBe("/admin/series/a?x=1");
+    expect(localePath("vi", "/dev/ui")).toBe("/dev/ui");
+    expect(localePath("vi", "/api/v1/series")).toBe("/api/v1/series");
+    expect(localePath("vi", "/administrator")).toBe("/vi/administrator");
+  });
+
   it("tách tiền tố đúng đoạn, không nhầm với đường dẫn bắt đầu bằng 'vi'", () => {
     expect(splitLocale("/vi")).toEqual({ lang: "vi", path: "/" });
     expect(splitLocale("/vi/browse?x=1")).toEqual({ lang: "vi", path: "/browse?x=1" });

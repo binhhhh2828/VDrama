@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import {
   Suspense,
   createContext,
@@ -14,6 +13,7 @@ import {
 } from "react";
 import { cn } from "@/lib/cn";
 import { VipPanel } from "./VipPanel";
+import { usePathname } from "@/components/i18n/navigation";
 
 type VipSheetApi = { open: () => void };
 

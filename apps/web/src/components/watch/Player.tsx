@@ -3,7 +3,6 @@
 import type Hls from "hls.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import Link from "next/link";
 import {
   CloseIcon,
   FullscreenIcon,
@@ -15,6 +14,9 @@ import {
 } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
 import { formatClock } from "@/lib/format";
+import { useLocale } from "@/components/i18n/I18nProvider";
+import { Link } from "@/components/i18n/navigation";
+import { localePath } from "@/lib/i18n/paths";
 
 export type PlayerSource = { url: string; expiresAt: number | null; sample: boolean };
 
@@ -58,6 +60,7 @@ export function Player({
   endOverlay,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const locale = useLocale();
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const srcRef = useRef(source);
@@ -265,8 +268,8 @@ export function Player({
       ArrowDown: () => setVol((videoRef.current?.volume ?? 1) - 0.1),
       m: toggleMute,
       f: toggleFullscreen,
-      n: () => nextHref && (window.location.href = nextHref),
-      p: () => prevHref && (window.location.href = prevHref),
+      n: () => nextHref && (window.location.href = localePath(locale, nextHref)),
+      p: () => prevHref && (window.location.href = localePath(locale, prevHref)),
     };
     const fn = map[e.key] ?? map[e.key.toLowerCase()];
     if (fn) {

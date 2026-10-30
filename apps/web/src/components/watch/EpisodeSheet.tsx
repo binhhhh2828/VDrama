@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BarsIcon, ChevronRightIcon, CloseIcon, LockIcon } from "@/components/ui/icons";
 import type { Episode } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { Link, usePathname } from "@/components/i18n/navigation";
 
 const TAB_SIZE = 30;
 /** Vuốt xuống quá chừng này (px) thì đóng bảng. */

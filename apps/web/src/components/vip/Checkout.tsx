@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PreviewNotice } from "@/components/preview/PreviewNotice";
 import { useSession } from "@/components/session/SessionProvider";
@@ -13,6 +11,7 @@ import { formatClock, formatVnd } from "@/lib/format";
 import { api } from "@/lib/api/client";
 import { IS_DEMO } from "@/lib/demo/config";
 import { PREVIEW_PLANS, PREVIEW_TRANSFER } from "@/lib/preview-data";
+import { Link, usePathname, useSearchParams } from "@/components/i18n/navigation";
 
 /**
  * PREVIEW trang thanh toán (Giai đoạn 5: SePay + VietQR). Không tạo đơn, không gửi gì, không bao

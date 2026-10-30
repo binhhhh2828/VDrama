@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
+import { Link } from "@/components/i18n/navigation";
 
 /**
  * Chip lọc (thể loại, sắp xếp): chữ nhật bo 10, nhìn cao 33px, vùng bấm 44px. Đang chọn thì nền accent.

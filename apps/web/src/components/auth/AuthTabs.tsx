@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/components/i18n/navigation";
 
 /** Khung nội dung cho các trang phụ của nhóm (auth) (quên mật khẩu, đặt lại, xác thực email). */
 export function AuthPage({ children }: { children: ReactNode }) {
