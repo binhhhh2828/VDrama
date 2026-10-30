@@ -66,14 +66,14 @@ export function PosterCard({
       <div className="flex flex-col gap-1">
         <span
           className={cn(
-            "line-clamp-2 text-[15px] leading-[17px]",
+            "line-clamp-2 text-[13px] leading-[16px]",
             variant === "row" ? "font-semibold" : "font-normal",
           )}
         >
           {title}
         </span>
         {genres && genres.length > 0 ? (
-          <span className="line-clamp-2 text-xs leading-[13px] text-muted">
+          <span className="line-clamp-2 text-[11px] leading-[13px] text-muted">
             {genres.join(" • ")}
           </span>
         ) : null}

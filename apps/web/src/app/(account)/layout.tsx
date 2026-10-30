@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AccountHeader } from "@/components/account/AccountHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export const metadata: Metadata = { robots: { index: false } };
 
@@ -17,6 +18,7 @@ export default function AccountHomeLayout({ children }: { children: React.ReactN
         <main id="main" className="mx-auto flex w-full max-w-[560px] flex-1 flex-col">
           {children}
         </main>
+        <SiteFooter />
       </div>
     </div>
   );

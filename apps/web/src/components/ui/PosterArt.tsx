@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 export type PosterArtProps = {
   src?: string | null;
   title: string;
-  /** "poster" là 3:4 (thẻ phim), "hero" là 4:5 (băng chuyền trang chủ). */
+  /** "poster" là 3:4 (thẻ phim), "hero" là 3:4 (băng chuyền trang chủ). */
   ratio?: "poster" | "hero";
   /**
    * In tên phim lên ảnh (chữ trắng, bóng đổ, 1/3 dưới) như poster có chữ nghệ thuật. Tắt khi ảnh
@@ -21,7 +21,7 @@ export type PosterArtProps = {
   children?: ReactNode;
 };
 
-const ratios = { poster: "aspect-[3/4]", hero: "aspect-[4/5]" } as const;
+const ratios = { poster: "aspect-[3/4]", hero: "aspect-[3/4]" } as const;
 
 /** Ảnh poster/hero có tên phim in đè, dùng khi ảnh chỉ là ảnh giữ chỗ không có chữ. */
 export function PosterArt({

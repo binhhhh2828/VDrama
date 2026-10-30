@@ -22,10 +22,10 @@ const ROTATE_MS = 6000;
 const UNDER_HEADER = "-mt-[58px] md:mt-0";
 
 /**
- * Hero trang chủ theo ảnh 01: ảnh 4:5 tràn hai mép, header đè lên trên; tên phim + nhãn HOT, nút
+ * Hero trang chủ theo ảnh 01: ảnh 3:4 tràn hai mép, header đè lên trên; tên phim + nhãn HOT, nút
  * "Play now" viên thuốc, chấm báo trang (đang chọn là thanh trắng dài). Vuốt bằng cuộn ngang có điểm
  * dừng (scroll-snap) nên đi theo ngón tay và mượt như cuộn gốc. Tự chuyển sau 6 giây; dừng khi đang
- * chạm/rê chuột/focus bên trong hoặc khi bật giảm chuyển động. Desktop: các thẻ 4:5 xếp cạnh nhau.
+ * chạm/rê chuột/focus bên trong hoặc khi bật giảm chuyển động. Desktop: các thẻ 3:4 xếp cạnh nhau.
  */
 export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -103,14 +103,14 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-b from-canvas/0 to-canvas" />
             </PosterArt>
             <div className="absolute inset-x-0 bottom-[26px] flex flex-col items-center gap-3 px-6">
-              <p className="flex max-w-full items-center gap-1.5 text-[15px] font-bold">
+              <p className="flex max-w-full items-center gap-1.5 text-sm font-bold">
                 <span className="truncate">{s.title}</span>
                 {s.hot ? <Badge kind="hot" className="shrink-0" /> : null}
               </p>
               <ButtonLink
                 href={`/series/${s.slug}/episode/1`}
                 size="xs"
-                className="w-60 max-w-full text-[15px]"
+                className="w-60 max-w-full text-sm"
               >
                 <PlayIcon size={14} /> {copy.series.playNow}
               </ButtonLink>
@@ -144,7 +144,7 @@ export function HeroFallback() {
   return (
     <section
       className={cn(
-        "relative flex aspect-[4/5] items-end bg-art md:mx-6 md:aspect-auto md:h-[500px] md:rounded-hero",
+        "relative flex aspect-[3/4] items-end bg-art md:mx-6 md:aspect-auto md:h-[500px] md:rounded-hero",
         UNDER_HEADER,
       )}
     >
@@ -163,7 +163,7 @@ export function HeroSkeleton() {
   return (
     <div
       className={cn(
-        "aspect-[4/5] animate-pulse bg-surface md:mx-6 md:aspect-auto md:h-[500px] md:rounded-hero",
+        "aspect-[3/4] animate-pulse bg-surface md:mx-6 md:aspect-auto md:h-[500px] md:rounded-hero",
         UNDER_HEADER,
       )}
     />

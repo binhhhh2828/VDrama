@@ -144,11 +144,6 @@ export function WatchView({
   const prevHref = prev ? `/series/${series.slug}/episode/${prev.number}` : null;
   const nextHref = next ? `/series/${series.slug}/episode/${next.number}` : null;
 
-  const swipe = useVerticalSwipe({
-    onUp: () => nextHref && router.push(nextHref),
-    onDown: () => prevHref && router.push(prevHref),
-  });
-
   // Tiến độ cũ của tập này (đã xem xong thì phát lại từ đầu).
   const saved = viewer.progress.get(episode.id);
   const startAt =
@@ -199,12 +194,7 @@ export function WatchView({
     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-center lg:gap-8 lg:px-6">
       <div className="flex min-w-0 flex-col bg-canvas-black lg:w-[420px] lg:shrink-0 lg:rounded-hero lg:pb-2">
         <div className="flex justify-center pt-0.5">
-          <div
-            onTouchStart={swipe.onTouchStart}
-            onTouchEnd={swipe.onTouchEnd}
-            // Vuốt dọc trên player là chuyển tập nên chặn trình duyệt cuộn trang ở vùng này.
-            className="relative w-[min(73.3vw,340px)] touch-none lg:w-[min(380px,calc((100dvh-190px)*9/16))]"
-          >
+          <div className="relative w-[min(73.3vw,340px)] lg:w-[min(380px,calc((100dvh-190px)*9/16))]">
             {/* Chờ có tiến độ cũ rồi mới gắn player, để tua đúng chỗ đang xem dở. */}
             {gate.kind === "ready" && viewer.ready ? (
               <Player
@@ -237,10 +227,10 @@ export function WatchView({
                 thumbnail={episode.thumbnail_url}
               />
             )}
-            {/* Chevron tập trước/sau nằm ở khoảng đen bên phải player, như ảnh 10. */}
+            {/* Chevron tập trước/sau nằm ở khoảng đen bên phải player, như ảnh 10, hạ thấp để người cầm tay trái cũng chạm được. */}
             <nav
               aria-label="Episode navigation"
-              className="absolute top-1/2 left-full ml-1.5 flex -translate-y-1/2 flex-col gap-3"
+              className="absolute top-[72%] left-full ml-1.5 flex -translate-y-1/2 flex-col gap-3"
             >
               {prevHref ? (
                 <EpisodeStep href={prevHref} label="Previous episode">
@@ -260,7 +250,7 @@ export function WatchView({
           type="button"
           onClick={() => setSheetOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-12 items-center gap-2 px-3 py-2 text-left text-[15px] text-fg"
+          className="flex min-h-12 items-center gap-2 px-3 py-2 text-left text-[13px] text-fg"
         >
           <LayersIcon size={20} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate">
@@ -340,7 +330,7 @@ function InfoPanel({
         {customTitle ? ` · ${episode.title}` : ""}
       </h1>
 
-      <div className="mt-3 flex items-center gap-5 px-0.5 text-[15px] text-fg-soft">
+      <div className="mt-3 flex items-center gap-5 px-0.5 text-[13px] text-fg-soft">
         {likes !== null ? (
           <span className="flex items-center gap-1.5">
             <HeartIcon size={18} className="text-fg-soft" />
@@ -371,7 +361,7 @@ function InfoPanel({
       {series.genres.length > 0 ? (
         <div className="mt-3.5 flex flex-wrap gap-2.5">
           {series.genres.map((g) => (
-            <GenreTag key={g} className="px-4 py-1.5 text-[15px]">
+            <GenreTag key={g} className="px-4 py-1.5 text-[13px]">
               {g}
             </GenreTag>
           ))}
@@ -380,12 +370,12 @@ function InfoPanel({
 
       {series.description ? (
         <div className="mt-4 px-0.5">
-          <p className="text-[15px]">{copy.series.summary}</p>
+          <p className="text-[13px]">{copy.series.summary}</p>
           <button
             type="button"
             aria-expanded={expanded}
             onClick={() => setExpanded((v) => !v)}
-            className="mt-2 flex w-full items-start gap-1 text-left text-[15px] leading-6 text-muted"
+            className="mt-2 flex w-full items-start gap-1 text-left text-[13px] leading-6 text-muted"
           >
             <span className={cn("min-w-0 flex-1", !expanded && "line-clamp-2")}>
               {series.description}
@@ -539,7 +529,7 @@ function GateBox({
       {eyebrow ? (
         <span className="text-xs font-bold tracking-[0.12em] text-vip">{eyebrow}</span>
       ) : null}
-      <p className="text-lg font-bold">{title}</p>
+      <p className="text-base font-bold">{title}</p>
       <p className="text-sm text-fg-soft">{text}</p>
       {children ? (
         <div className="mt-1 flex flex-wrap justify-center gap-2.5">{children}</div>
@@ -568,7 +558,7 @@ function EndCard({
       >
         UP NEXT{locked ? " · VIP" : ""}
       </span>
-      <p className="text-lg font-bold">Episode {next.number}</p>
+      <p className="text-base font-bold">Episode {next.number}</p>
       <div className="flex gap-2.5">
         {locked ? (
           <ButtonLink href="/vip" variant="vip" size="sm">
@@ -615,33 +605,4 @@ function EpisodeStep({
       {children}
     </Link>
   );
-}
-
-/** Vuốt dọc quá chừng này (px) và dọc nhiều hơn ngang thì tính là một cú vuốt chuyển tập. */
-const SWIPE_STEP = 70;
-
-/**
- * Cử chỉ kiểu video ngắn: vuốt lên (ngón tay đi lên) sang tập sau, vuốt xuống về tập trước. Bỏ qua cú
- * vuốt bắt đầu trên thanh tua để kéo thanh tua không bị tính nhầm.
- */
-function useVerticalSwipe({ onUp, onDown }: { onUp: () => void; onDown: () => void }) {
-  const start = useRef<{ x: number; y: number } | null>(null);
-  return {
-    onTouchStart: (e: React.TouchEvent) => {
-      const t = e.touches[0];
-      const onSeekBar = e.target instanceof HTMLInputElement;
-      start.current = t && !onSeekBar ? { x: t.clientX, y: t.clientY } : null;
-    },
-    onTouchEnd: (e: React.TouchEvent) => {
-      const from = start.current;
-      const t = e.changedTouches[0];
-      start.current = null;
-      if (!from || !t) return;
-      const dx = t.clientX - from.x;
-      const dy = t.clientY - from.y;
-      if (Math.abs(dy) < SWIPE_STEP || Math.abs(dy) < Math.abs(dx) * 1.5) return;
-      if (dy < 0) onUp();
-      else onDown();
-    },
-  };
 }

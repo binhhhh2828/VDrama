@@ -4,7 +4,7 @@ export type Crumb = { label: string; href?: string };
 
 /**
  * Đường dẫn "Home > Series > tên phim" (ảnh 10, 15, 18): chữ xám 15px, mục cuối (trang hiện tại) màu
- * sáng và xuống dòng riêng. Truyền tên phim đã viết thường nếu muốn giống ảnh.
+ * sáng. Truyền tên phim đã viết thường nếu muốn giống ảnh.
  */
 export function Breadcrumb({ items }: { items: Crumb[] }) {
   return (
@@ -16,7 +16,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
             <li
               key={item.label}
               aria-current={last ? "page" : undefined}
-              className={last && items.length > 2 ? "basis-full text-fg" : last ? "text-fg" : ""}
+              className={last ? "text-fg" : ""}
             >
               {item.href && !last ? (
                 <Link href={item.href} className="text-muted no-underline hover:text-fg">

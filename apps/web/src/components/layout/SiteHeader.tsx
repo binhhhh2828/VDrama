@@ -22,8 +22,12 @@ export function SiteHeader() {
       </a>
       <div className="mx-auto flex h-[58px] max-w-[1360px] items-center pr-[17px] pl-1 sm:pl-3 md:gap-6 md:px-6">
         <MenuDrawer />
-        <Link href="/" aria-label="VDrama home" className="ml-0.5 shrink-0 leading-none md:ml-0">
-          <Logo height={24} preload className="h-6 w-auto md:h-8" />
+        <Link
+          href="/"
+          aria-label="VDrama home"
+          className="ml-0.5 mr-3 shrink-0 leading-none md:ml-0 md:mr-0"
+        >
+          <Logo height={17} preload className="h-[17px] w-auto md:h-8" />
         </Link>
         <NavLinks />
         <Suspense fallback={<SearchForm />}>

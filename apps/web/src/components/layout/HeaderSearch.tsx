@@ -16,9 +16,9 @@ export function SearchForm({
     <form
       role="search"
       action="/search"
-      className="ml-auto flex h-9 max-w-[183px] min-w-0 flex-1 items-center gap-2 rounded-full bg-surface-2 px-3 focus-within:ring-2 focus-within:ring-link md:max-w-[360px]"
+      className="ml-auto flex h-8 max-w-[150px] min-w-0 flex-1 items-center gap-1.5 rounded-full bg-surface-2 px-3 focus-within:ring-2 focus-within:ring-link md:max-w-[360px]"
     >
-      <SearchIcon size={18} className="shrink-0 text-muted" />
+      <SearchIcon size={16} className="shrink-0 text-muted" />
       <label htmlFor="site-search" className="sr-only">
         {copy.nav.searchLabel}
       </label>
@@ -32,7 +32,7 @@ export function SearchForm({
         defaultValue={defaultValue}
         autoFocus={autoFocus}
         placeholder={copy.nav.search}
-        className="-my-1 h-11 min-w-0 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-muted"
+        className="-my-1 h-11 min-w-0 flex-1 bg-transparent text-[13px] text-fg outline-none placeholder:text-muted"
       />
     </form>
   );

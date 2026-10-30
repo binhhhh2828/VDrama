@@ -27,12 +27,12 @@ export function SectionHeader({
     >
       <h2
         id={id}
-        className={cn(size === "lg" ? "text-2xl leading-8 font-semibold" : "text-base font-bold")}
+        className={cn(size === "lg" ? "text-xl leading-7 font-semibold" : "text-base font-bold")}
       >
         {title}
       </h2>
       {href ? (
-        <Link href={href} className="text-sm font-medium no-underline">
+        <Link href={href} className="text-[13px] font-medium no-underline">
           {copy.home.seeAll}
         </Link>
       ) : null}

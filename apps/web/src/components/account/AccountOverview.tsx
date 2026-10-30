@@ -15,7 +15,9 @@ import {
   GridIcon,
   HeadsetIcon,
   HistoryIcon,
+  PlaySquareIcon,
   InfoIcon,
+  LayersIcon,
   LockIcon,
   LogOutIcon,
   UserIcon,
@@ -25,19 +27,23 @@ import type { User } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/format";
 import { DeleteAccountRow } from "./DeleteAccountRow";
+import { Coin, TopUpSheet } from "./TopUpSheet";
 
-const DAY = 86_400_000;
+/** Quyền lợi VIP ở thẻ vàng, mỗi mục có biểu tượng riêng như NetShort (AD và HD là khung chữ). */
+const VIP_PERKS_SHORT: { label: string; icon: ReactNode }[] = [
+  { label: "All episodes", icon: <PlaySquareIcon size={20} strokeWidth={2.2} /> },
+  { label: "Ad-free", icon: <PerkTag>AD</PerkTag> },
+  { label: "1080P HD", icon: <PerkTag>HD</PerkTag> },
+  { label: "2 devices", icon: <LayersIcon size={20} strokeWidth={2.2} /> },
+];
 
-function daysLeft(iso: string | null): number {
-  if (!iso) return 0;
-  return Math.max(0, Math.ceil((Date.parse(iso) - Date.now()) / DAY));
+function PerkTag({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex h-[15px] w-5 items-center justify-center rounded-[3px] border-[1.5px] border-current text-[8px] leading-none font-extrabold">
+      {children}
+    </span>
+  );
 }
-
-function daysSince(iso: string): number {
-  return Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / DAY));
-}
-
-const VIP_PERKS_SHORT = ["All episodes", "No ads", "Full HD 1080p", "2 devices"];
 
 /**
  * Trang tài khoản theo NetShort (ảnh 06 và 20): avatar + tên + mã tài khoản, thẻ VIP vàng, thẻ "My VIP"
@@ -62,10 +68,10 @@ export function AccountOverview() {
   const user = session.status === "user" ? session.user : null;
 
   return (
-    <div className="flex min-h-[calc(100dvh-58px)] flex-col px-[13px] pb-8">
+    <div className="flex min-h-[calc(100dvh+100px)] flex-col px-[13px] pb-8">
       <Profile user={user} />
       <VipCard user={user} onOpen={vipSheet.open} />
-      <MyVipCard user={user} onOpen={vipSheet.open} />
+      <WalletCard />
 
       <ul className="mt-3 flex flex-col">
         {user ? (
@@ -99,7 +105,7 @@ export function AccountOverview() {
         {user ? <DeleteAccountRow /> : null}
       </ul>
 
-      <div className="mt-auto flex justify-center pt-10">
+      <div className="mt-auto flex justify-center pt-24">
         {user ? (
           <Button
             variant="secondary"
@@ -151,11 +157,11 @@ function Profile({ user }: { user: User | null }) {
         )}
       </span>
       <div className="min-w-0">
-        <p className="truncate text-[28px] leading-9 font-semibold">
+        <p className="truncate text-2xl leading-8 font-semibold">
           {user ? user.display_name : "Visitor"}
         </p>
         {uid ? (
-          <p className="flex items-center text-[15px] text-muted">
+          <p className="flex items-center text-[13px] text-muted">
             {uid}
             <button
               type="button"
@@ -167,14 +173,14 @@ function Profile({ user }: { user: User | null }) {
             </button>
           </p>
         ) : (
-          <p className="text-[15px] text-muted">Sign in to save your list</p>
+          <p className="text-[13px] text-muted">Sign in to save your list</p>
         )}
       </div>
     </div>
   );
 }
 
-/** Thẻ VIP vàng: "Activate" mở bảng VIP; đã là VIP thì ghi ngày hết hạn và nút "Extend". */
+/** Thẻ VIP vàng: "Subscribe" mở bảng VIP; đã là VIP thì ghi ngày hết hạn và nút "Extend". */
 function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
   const isVip = user?.is_vip === true;
   return (
@@ -184,26 +190,26 @@ function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
     >
       <div className="flex items-start justify-between gap-3 px-1">
         <div className="min-w-0">
-          <h2 id="vip-card-h" className="flex items-center gap-2 text-[22px] leading-8 font-bold">
-            <CrownIcon size={22} strokeWidth={2.2} /> VDrama VIP
+          <h2 id="vip-card-h" className="flex items-center gap-2 text-lg leading-7 font-bold">
+            <CrownIcon size={20} strokeWidth={2.2} /> VDrama VIP
           </h2>
-          <p className="mt-0.5 text-[15px]">
+          <p className="mt-0.5 text-[13px]">
             {isVip ? `Active until ${formatDate(user?.vip_expires_at)}` : "Exclusive perks"}
           </p>
         </div>
         <button
           type="button"
           onClick={onOpen}
-          className="hit-44 relative h-11 shrink-0 rounded-full bg-vip-ink/90 px-5 text-lg text-vip"
+          className="hit-44 relative h-10 shrink-0 rounded-full bg-vip-ink/90 px-5 text-base font-medium text-vip"
         >
-          {isVip ? "Extend" : "Activate"}
+          {isVip ? "Extend" : "Subscribe"}
         </button>
       </div>
-      <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-[14px] bg-white/25 px-3.5 py-2.5 text-[15px]">
+      <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-[14px] bg-white/25 px-3.5 py-2.5 text-[13px]">
         {VIP_PERKS_SHORT.map((perk) => (
-          <li key={perk} className="flex items-center gap-2">
-            <CheckIcon size={16} strokeWidth={2.6} className="shrink-0" />
-            <span className="truncate">{perk}</span>
+          <li key={perk.label} className="flex items-center gap-2">
+            <span className="flex w-5 shrink-0 justify-center">{perk.icon}</span>
+            <span className="truncate">{perk.label}</span>
           </li>
         ))}
       </ul>
@@ -211,35 +217,41 @@ function VipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
   );
 }
 
-/** Thẻ thay cho thẻ Ví: số ngày VIP còn lại và số ngày đã ở cùng VDrama. */
-function MyVipCard({ user, onOpen }: { user: User | null; onOpen: () => void }) {
-  const left = user ? daysLeft(user.vip_expires_at) : null;
-  const member = user ? daysSince(user.created_at) : null;
+/** Thẻ "My Wallet" theo NetShort: số xu, số xu thưởng và nút Top Up mở bảng nạp xu (PREVIEW, chưa bán xu). */
+function WalletCard() {
+  const [open, setOpen] = useState(false);
   return (
-    <section aria-labelledby="my-vip-h" className="mt-3 rounded-[20px] bg-wallet p-[14px] pb-4">
+    <section aria-labelledby="wallet-h" className="mt-3 rounded-[20px] bg-wallet p-[14px] pb-4">
       <div className="flex items-center justify-between gap-3 px-1">
-        <h2 id="my-vip-h" className="text-[22px] leading-8 font-semibold">
-          My VIP
+        <h2 id="wallet-h" className="text-lg leading-7 font-semibold">
+          My Wallet
         </h2>
-        <Button variant="gradient" size="sm" className="h-11 px-5 text-lg" onClick={onOpen}>
-          {user?.is_vip ? "Extend VIP" : "Get VIP"}
+        <Button
+          variant="gradient"
+          size="sm"
+          className="h-10 px-5 text-base"
+          onClick={() => setOpen(true)}
+        >
+          Top Up
         </Button>
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-3 px-1">
-        <Stat value={left} label="Days left" />
-        <Stat value={member} label="Days with us" />
+        <Stat value={0} label="Coins" />
+        <Stat value={0} label="Bonus" />
       </dl>
+      <TopUpSheet open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }
 
-function Stat({ value, label }: { value: number | null; label: string }) {
+function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div>
-      <dd className="order-1 text-[32px] leading-10 font-medium text-[#ffb53a]">
-        {value === null ? "–" : value}
+      <dd className="flex items-center gap-1.5 text-[28px] leading-9 font-medium text-[#ffb53a]">
+        <Coin size={20} />
+        {value}
       </dd>
-      <dt className="text-[15px] text-muted">{label}</dt>
+      <dt className="text-[13px] text-muted">{label}</dt>
     </div>
   );
 }
@@ -261,7 +273,7 @@ export function Row({
       <Link
         href={href}
         className={cn(
-          "flex min-h-14 items-center gap-3.5 px-1 text-[22px] text-fg no-underline hover:text-fg",
+          "flex min-h-14 items-center gap-3.5 px-1 text-base text-fg no-underline hover:text-fg",
           className,
         )}
       >

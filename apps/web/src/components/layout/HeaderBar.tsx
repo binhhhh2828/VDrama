@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/** Thẻ `<header>` dính đầu trang: trong suốt ở đầu trang, có lớp tối nhẹ khi đã cuộn để chữ đọc được. */
+/** Thẻ `<header>` dính đầu trang: trong suốt ở đầu trang, có lớp tối mờ (vẫn thấy poster phía sau) khi đã cuộn. */
 export function HeaderBar({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -18,7 +18,9 @@ export function HeaderBar({ children }: { children: ReactNode }) {
     <header
       className={cn(
         "sticky top-0 z-30 transition-colors duration-200",
-        scrolled ? "bg-canvas/80 backdrop-blur-md" : "bg-transparent",
+        scrolled
+          ? "bg-linear-to-b from-black/60 to-black/20 backdrop-blur-[2px]"
+          : "bg-transparent",
       )}
     >
       {children}

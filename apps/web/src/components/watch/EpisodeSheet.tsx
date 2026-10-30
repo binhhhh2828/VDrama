@@ -60,6 +60,10 @@ export function EpisodeSheet({
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
+    // Next giữ trang cũ ở trạng thái ẩn khi chuyển tập; hộp thoại còn mở sẽ chặn cuộn và vuốt ở trang mới.
+    return () => {
+      if (dialog.open) dialog.close();
+    };
   }, [open]);
 
   // Đổi trang (bấm một tập) thì đóng.
@@ -153,6 +157,7 @@ export function EpisodeSheet({
               <li key={e.id}>
                 <Link
                   href={`/series/${slug}/episode/${e.number}`}
+                  onClick={onClose}
                   aria-current={current ? "page" : undefined}
                   aria-label={`Episode ${e.number}${locked ? ", VIP" : ""}`}
                   className={cn(

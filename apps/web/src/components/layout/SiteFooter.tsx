@@ -15,10 +15,10 @@ export function SiteFooter() {
         <div className="border-b border-line pb-2">
           {FOOTER_GROUPS.map((group) => (
             <details key={group.title} className="group">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-lg text-fg [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm text-fg [&::-webkit-details-marker]:hidden">
                 {group.title}
                 <ChevronDownIcon
-                  size={20}
+                  size={16}
                   className="text-muted transition-transform group-open:rotate-180"
                 />
               </summary>
@@ -27,7 +27,7 @@ export function SiteFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="flex min-h-11 items-center text-[15px] text-muted no-underline hover:text-fg"
+                      className="flex min-h-10 items-center text-[13px] text-muted no-underline hover:text-fg"
                     >
                       {link.label}
                     </Link>
@@ -37,7 +37,7 @@ export function SiteFooter() {
             </details>
           ))}
         </div>
-        <p className="pt-6 text-center text-[13px] text-muted">{copy.footer.rights}</p>
+        <p className="pt-6 text-center text-xs text-muted">{copy.footer.rights}</p>
       </div>
     </footer>
   );

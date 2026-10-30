@@ -8,6 +8,8 @@ const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
 
 const nextConfig: NextConfig = {
   output: isDemo ? undefined : "standalone",
+  // Cho phép mở bản dev từ điện thoại cùng mạng (iPhone hotspot dùng dải 172.20.10.x, wifi nhà thường 192.168.x.x).
+  allowedDevOrigins: ["172.20.10.*", "192.168.*.*"],
   cacheComponents: true,
   partialPrefetching: true,
   images: {
