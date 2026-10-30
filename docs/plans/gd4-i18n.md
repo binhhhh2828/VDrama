@@ -1,6 +1,6 @@
 # Plan: Đa ngôn ngữ giao diện (English, Tiếng Việt) và menu đổi ngôn ngữ
 
-> Trạng thái: đã duyệt 2026-10-30; Bước 1–6 xong
+> Trạng thái: xong 2026-10-30 (Bước 1–7)
 > Bối cảnh: sếp hướng tới thị trường nước ngoài (mặc định tiếng Anh), nhưng trước mắt cần bản tiếng Việt để nhà đầu tư người Việt xem hiểu. Giao diện người xem: `docs/plans/gd3-netshort-ui.md`. Ảnh poster: `docs/plans/gd4-poster-images.md`.
 
 ## Mục tiêu và phạm vi
@@ -58,7 +58,7 @@ Mỗi bước giữ giao diện chạy được và có commit riêng.
 - [x] **Bước 6: Dịch tài khoản, đăng nhập, VIP, News và các trang tĩnh** — xong 2026-10-30: Account (thẻ VIP, Ví, hàng liên kết, xóa tài khoản), Danh sách của tôi, Lịch sử xem, đăng nhập/đăng ký (cả khung 2 cột desktop), quên/đặt lại mật khẩu, xác thực email, tài khoản demo, trang VIP + FAQ + thanh gói của bạn, thanh toán, News (bài mẫu), Download, Contact, Terms/Privacy/Refunds (`lib/legal-content.ts`, bản tiếng Việt có ghi chú "bản dịch tham khảo"). Tiêu đề tab của các trang này theo ngôn ngữ (`titleMetadata`). `lib/copy.ts` đã xóa (mọi chữ nằm trong từ điển). Luồng demo ở `/vi`: đăng nhập → Account → VIP → thanh toán demo chạy được. Thông báo lỗi trong biểu mẫu dùng `apiErrorText`/`fieldErrorText`.
   - Việc cần làm: Account, Sign in/up, quên mật khẩu, VIP/checkout (giữ nhãn PREVIEW), News, Download, Contact, Terms/Privacy/Refunds (bản nháp có ghi chú).
   - Tiêu chí hoàn thành: như bước 4; luồng demo khách → đăng nhập → VIP → xem tập chạy được ở cả hai ngôn ngữ.
-- [ ] **Bước 7: Quét toàn site và tài liệu**
+- [x] **Bước 7: Quét toàn site và tài liệu** — xong 2026-10-30: curl 24 route × 2 ngôn ngữ (200, `<html lang>` đúng, không rò khóa dịch dạng `nav.home`; địa chỉ lạ cho 404 đúng ngôn ngữ); trình duyệt ở 320 px: 23 route ở `/vi` và 6 route tiếng Anh không tràn ngang; sửa cảnh báo dev "Could not validate instant" của route 404 (`instant = false`). Tài liệu: `docs/design.md` (mục Đa ngôn ngữ, font), `README.md`, `CLAUDE.md`. Chưa quét 360/390/440 px cho mọi route (chỉ vài trang), chưa thử trên iPhone thật, `proxy.ts` chưa thử trên Netlify.
   - Việc cần làm: quét mọi route × hai ngôn ngữ × 4 độ rộng (không lỗi console, không tràn ngang, không còn khóa trống); cập nhật `docs/design.md` (cách thêm ngôn ngữ mới), `README.md`.
   - Tiêu chí hoàn thành: `pnpm lint/typecheck/format:check/test/build` pass; báo cáo quét kèm.
 

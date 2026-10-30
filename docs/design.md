@@ -2,7 +2,7 @@
 
 Nguồn: bố cục **NetShort mobile web** (23 ảnh chụp iPhone, số đo ở `docs/plans/gd3-netshort-ui.md`; chốt 2026-10-29, thay canvas [VDrama Web Design](https://claude.ai/artifact/Kto2QDvHNF4qtuLEAXUja2) cũ). Chỉ lấy bố cục, nhịp điệu, màu; thương hiệu, nội dung và chữ là của VDrama. Code nằm ở `apps/web/src/app/globals.css` (token) và `apps/web/src/components/ui/` (thành phần). Xem trực tiếp mọi thành phần ở `http://localhost:3000/dev/ui` khi chạy `pnpm dev`.
 
-Giao diện **chỉ có nền tối**, **tiếng Anh** (chuỗi mới gom ở `src/lib/copy.ts`), **mobile-first** (viết cho 360–430 px trước).
+Giao diện **chỉ có nền tối**, **hai ngôn ngữ English và Tiếng Việt** (mọi chữ nằm ở `src/lib/i18n/dictionaries/`, xem mục Đa ngôn ngữ cuối file), **mobile-first** (viết cho 360–430 px trước).
 
 ## Màu
 
@@ -44,7 +44,7 @@ Nền chuyển sắc (`@utility` trong `globals.css`):
 
 ## Chữ
 
-- **Poppins** (OFL), nạp bằng `next/font/google` (tự host), độ đậm 400–900. Không có bộ ký tự tiếng Việt; giao diện là tiếng Anh.
+- **Be Vietnam Pro** (OFL), nạp bằng `next/font/google` (tự host), độ đậm 400–900, bộ ký tự latin + latin-ext + vietnamese. Dùng cho cả hai ngôn ngữ để chữ không đổi dáng khi chuyển. Đã bỏ Poppins vì không có bộ tiếng Việt (dấu ạ, ợ, ế lệch nét). Biến CSS `--font-body` (khai ở `src/lib/site-fonts.ts`).
 - Tiêu đề trang ≈ 28px · 700; tiêu đề hàng trang chủ ≈ 24px · 600; tiêu đề hàng ở trang xem ≈ 16px · 700.
 - Tên phim trong thẻ ≈ 15px/17px · 600, tối đa 2 dòng; dòng thể loại ≈ 12px `muted`, ngăn bằng " • ".
 - Thân 15px / 1.6 `fg-soft`.
@@ -106,3 +106,15 @@ Cách tách nền: độ sáng thành độ trong suốt (đen → trong suốt 
 - Mọi thứ bấm được đều tới được bằng phím Tab; viền focus 2px màu `link`.
 - Icon trang trí có `aria-hidden`; nút chỉ có icon phải có `aria-label`.
 - Không truyền đạt thông tin chỉ bằng màu (ổ khóa đi kèm nhãn VIP, lỗi đi kèm chữ).
+
+## Đa ngôn ngữ (English, Tiếng Việt)
+
+Kế hoạch và quyết định: [docs/plans/gd4-i18n.md](plans/gd4-i18n.md).
+
+- **URL:** tiếng Anh ở gốc (`/series/a`), tiếng Việt có tiền tố (`/vi/series/a`). `src/proxy.ts` (quy tắc ở `lib/i18n/routing.ts`, có test) rewrite địa chỉ gốc sang `/en/...`, chuyển `/en/...` về địa chỉ gốc, và chuyển người dùng có cookie `NEXT_LOCALE` hoặc trình duyệt tiếng Việt sang `/vi`. Admin và `/dev` nằm ngoài (nhóm `app/(internal)`, chỉ tiếng Anh, không tiền tố).
+- **Từ điển:** `lib/i18n/dictionaries/en.ts` là bản gốc và sinh kiểu `Dictionary`; `vi.ts` phải có đúng các khóa nên thiếu khóa là lỗi biên dịch. Chuỗi có tham số viết `{tên}`; số nhiều viết `{ one, other }`. Test kiểm tra đủ khóa, không rỗng, `{tham_số}` khớp và bản dịch không trùng bản gốc (trừ thuật ngữ giữ nguyên).
+- **Dùng trong code:** client component `useT()` / `useLocale()`; server component `getServerT(lang)` với `lang` từ `params`; tiêu đề tab `titleMetadata("khóa")`. Liên kết và điều hướng **phải** dùng `Link`, `useRouter`, `usePathname` của `@/components/i18n/navigation` (tự thêm `/vi`); có test chặn `next/link` thô ngoài admin.
+- **Định dạng:** `lib/format.ts` nhận `locale` (thời lượng, ngày, số, VND). Lỗi API dịch theo mã lỗi qua `lib/i18n/api-errors.ts`. Tên thể loại dịch theo `slug` (`genreLabel`), tên tập mặc định "Episode N" thành "Tập N".
+- **Thêm ngôn ngữ mới:** thêm mã vào `LOCALES` và tên vào `LOCALE_INFO` (`lib/i18n/config.ts`); tạo `dictionaries/<mã>.ts` thỏa kiểu `Dictionary` và đăng ký ở `dictionaries/index.ts`; thêm khối cùng cấu trúc trong `lib/legal-content.ts`; kiểm tra font có bộ ký tự của ngôn ngữ đó. Nếu mã mới có thể bị nhầm với một đoạn đường dẫn thì kiểm tra `splitLocale`.
+- **Chưa dịch (là dữ liệu, không phải giao diện):** tên, mô tả và review phim. Khi có phim thật cần bản dịch cho từng phim (backend: cột/ bảng bản dịch), tách thành plan riêng.
+- Trang pháp lý (Terms, Privacy, Refunds) mới là cấu trúc và phần giữ chỗ, cả hai bản cần luật sư duyệt.

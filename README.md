@@ -4,7 +4,7 @@ Website xem phim bộ có tài khoản và gói VIP. Kế hoạch đầy đủ: 
 
 ## Mở bản demo
 
-Bản demo gồm cả phía người xem và phía admin, giao diện tiếng Anh. Màn hình nào chưa có API thì là giao diện tĩnh có nhãn **PREVIEW** màu vàng: bấm thử được, nhưng nút lưu bị tắt và không gửi gì đi. Plan frontend: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md), hệ thống thiết kế: [docs/design.md](docs/design.md). Giao diện người xem làm theo phong cách NetShort mobile web (ưu tiên điện thoại): [docs/plans/gd3-netshort-ui.md](docs/plans/gd3-netshort-ui.md).
+Bản demo gồm cả phía người xem và phía admin. Giao diện người xem có hai ngôn ngữ **English** (mặc định, địa chỉ gốc) và **Tiếng Việt** (`/vi/...`), đổi ở menu bên trái hoặc chân trang; khu admin chỉ tiếng Anh. Cách thêm ngôn ngữ: [docs/design.md](docs/design.md#đa-ngôn-ngữ-english-tiếng-việt). Màn hình nào chưa có API thì là giao diện tĩnh có nhãn **PREVIEW** màu vàng: bấm thử được, nhưng nút lưu bị tắt và không gửi gì đi. Plan frontend: [docs/plans/gd3-frontend.md](docs/plans/gd3-frontend.md), hệ thống thiết kế: [docs/design.md](docs/design.md). Giao diện người xem làm theo phong cách NetShort mobile web (ưu tiên điện thoại): [docs/plans/gd3-netshort-ui.md](docs/plans/gd3-netshort-ui.md).
 
 Cần Docker, Python 3.12 + [uv](https://docs.astral.sh/uv/), Node 24 + pnpm. Mở 3 terminal:
 
@@ -45,7 +45,7 @@ Luồng gợi ý:
 Cho người không chạy được máy: bản này chỉ gồm giao diện, **API giả chạy ngay trong trình duyệt** (dữ liệu phim chụp từ DB demo, tài khoản và VIP lưu trong trình duyệt của từng người). Cấu hình ở [apps/web/netlify.toml](apps/web/netlify.toml); biến `NEXT_PUBLIC_DEMO=true` bật chế độ này, bỏ đi thì web lại cần API thật. Kế hoạch: [docs/plans/gd3-netlify-demo.md](docs/plans/gd3-netlify-demo.md).
 
 - Tài khoản demo (mật khẩu `Demo1234!`, giả và công khai): `viewer@example.com`, `vip@example.com`, `admin@example.com`. Trang đăng nhập có sẵn nút bấm một chạm.
-- Nút **I've paid (demo)** ở trang thanh toán cấp VIP giả. Nút **Reset demo** ở dải đầu trang xóa mọi thứ về ban đầu.
+- Nút **I've paid (demo)** (bản tiếng Việt: "Tôi đã thanh toán (demo)") ở trang thanh toán cấp VIP giả. Nút **Reset demo** ở dải đầu trang xóa mọi thứ về ban đầu.
 - Mọi tập phát cùng một video mẫu công khai; trang tự chặn công cụ tìm kiếm (`noindex`).
 - Chạy thử local, không cần API: `cd apps/web && NEXT_PUBLIC_DEMO=true pnpm dev`.
 - Chụp lại dữ liệu phim khi seed đổi (cần API đang chạy): `cd apps/web && DEMO_PASSWORD='...' node scripts/capture-demo-data.mjs the-one-in-my-dream`, rồi commit `src/lib/demo/data.json`.
