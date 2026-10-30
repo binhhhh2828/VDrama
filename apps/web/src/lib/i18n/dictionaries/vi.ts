@@ -490,7 +490,7 @@ export const vi: Dictionary = {
     team: "Đội ngũ VDrama",
     behindTag: "Hậu trường",
     behindTitle:
-      "Hậu trường “Tiên Duyên Kỳ Ngộ”: câu chuyện tình AI được dựng trong sáu tuần như thế nào",
+      "Hậu trường “Lời Nguyền Dưới Ánh Trăng”: câu chuyện tình AI được dựng trong sáu tuần như thế nào",
     behindExcerpt:
       "Từ bản thảo kịch bản đầu tiên đến bước chỉnh màu cuối cùng, đội ngũ chia sẻ cách một lập trình viên cô độc và AI do cô tạo ra được thổi hồn, và vì sao tập 3 thay đổi tất cả.",
     weekTag: "Phim mới",

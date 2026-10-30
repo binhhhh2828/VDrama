@@ -10,7 +10,7 @@ export type NewsArticle = {
 };
 
 export const NEWS_ARTICLES: NewsArticle[] = [
-  { slug: "behind-tien-duyen-ky-ngo", key: "behind", date: "2026-10-28" },
+  { slug: "behind-loi-nguyen-duoi-anh-trang", key: "behind", date: "2026-10-28" },
   { slug: "new-this-week", key: "week", date: "2026-10-26" },
   { slug: "vip-explained", key: "vip", date: "2026-10-22" },
   { slug: "watch-anywhere", key: "tips", date: "2026-10-18" },

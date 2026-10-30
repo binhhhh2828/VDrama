@@ -67,7 +67,7 @@ describe("catalog", () => {
     const { api } = setup();
     const hot = await api.listSeries({ sort: "hot", limit: 50 });
     const slugs = hot.items.map((s) => s.slug);
-    expect(slugs[0]).toBe("tien-duyen-ky-ngo");
+    expect(slugs[0]).toBe("loi-nguyen-duoi-anh-trang");
     const genre = hot.items[0].genres[0].slug;
     const filtered = await api.listSeries({ genre, limit: 50 });
     expect(filtered.items.every((s) => s.genres.some((g) => g.slug === genre))).toBe(true);
@@ -76,9 +76,9 @@ describe("catalog", () => {
   it("searches by title ignoring case, and rejects short terms", async () => {
     const { demoFetch } = setup();
     const ok = await (
-      await demoFetch(`/api/v1/search?q=${encodeURIComponent("VƯƠNG phi")}`)
+      await demoFetch(`/api/v1/search?q=${encodeURIComponent("LỜI nguyền")}`)
     ).json();
-    expect(ok.items.map((s: { slug: string }) => s.slug)).toContain("vuong-phi-khong-de-choc");
+    expect(ok.items.map((s: { slug: string }) => s.slug)).toContain("loi-nguyen-duoi-anh-trang");
     expect((await demoFetch("/api/v1/search?q=v")).status).toBe(422);
   });
 
@@ -260,7 +260,9 @@ describe("admin", () => {
     const { free } = await episodes(api);
     await api.login({ email: "admin@example.com", password: DEMO_PASSWORD });
     expect((await failure(api.adminStartUpload(free.id, 1000))).code).toBe("conflict");
-    const draft = (await api.adminEpisodes("hoa-tuyet-roi-day-troi")).find((e) => !e.is_published)!;
+    const draft = (await api.adminEpisodes("duoi-nguoi-chot-don-mat-luon-khach-vip")).find(
+      (e) => !e.is_published,
+    )!;
     expect((await failure(api.adminStartUpload(draft.id, 1000))).code).toBe("stream_unavailable");
     expect((await failure(api.adminStreamSync(draft.id))).code).toBe("stream_unavailable");
     expect((await api.adminStreamSync(free.id)).result).toBe("skipped_published");

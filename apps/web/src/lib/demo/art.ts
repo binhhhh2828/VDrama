@@ -4,20 +4,20 @@
 // giữ chỗ picsum theo `seed` cố định.
 
 const DEMO_POSTERS = [
-  "vuong_phi_khong_de_choc",
-  "nha_co_ba_chang_trai",
-  "tien_duyen_ky_ngo",
-  "hoa_tuyet_roi_day_troi",
-  "kiem_khach_tinh_duyen",
+  "hoang_tu_va_nu_tu_nhan",
+  "chi_tien_cho_trai_dep",
+  "loi_nguyen_duoi_anh_trang",
+  "duoi_nguoi_chot_don_mat_luon_khach_vip",
+  "ke_bao_thu",
 ] as const;
 
 /** Slug phim demo có poster, cùng thứ tự với DEMO_POSTERS (phim thứ i dùng poster thứ i). */
 const DEMO_SLUGS = [
-  "vuong-phi-khong-de-choc",
-  "nha-co-ba-chang-trai",
-  "tien-duyen-ky-ngo",
-  "hoa-tuyet-roi-day-troi",
-  "kiem-khach-tinh-duyen",
+  "hoang-tu-va-nu-tu-nhan",
+  "chi-tien-cho-trai-dep",
+  "loi-nguyen-duoi-anh-trang",
+  "duoi-nguoi-chot-don-mat-luon-khach-vip",
+  "ke-bao-thu",
 ] as const;
 
 type Rendition = "thumb" | "detail" | "hero";

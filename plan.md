@@ -241,6 +241,7 @@ Giao diện tiếng Anh, theo canvas thiết kế [VDrama Web Design](https://cl
 
 Luồng: người dùng chọn gói → backend tạo `payments` (`provider='sepay'`, `status='pending'`, mã đơn duy nhất làm nội dung chuyển khoản) → trang hiển thị ảnh VietQR (số tài khoản, số tiền, nội dung = mã đơn) → người dùng chuyển khoản → SePay gọi webhook → backend khớp mã đơn + số tiền → kích hoạt VIP → trang thanh toán thấy trạng thái đổi (hỏi lại backend định kỳ, không tin phía trình duyệt).
 
+- [ ] **Khách vãng lai xem phim, mua VIP không cần đăng nhập, sau đó nhận tài khoản** (yêu cầu 2026-10-30; plan chi tiết, **tạm hoãn đến khi làm app**: [docs/plans/gd5-guest-vip.md](docs/plans/gd5-guest-vip.md)). Làm trước khi nối cổng thanh toán thật, vì tạo đơn phải hỗ trợ khách
 - [ ] Tạo đơn: sinh mã đơn ngắn, khó đoán, đúng định dạng mã thanh toán đã cấu hình trên SePay (tiền tố + số/chữ); lưu số tiền tại thời điểm mua; đơn có hạn (ví dụ 15–30 phút)
 - [ ] Trang thanh toán: ảnh VietQR + thông tin chuyển khoản thủ công (ngân hàng, số tài khoản, số tiền, nội dung), đếm ngược hạn đơn, tự cập nhật khi đã nhận tiền
 - [ ] Webhook SePay: xác thực API key trong header (so sánh an toàn, sai thì 401), chỉ nhận giao dịch tiền vào; lưu mọi sự kiện vào `payment_events` (`event_id` = mã giao dịch SePay) trước khi xử lý; trùng thì trả thành công mà không làm gì thêm; trả 2xx nhanh. Đối chiếu tên trường payload với tài liệu SePay hiện hành khi tích hợp

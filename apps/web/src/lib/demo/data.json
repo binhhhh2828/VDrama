@@ -28,10 +28,10 @@
   "series": [
     {
       "id": 1,
-      "slug": "vuong-phi-khong-de-choc",
-      "title": "Vương Phi Không Dễ Chọc",
-      "poster_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
-      "banner_url": "/demo/posters/vuong_phi_khong_de_choc/hero.webp",
+      "slug": "hoang-tu-va-nu-tu-nhan",
+      "title": "Hoàng Tử Và Nữ Tù Nhân",
+      "poster_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
+      "banner_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -43,24 +43,24 @@
           "name": "Romance"
         },
         {
-          "slug": "fantasy",
-          "name": "Fantasy"
+          "slug": "drama",
+          "name": "Drama"
         }
       ],
-      "description": "Càng yêu càng đau, càng xa càng nhớ. Nàng vương phi nhỏ bé nhưng không dễ chọc.",
+      "description": "Yêu là tự do hay là mất tất cả? Một hoàng tử quyền lực và người con gái bị giam cầm, giữa lâu đài và những lời thề.",
       "episode_count": 12,
       "latest_episode_number": 12,
       "view_count": 5200,
       "favorite_count": 2,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/vuong_phi_khong_de_choc/detail.webp"
+      "poster_detail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/detail.webp"
     },
     {
       "id": 2,
-      "slug": "nha-co-ba-chang-trai",
-      "title": "Nhà Có Ba Chàng Trai",
-      "poster_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
-      "banner_url": "/demo/posters/nha_co_ba_chang_trai/hero.webp",
+      "slug": "chi-tien-cho-trai-dep",
+      "title": "Chi Tiền Cho Trai Đẹp",
+      "poster_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
+      "banner_url": "/demo/posters/chi_tien_cho_trai_dep/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -68,28 +68,28 @@
       "published_at": "2026-10-25T06:34:37.368783Z",
       "genres": [
         {
-          "slug": "comedy",
-          "name": "Comedy"
+          "slug": "romance",
+          "name": "Romance"
         },
         {
-          "slug": "family",
-          "name": "Family"
+          "slug": "drama",
+          "name": "Drama"
         }
       ],
-      "description": "Những cuộc phiêu lưu nhỏ làm nên hạnh phúc lớn của một gia đình có ba cậu con trai và chú chó.",
+      "description": "Đẹp chưa đủ, phải biết giá. Một đêm tiệc xa hoa, ba người đàn ông và một cô gái khiến tình yêu, tiền bạc và danh vọng đảo lộn.",
       "episode_count": 8,
       "latest_episode_number": 8,
       "view_count": 3100,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/nha_co_ba_chang_trai/detail.webp"
+      "poster_detail_url": "/demo/posters/chi_tien_cho_trai_dep/detail.webp"
     },
     {
       "id": 3,
-      "slug": "tien-duyen-ky-ngo",
-      "title": "Tiên Duyên Kỳ Ngộ",
-      "poster_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
-      "banner_url": "/demo/posters/tien_duyen_ky_ngo/hero.webp",
+      "slug": "loi-nguyen-duoi-anh-trang",
+      "title": "Lời Nguyền Dưới Ánh Trăng",
+      "poster_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
+      "banner_url": "/demo/posters/loi_nguyen_duoi_anh_trang/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "completed",
@@ -105,20 +105,20 @@
           "name": "Fantasy"
         }
       ],
-      "description": "Kiếp này kiếp khác, chỉ nguyện bên người. Hai người gặp lại giữa rừng hoa đào và mở ra duyên tiền kiếp.",
+      "description": "Yêu nàng là lời nguyền đẹp nhất của ta. Dưới trăng, một vị vương mang lời nguyền gặp lại người con gái định mệnh.",
       "episode_count": 10,
       "latest_episode_number": 10,
       "view_count": 8700,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/tien_duyen_ky_ngo/detail.webp"
+      "poster_detail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/detail.webp"
     },
     {
       "id": 4,
-      "slug": "hoa-tuyet-roi-day-troi",
-      "title": "Hoa Tuyết Rơi Đầy Trời",
-      "poster_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
-      "banner_url": "/demo/posters/hoa_tuyet_roi_day_troi/hero.webp",
+      "slug": "duoi-nguoi-chot-don-mat-luon-khach-vip",
+      "title": "Đuổi Người Chốt Đơn, Mất Luôn Khách VIP",
+      "poster_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
+      "banner_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -126,28 +126,28 @@
       "published_at": "2026-10-19T06:34:37.368783Z",
       "genres": [
         {
-          "slug": "romance",
-          "name": "Romance"
-        },
-        {
           "slug": "drama",
           "name": "Drama"
+        },
+        {
+          "slug": "comedy",
+          "name": "Comedy"
         }
       ],
-      "description": "Tình yêu này, nguyện gửi vào gió tuyết. Giữa mùa đông lạnh giá, hai trái tim tìm thấy hơi ấm của nhau.",
+      "description": "Cô gái chốt đơn giỏi nhất công ty bị đuổi việc, và khách VIP lớn nhất đi theo cô. Cuộc phản công nơi phố tài chính bắt đầu.",
       "episode_count": 8,
       "latest_episode_number": 8,
       "view_count": 4400,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/hoa_tuyet_roi_day_troi/detail.webp"
+      "poster_detail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/detail.webp"
     },
     {
       "id": 5,
-      "slug": "kiem-khach-tinh-duyen",
-      "title": "Kiếm Khách Tình Duyên",
-      "poster_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
-      "banner_url": "/demo/posters/kiem_khach_tinh_duyen/hero.webp",
+      "slug": "ke-bao-thu",
+      "title": "Kẻ Báo Thù",
+      "poster_url": "/demo/posters/ke_bao_thu/thumb.webp",
+      "banner_url": "/demo/posters/ke_bao_thu/hero.webp",
       "year": 2026,
       "country": "Vietnam",
       "status": "ongoing",
@@ -159,17 +159,17 @@
           "name": "Action"
         },
         {
-          "slug": "romance",
-          "name": "Romance"
+          "slug": "drama",
+          "name": "Drama"
         }
       ],
-      "description": "Cùng người đi khắp thế gian, dù giông bão cũng chẳng màng. Một kiếm khách và cô gái bước vào cuộc phiêu lưu.",
+      "description": "Giữa thành phố đầy khói lửa, một người đàn ông quay lại đòi món nợ cũ và gặp người con gái mang trên mình vết thương cùng bí mật.",
       "episode_count": 6,
       "latest_episode_number": 6,
       "view_count": 950,
       "favorite_count": 0,
       "is_published": true,
-      "poster_detail_url": "/demo/posters/kiem_khach_tinh_duyen/detail.webp"
+      "poster_detail_url": "/demo/posters/ke_bao_thu/detail.webp"
     },
     {
       "id": 11,
@@ -198,13 +198,13 @@
     }
   ],
   "episodes": {
-    "vuong-phi-khong-de-choc": [
+    "hoang-tu-va-nu-tu-nhan": [
       {
         "id": 1,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "free",
         "published_at": "2026-10-28T07:34:37.368783Z",
         "is_published": true
@@ -214,7 +214,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "free",
         "published_at": "2026-10-28T08:34:37.368783Z",
         "is_published": true
@@ -224,7 +224,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T09:34:37.368783Z",
         "is_published": true
@@ -234,7 +234,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T10:34:37.368783Z",
         "is_published": true
@@ -244,7 +244,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T11:34:37.368783Z",
         "is_published": true
@@ -254,7 +254,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T12:34:37.368783Z",
         "is_published": true
@@ -264,7 +264,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T13:34:37.368783Z",
         "is_published": true
@@ -274,7 +274,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T14:34:37.368783Z",
         "is_published": true
@@ -284,7 +284,7 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T15:34:37.368783Z",
         "is_published": true
@@ -294,7 +294,7 @@
         "number": 10,
         "title": "Episode 10",
         "duration_sec": 1270,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T16:34:37.368783Z",
         "is_published": true
@@ -304,7 +304,7 @@
         "number": 11,
         "title": "Episode 11",
         "duration_sec": 1367,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T17:34:37.368783Z",
         "is_published": true
@@ -314,19 +314,19 @@
         "number": 12,
         "title": "Episode 12",
         "duration_sec": 1464,
-        "thumbnail_url": "/demo/posters/vuong_phi_khong_de_choc/thumb.webp",
+        "thumbnail_url": "/demo/posters/hoang_tu_va_nu_tu_nhan/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-28T18:34:37.368783Z",
         "is_published": true
       }
     ],
-    "nha-co-ba-chang-trai": [
+    "chi-tien-cho-trai-dep": [
       {
         "id": 13,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T07:34:37.368783Z",
         "is_published": true
@@ -336,7 +336,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "free",
         "published_at": "2026-10-25T08:34:37.368783Z",
         "is_published": true
@@ -346,7 +346,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T09:34:37.368783Z",
         "is_published": true
@@ -356,7 +356,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T10:34:37.368783Z",
         "is_published": true
@@ -366,7 +366,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T11:34:37.368783Z",
         "is_published": true
@@ -376,7 +376,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T12:34:37.368783Z",
         "is_published": true
@@ -386,7 +386,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T13:34:37.368783Z",
         "is_published": true
@@ -396,19 +396,19 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/nha_co_ba_chang_trai/thumb.webp",
+        "thumbnail_url": "/demo/posters/chi_tien_cho_trai_dep/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-25T14:34:37.368783Z",
         "is_published": true
       }
     ],
-    "tien-duyen-ky-ngo": [
+    "loi-nguyen-duoi-anh-trang": [
       {
         "id": 21,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "free",
         "published_at": "2026-10-22T07:34:37.368783Z",
         "is_published": true
@@ -418,7 +418,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "free",
         "published_at": "2026-10-22T08:34:37.368783Z",
         "is_published": true
@@ -428,7 +428,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T09:34:37.368783Z",
         "is_published": true
@@ -438,7 +438,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T10:34:37.368783Z",
         "is_published": true
@@ -448,7 +448,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T11:34:37.368783Z",
         "is_published": true
@@ -458,7 +458,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T12:34:37.368783Z",
         "is_published": true
@@ -468,7 +468,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T13:34:37.368783Z",
         "is_published": true
@@ -478,7 +478,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T14:34:37.368783Z",
         "is_published": true
@@ -488,7 +488,7 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T15:34:37.368783Z",
         "is_published": true
@@ -498,19 +498,19 @@
         "number": 10,
         "title": "Episode 10",
         "duration_sec": 1270,
-        "thumbnail_url": "/demo/posters/tien_duyen_ky_ngo/thumb.webp",
+        "thumbnail_url": "/demo/posters/loi_nguyen_duoi_anh_trang/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-22T16:34:37.368783Z",
         "is_published": true
       }
     ],
-    "hoa-tuyet-roi-day-troi": [
+    "duoi-nguoi-chot-don-mat-luon-khach-vip": [
       {
         "id": 31,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T07:34:37.368783Z",
         "is_published": true
@@ -520,7 +520,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "free",
         "published_at": "2026-10-19T08:34:37.368783Z",
         "is_published": true
@@ -530,7 +530,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T09:34:37.368783Z",
         "is_published": true
@@ -540,7 +540,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T10:34:37.368783Z",
         "is_published": true
@@ -550,7 +550,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T11:34:37.368783Z",
         "is_published": true
@@ -560,7 +560,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T12:34:37.368783Z",
         "is_published": true
@@ -570,7 +570,7 @@
         "number": 7,
         "title": "Episode 7",
         "duration_sec": 1879,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T13:34:37.368783Z",
         "is_published": true
@@ -580,7 +580,7 @@
         "number": 8,
         "title": "Episode 8",
         "duration_sec": 1976,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-19T14:34:37.368783Z",
         "is_published": true
@@ -590,19 +590,19 @@
         "number": 9,
         "title": "Episode 9",
         "duration_sec": 2073,
-        "thumbnail_url": "/demo/posters/hoa_tuyet_roi_day_troi/thumb.webp",
+        "thumbnail_url": "/demo/posters/duoi_nguoi_chot_don_mat_luon_khach_vip/thumb.webp",
         "access": "vip",
         "published_at": null,
         "is_published": false
       }
     ],
-    "kiem-khach-tinh-duyen": [
+    "ke-bao-thu": [
       {
         "id": 40,
         "number": 1,
         "title": "Episode 1",
         "duration_sec": 1297,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "free",
         "published_at": "2026-10-16T07:34:37.368783Z",
         "is_published": true
@@ -612,7 +612,7 @@
         "number": 2,
         "title": "Episode 2",
         "duration_sec": 1394,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "free",
         "published_at": "2026-10-16T08:34:37.368783Z",
         "is_published": true
@@ -622,7 +622,7 @@
         "number": 3,
         "title": "Episode 3",
         "duration_sec": 1491,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T09:34:37.368783Z",
         "is_published": true
@@ -632,7 +632,7 @@
         "number": 4,
         "title": "Episode 4",
         "duration_sec": 1588,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T10:34:37.368783Z",
         "is_published": true
@@ -642,7 +642,7 @@
         "number": 5,
         "title": "Episode 5",
         "duration_sec": 1685,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T11:34:37.368783Z",
         "is_published": true
@@ -652,7 +652,7 @@
         "number": 6,
         "title": "Episode 6",
         "duration_sec": 1782,
-        "thumbnail_url": "/demo/posters/kiem_khach_tinh_duyen/thumb.webp",
+        "thumbnail_url": "/demo/posters/ke_bao_thu/thumb.webp",
         "access": "vip",
         "published_at": "2026-10-16T12:34:37.368783Z",
         "is_published": true

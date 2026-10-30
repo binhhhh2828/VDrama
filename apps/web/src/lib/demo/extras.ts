@@ -14,11 +14,11 @@ export type DemoExtras = {
 };
 
 const EXTRAS: Record<string, DemoExtras> = {
-  "vuong-phi-khong-de-choc": { badge: "hot", likes: 21_400, reviews: [] },
-  "nha-co-ba-chang-trai": { badge: "hot", likes: 12_800, reviews: [] },
-  "tien-duyen-ky-ngo": { badge: null, likes: 6_300, reviews: [] },
-  "hoa-tuyet-roi-day-troi": { badge: "original", likes: 9_700, reviews: [] },
-  "kiem-khach-tinh-duyen": { badge: "original", likes: 4_100, reviews: [] },
+  "hoang-tu-va-nu-tu-nhan": { badge: "hot", likes: 21_400, reviews: [] },
+  "chi-tien-cho-trai-dep": { badge: "hot", likes: 12_800, reviews: [] },
+  "loi-nguyen-duoi-anh-trang": { badge: null, likes: 6_300, reviews: [] },
+  "duoi-nguoi-chot-don-mat-luon-khach-vip": { badge: "original", likes: 9_700, reviews: [] },
+  "ke-bao-thu": { badge: "original", likes: 4_100, reviews: [] },
   "the-one-in-my-dream": { badge: null, likes: 1_900, reviews: [] },
 };
 
